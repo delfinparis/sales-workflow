@@ -1,0 +1,253 @@
+{
+  "name": "REA - Calendly Appointment Booked",
+  "description": "When a lead books an appointment via Calendly, update their Monday status to 'Appointment Scheduled' and move to 'Scheduled Appointments' group.",
+  "trigger": "Calendly Webhook: invitee.created",
+  "board_id": "18391158354",
+  "flow": [
+    {
+      "id": 1,
+      "module": "calendly:watchEvents",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "events": ["invitee.created"]
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Watches for new Calendly bookings"
+    },
+    {
+      "id": 2,
+      "module": "monday:searchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "18391158354",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "email_mkybfqax",
+              "compare_value": ["{{1.invitee_email}}"]
+            }
+          ]
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Search Monday for lead by email"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "label": "Lead Found - Update Monday",
+          "flow": [
+            {
+              "id": 4,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{2.items[0].id}}",
+                "columnId": "color_mkybxbyk",
+                "value": "{\"label\":\"Appointment Scheduled\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 0
+                }
+              },
+              "note": "Set status to Appointment Scheduled"
+            },
+            {
+              "id": 5,
+              "module": "monday:moveItemToGroup",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{2.items[0].id}}",
+                "groupId": "group_mkybxtds"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0
+                }
+              },
+              "note": "Move to Scheduled Appointments group"
+            },
+            {
+              "id": 6,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{2.items[0].id}}",
+                "columnId": "date_mkyb9hr1",
+                "value": "{\"date\":\"{{formatDate(1.event_start_time; 'YYYY-MM-DD')}}\", \"time\":\"{{formatDate(1.event_start_time; 'HH:mm:ss')}}\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0
+                }
+              },
+              "note": "Set Appointment Date"
+            },
+            {
+              "id": 7,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{2.items[0].id}}",
+                "columnId": "link_mkybkpnj",
+                "value": "{\"url\":\"{{1.event_uri}}\", \"text\":\"Calendly Event\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 0
+                }
+              },
+              "note": "Set Appointment URL"
+            },
+            {
+              "id": 8,
+              "module": "monday:createUpdate",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{2.items[0].id}}",
+                "body": ":calendar: **Appointment Booked!**\n\n**Date:** {{formatDate(1.event_start_time; 'dddd, MMMM D, YYYY')}}\n**Time:** {{formatDate(1.event_start_time; 'h:mm A')}} CT\n**Event Type:** {{1.event_type_name}}\n**Location:** {{1.location}}\n\n**Invitee:** {{1.invitee_name}} ({{1.invitee_email}})"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0
+                }
+              },
+              "note": "Add booking details to item updates"
+            },
+            {
+              "id": 9,
+              "module": "slack:postMessage",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "channel": "DJ_SLACK_CHANNEL_OR_DM",
+                "text": ":calendar: *New Appointment Booked!*\n\n*Lead:* {{1.invitee_name}}\n*Date:* {{formatDate(1.event_start_time; 'dddd, MMMM D')}} at {{formatDate(1.event_start_time; 'h:mm A')}} CT\n*Event:* {{1.event_type_name}}\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354/pulses/{{2.items[0].id}}|Open in Monday>"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 0
+                }
+              },
+              "note": "Notify DJ of upcoming appointment"
+            }
+          ],
+          "filter": {
+            "name": "Lead found",
+            "conditions": [
+              [
+                {
+                  "a": "{{length(2.items)}}",
+                  "b": "0",
+                  "o": "number:greater"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "label": "Lead NOT Found - Alert Team",
+          "flow": [
+            {
+              "id": 10,
+              "module": "slack:postMessage",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "channel": "REA_SLACK_CHANNEL_OR_DM",
+                "text": ":warning: *Calendly Booking - Lead Not Found in Monday*\n\n*Invitee:* {{1.invitee_name}}\n*Email:* {{1.invitee_email}}\n*Date:* {{formatDate(1.event_start_time; 'dddd, MMMM D')}} at {{formatDate(1.event_start_time; 'h:mm A')}} CT\n\nPlease add this lead to Monday manually or check if email matches."
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 200
+                }
+              },
+              "note": "Alert Rea about missing lead"
+            }
+          ],
+          "filter": {
+            "name": "Lead not found (default)",
+            "conditions": []
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Connect Calendly account in Make.com",
+    "step_2": "Select the specific Calendly event type(s) to watch",
+    "step_3": "Replace DJ_SLACK_CHANNEL_OR_DM with DJ's Slack channel",
+    "step_4": "Replace REA_SLACK_CHANNEL_OR_DM with Rea's Slack channel",
+    "step_5": "Configure Monday connection",
+    "step_6": "Test with a test booking",
+    "step_7": "Activate scenario"
+  },
+  "calendly_event_types": {
+    "note": "Configure which Calendly event types should trigger this scenario",
+    "suggested_filter": "Filter to only DJ's appointment types for newly licensed leads"
+  }
+}

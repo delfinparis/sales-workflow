@@ -1,0 +1,1297 @@
+# Monday.com Views Configuration
+#
+# As of 2025, Monday's API NOW SUPPORTS creating views programmatically!
+# Use create_view_table mutation with ItemsQueryRule filters.
+#
+# IMPORTANT: Each role should primarily use their designated views.
+# This reduces cognitive load by showing only relevant columns.
+#
+# ============================================================
+# SETUP INSTRUCTIONS
+# ============================================================
+#
+# STEP 1: Replace 18390370563 with your actual board ID throughout this file
+# STEP 2: Run the "Get Status Indices" query below to get your status mappings
+# STEP 3: Update the STATUS_INDEX_MAP section with your actual indices
+# STEP 4: Run each create_view_table mutation to create views
+#
+# ============================================================
+
+# ============================================================
+# GET EXISTING VIEWS
+# ============================================================
+
+query GetExistingViews {
+  boards(ids: [18390370563]) {
+    views {
+      id
+      name
+      type
+    }
+  }
+}
+
+# ============================================================
+# STEP 2: GET STATUS COLUMN INDICES (RUN THIS FIRST!)
+# ============================================================
+#
+# Status filters require numeric INDEX values, not label text.
+# Run this query to get your status label → index mappings.
+
+query GetStatusIndices {
+  boards(ids: [18390370563]) {
+    columns(ids: ["status"]) {
+      id
+      title
+      settings_str
+    }
+  }
+}
+
+# The settings_str will return JSON like:
+# {
+#   "labels": {
+#     "0": "New Lead",
+#     "1": "SMS Sent",
+#     "2": "30-Day Timeout",
+#     ...
+#   }
+# }
+#
+# Use these index numbers in your filter rules below.
+
+# ============================================================
+# STATUS INDEX MAP (YOUR ACTUAL VALUES)
+# ============================================================
+#
+# | Index | Status Label                  | Phase    |
+# |-------|-------------------------------|----------|
+# | 5     | New Lead                      | Jennica  |
+# | 2     | SMS Sent                      | Jennica  |
+# | 4     | 30-Day Timeout                | Jennica  |
+# | 6     | Replied - Awaiting Ana        | Ana      |
+# | 7     | Tool Offered                  | Ana      |
+# | 8     | Training Invited              | Ana      |
+# | 9     | Relationship Building         | Ana      |
+# | 10    | Ask Made                      | Ana      |
+# | 11    | Meeting Scheduled             | DJ       |
+# | 13    | DJ Meeting Complete           | DJ       |
+# | 14    | Offer Extended                | DJ       |
+# | 15    | Nurture (Post-Meeting)        | Ana      |
+# | 12    | No Show                       | DJ       |
+# | 16    | Won                           | Terminal |
+# | 17    | Lost - Not Interested         | Terminal |
+# | 18    | Lost - Competitor             | Terminal |
+# | 19    | Lost - Not Qualified          | Terminal |
+# | 101   | Dead - Negative Reply         | Terminal |
+# | 102   | Hibernation 90-Day            | Terminal |
+#
+# NOTE: Indices 0 (Working on it) and 1 (Done) are deactivated/unused.
+
+# ============================================================
+# GET COLUMN IDS (RUN THIS TO GET YOUR COLUMN IDS)
+# ============================================================
+
+query GetColumnIds {
+  boards(ids: [18390370563]) {
+    columns {
+      id
+      title
+      type
+    }
+  }
+}
+
+# ============================================================
+# COLUMN ID MAP (YOUR ACTUAL VALUES)
+# ============================================================
+#
+# | Column Title           | Column ID                    | Type          |
+# |------------------------|------------------------------|---------------|
+# | Name                   | name                         | name          |
+# | Status                 | status                       | status        |
+# | Phone                  | phone_mky6fr9j               | phone         |
+# | Email                  | email_mky6p7cy               | email         |
+# | Lead Source            | dropdown_mky6ctrz            | dropdown      |
+# | Priority               | dropdown_mky64tz0            | dropdown      |
+# | Last Contact Date      | date_mky6fwh8                | date          |
+# | Last Superlative Date  | date_mky648ha                | date          |
+# | Next Action Date       | date_mky6h6ny                | date          |
+# | Next Action            | text_mky64dyz                | text          |
+# | Superlative Type       | dropdown_mky6t9qt            | dropdown      |
+# | Courted Profile        | link_mky6yvca                | link          |
+# | Deal Count             | numeric_mky68zwz             | numeric       |
+# | Notes                  | long_text_mky6bj1v           | long_text     |
+# | Current Tasks          | long_text_mky6t22m           | long_text     |
+# | Timeout Until          | date_mky69mew                | date          |
+# | Timeout Count          | numeric_mky6c75r             | numeric       |
+# | Hibernation Until      | date_mky68ca2                | date          |
+# | Do Not Contact         | boolean_mky6sedx             | checkbox      |
+# | Dead Until             | date_mky68q9y                | date          |
+# | Review Eligible        | boolean_mky6nk5e             | checkbox      |
+# | Lost Reason            | dropdown_mky6hvm6            | dropdown      |
+# | Meeting Date           | date_mky6169y                | date          |
+# | Meeting URL            | link_mky6bxx2                | link          |
+# | Emailed By             | text_mky65vj0                | text          |
+# | Tool Type              | dropdown_mky6sdtf            | dropdown      |
+# | Voice Memo Sent        | boolean_mky62p98             | checkbox      |
+# | Meeting Outcome        | dropdown_mky6q11b            | dropdown      |
+# | Current Brokerage      | text_mky6grjs                | text          |
+# | Business Goals         | long_text_mky61tn3           | long_text     |
+# | Timeline               | dropdown_mky6qt1e            | dropdown      |
+# | Objections             | long_text_mky6mywa           | long_text     |
+# | AI Meeting Notes       | long_text_mky6ethw           | long_text     |
+# | Meeting Prep Done      | boolean_mky6afp7             | checkbox      |
+# | Second Meeting Purpose | dropdown_mky63eh7            | dropdown      |
+# | Offer Date             | date_mky65kn1                | date          |
+# | Day 3 Follow-up Done   | boolean_mky68bb9             | checkbox      |
+# | Day 7 Follow-up Done   | boolean_mky6xcrv             | checkbox      |
+# | Day 14 Follow-up Done  | boolean_mky62bp0             | checkbox      |
+# | Day 21 Follow-up Done  | boolean_mky63yrz             | checkbox      |
+# | Last Offer Follow-up   | date_mky64jxa                | date          |
+# | Queue for Event Invite | boolean_mky6k8g8             | checkbox      |
+# | Last Event Invite      | date_mky62mab                | date          |
+# | Facebook Connected     | boolean_mky6r6nn             | checkbox      |
+# | Last Social Check      | date_mky65b34                | date          |
+# | Social Intel           | long_text_mky6kmy9           | long_text     |
+# | First Contact Date     | date_mky6ky4j                | date          |
+# | Assigned To            | multiple_person_mky6jgt4     | people        |
+#
+
+# ============================================================
+# FILTER SYNTAX REFERENCE
+# ============================================================
+#
+# ItemsQueryRule format:
+#   { column_id: "col_id", compare_value: [...], operator: OPERATOR }
+#
+# OPERATORS:
+#   any_of          - matches any of the values
+#   not_any_of      - excludes any of the values
+#   contains_text   - text contains string
+#   is_empty        - column is empty/blank
+#   is_not_empty    - column has a value
+#   greater_than    - date/number greater than
+#   lower_than      - date/number less than
+#
+# STATUS COLUMN:
+#   compare_value: [0, 1, 2]  ← Use INDEX numbers, not labels!
+#
+# DATE COLUMN (relative dates):
+#   "TODAY", "YESTERDAY", "TOMORROW"
+#   "THIS_WEEK", "ONE_WEEK_AGO", "ONE_WEEK_FROM_NOW"
+#   "THIS_MONTH", "ONE_MONTH_AGO", "ONE_MONTH_FROM_NOW"
+#   "PAST_DATETIME", "FUTURE_DATETIME"
+#   "$$$blank$$$"  ← for empty dates
+#   ["EXACT", "2025-01-15"]  ← for specific date
+#
+# CHECKBOX COLUMN:
+#   is_empty = unchecked
+#   is_not_empty = checked
+#
+# COMBINING RULES:
+#   operator: and  ← ALL rules must match
+#   operator: or   ← ANY rule can match
+
+# ============================================================
+# ⭐ "MY DAY" VIEWS - PRIMARY DAILY DASHBOARDS ⭐
+# ============================================================
+#
+# These are the MAIN views each person should open every morning.
+# Simple, clean, action-focused. Everything else is secondary.
+#
+# Pin these to favorites for each team member.
+
+# -----------------------------------------------------------
+# 🟣 JENNICA'S DAY
+# -----------------------------------------------------------
+# Type: Table View
+#
+# This single view shows Jennica everything she needs:
+# - Section 1: Leads ready to hunt (New Lead)
+# - Section 2: Leads returning from timeout soon
+#
+# Columns (6 only - ultra clean):
+#   - Name, Phone, Status, Superlative Type, Last Superlative Date, Courted Profile
+#
+# Group by: Status
+# Sort: Last Superlative Date (oldest first)
+
+mutation CreateView_JennicasDay {
+  create_view_table(
+    board_id: 18390370563
+    name: "🟣 Jennica's Day"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [5, 4], operator: any_of }
+        { column_id: "boolean_mky6sedx", compare_value: [], operator: is_empty }
+      ]
+    }
+    sort: [{ column_id: "date_mky648ha", direction: asc }]
+    settings: {
+      group_by: { column_id: "status" }
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "status", visible: true }
+          { column_id: "dropdown_mky6t9qt", visible: true }
+          { column_id: "date_mky648ha", visible: true }
+          { column_id: "link_mky6yvca", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# DAILY WORKFLOW:
+# 1. Open Jennica's Day view
+# 2. Open Courted.ai in another tab
+# 3. For each "New Lead": search Courted for superlative
+# 4. Found one? → Send SMS, update Superlative Type, status → SMS Sent
+# 5. Target: 20 SMS/day
+
+# -----------------------------------------------------------
+# 🔵 ANA'S DAY
+# -----------------------------------------------------------
+# Type: Table View
+#
+# Shows Ana's priorities in order:
+# - Section 1: 🔥 New replies (respond TODAY)
+# - Section 2: 📅 Scheduled follow-ups for today
+# - Section 3: ⚠️ Stale leads (7+ days no contact)
+#
+# Columns (8 only):
+#   - Name, Status, Phone, Priority, Last Contact Date, Next Action Date, Next Action, Current Tasks
+#
+# Group by: Status
+# Sort: Last Contact Date (newest first for replies)
+
+mutation CreateView_AnasDay {
+  create_view_table(
+    board_id: 18390370563
+    name: "🔵 Ana's Day"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [6, 7, 8, 9, 10, 12], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky6fwh8", direction: desc }]
+    settings: {
+      group_by: { column_id: "status" }
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "status", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "dropdown_mky64tz0", visible: true }
+          { column_id: "date_mky6fwh8", visible: true }
+          { column_id: "date_mky6h6ny", visible: true }
+          { column_id: "text_mky64dyz", visible: true }
+          { column_id: "long_text_mky6t22m", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# DAILY WORKFLOW:
+# 1. Open Ana's Day view
+# 2. Handle ALL "Replied - Awaiting Ana" first (same-day response goal)
+# 3. Work through Today's Follow-ups
+# 4. Address any Stale leads before they go colder
+# 5. Update Next Action / Next Action Date after each contact
+
+# -----------------------------------------------------------
+# 🟢 DJ'S DAY
+# -----------------------------------------------------------
+# Type: Table View
+#
+# Shows DJ's priorities:
+# - Section 1: 📅 Today's meetings (prep needed)
+# - Section 2: 🔥 Hot leads needing follow-up
+# - Section 3: 📝 Post-meeting processing needed
+#
+# Columns (10):
+#   - Name, Status, Phone, Meeting Date, Meeting URL, Meeting Outcome,
+#     Current Brokerage, Timeline, Next Action, AI Meeting Notes
+#
+# Group by: Status
+# Sort: Meeting Date (soonest first)
+
+mutation CreateView_DJsDay {
+  create_view_table(
+    board_id: 18390370563
+    name: "🟢 DJ's Day"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [11, 13, 14, 12], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky6169y", direction: asc }]
+    settings: {
+      group_by: { column_id: "status" }
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "status", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "date_mky6169y", visible: true }
+          { column_id: "link_mky6bxx2", visible: true }
+          { column_id: "dropdown_mky6q11b", visible: true }
+          { column_id: "text_mky6grjs", visible: true }
+          { column_id: "dropdown_mky6qt1e", visible: true }
+          { column_id: "text_mky64dyz", visible: true }
+          { column_id: "long_text_mky6ethw", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# DAILY WORKFLOW:
+# 1. Open DJ's Day view
+# 2. Check "Meeting Scheduled" section - any meetings today?
+# 3. Review Current Tasks (prep questions) before each meeting
+# 4. After meeting: Update Meeting Outcome, fill in structured fields
+# 5. Hot leads: Prioritize follow-up / extend offers
+# 6. At 5pm: Mark all today's meetings as Show or No Show
+
+# ============================================================
+# JENNICA'S VIEWS (3 views)
+# ============================================================
+
+# -----------------------------------------------------------
+# VIEW 1: Jennica - Today's Hunt ⭐ (Primary)
+# -----------------------------------------------------------
+# Purpose: Jennica's daily queue. Clean, focused, no distractions.
+# Columns: Name, Phone, Superlative Type, Courted Profile, Deal Count, Last Superlative Date, Do Not Contact
+# Sort: Last Superlative Date (oldest first)
+
+mutation CreateView_01_JennicaTodaysHunt {
+  create_view_table(
+    board_id: 18390370563
+    name: "Jennica - Today's Hunt ⭐"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [5], operator: any_of }
+        { column_id: "boolean_mky6sedx", compare_value: [], operator: is_empty }
+      ]
+    }
+    sort: [{ column_id: "date_mky648ha", direction: asc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "dropdown_mky6t9qt", visible: true }
+          { column_id: "link_mky6yvca", visible: true }
+          { column_id: "numeric_mky68zwz", visible: true }
+          { column_id: "date_mky648ha", visible: true }
+          { column_id: "boolean_mky6sedx", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 2: Jennica - Timeout Returning Soon
+# -----------------------------------------------------------
+# Purpose: Preview leads about to return - check if they have new superlatives
+# Columns: Name, Phone, Timeout Until, Timeout Count, Last Superlative Date
+# Sort: Timeout Until (soonest first)
+#
+# NOTE: Monday API doesn't support "Today + 3 days" in filters.
+# This view shows ALL 30-Day Timeout leads, sorted by Timeout Until.
+# Jennica focuses on the top items (soonest to return).
+
+mutation CreateView_02_JennicaTimeoutReturning {
+  create_view_table(
+    board_id: 18390370563
+    name: "Jennica - Timeout Returning Soon"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [4], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky69mew", direction: asc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "date_mky69mew", visible: true }
+          { column_id: "numeric_mky6c75r", visible: true }
+          { column_id: "date_mky648ha", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 3: Jennica - SMS Sent (Awaiting Reply)
+# -----------------------------------------------------------
+# Purpose: Track pending outreach, see what's been waiting longest
+# Columns: Name, Phone, Last Contact Date, Superlative Type
+# Sort: Last Contact Date (oldest first)
+
+mutation CreateView_03_JennicaSMSSent {
+  create_view_table(
+    board_id: 18390370563
+    name: "Jennica - SMS Sent (Awaiting Reply)"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [2], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky6fwh8", direction: asc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "date_mky6fwh8", visible: true }
+          { column_id: "dropdown_mky6t9qt", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# ============================================================
+# ANA'S VIEWS (7 views)
+# ============================================================
+
+# -----------------------------------------------------------
+# VIEW 4: Ana - New Replies 🔥 (Priority!)
+# -----------------------------------------------------------
+# Purpose: IMMEDIATE action queue - respond same day
+# Columns: Name, Phone, Email, Last Contact Date, Superlative Type, Lead Source, Current Tasks, Priority
+# Sort: Last Contact Date (newest first)
+
+mutation CreateView_04_AnaNewReplies {
+  create_view_table(
+    board_id: 18390370563
+    name: "Ana - New Replies 🔥"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [6], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky6fwh8", direction: desc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "email_mky6p7cy", visible: true }
+          { column_id: "date_mky6fwh8", visible: true }
+          { column_id: "dropdown_mky6t9qt", visible: true }
+          { column_id: "dropdown_mky6ctrz", visible: true }
+          { column_id: "long_text_mky6t22m", visible: true }
+          { column_id: "dropdown_mky64tz0", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 5: Ana - Today's Follow-ups
+# -----------------------------------------------------------
+# Purpose: Today's scheduled tasks
+# Columns: Name, Phone, Status, Next Action, Last Contact Date, Current Tasks, Voice Memo Sent
+# Sort: Status
+#
+# Filter: Next Action Date = TODAY and excludes terminal/Jennica statuses
+
+mutation CreateView_05_AnaTodaysFollowups {
+  create_view_table(
+    board_id: 18390370563
+    name: "Ana - Today's Follow-ups"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "date_mky6h6ny", compare_value: ["TODAY"], operator: any_of }
+        { column_id: "status", compare_value: [5, 2, 4, 16, 17, 18, 19, 101, 102], operator: not_any_of }
+      ]
+    }
+    sort: [{ column_id: "status", direction: asc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "status", visible: true }
+          { column_id: "text_mky64dyz", visible: true }
+          { column_id: "date_mky6fwh8", visible: true }
+          { column_id: "long_text_mky6t22m", visible: true }
+          { column_id: "boolean_mky62p98", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 6: Ana - Active Pipeline
+# -----------------------------------------------------------
+# Purpose: Full view of Ana's active leads by stage
+# Columns: Name, Status, Phone, Last Contact Date, Next Action Date, Next Action, Priority, Deal Count, Notes
+# Group by: Status
+
+mutation CreateView_06_AnaActivePipeline {
+  create_view_table(
+    board_id: 18390370563
+    name: "Ana - Active Pipeline"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [7, 8, 9, 10], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky6fwh8", direction: desc }]
+    settings: {
+      group_by: { column_id: "status" }
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "status", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "date_mky6fwh8", visible: true }
+          { column_id: "date_mky6h6ny", visible: true }
+          { column_id: "text_mky64dyz", visible: true }
+          { column_id: "dropdown_mky64tz0", visible: true }
+          { column_id: "numeric_mky68zwz", visible: true }
+          { column_id: "long_text_mky6bj1v", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 7: Ana - Stale Leads ⚠️
+# -----------------------------------------------------------
+# Purpose: Leads going cold - need immediate attention (7+ days no contact)
+# Columns: Name, Status, Phone, Last Contact Date, Next Action, Notes
+# Sort: Last Contact Date (oldest first)
+#
+# NOTE: Monday API uses "ONE_WEEK_AGO" for relative date filtering
+
+mutation CreateView_07_AnaStaleLeads {
+  create_view_table(
+    board_id: 18390370563
+    name: "Ana - Stale Leads ⚠️"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [7, 8, 9, 10], operator: any_of }
+        { column_id: "date_mky6fwh8", compare_value: ["ONE_WEEK_AGO"], operator: lower_than }
+      ]
+    }
+    sort: [{ column_id: "date_mky6fwh8", direction: asc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "status", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "date_mky6fwh8", visible: true }
+          { column_id: "text_mky64dyz", visible: true }
+          { column_id: "long_text_mky6bj1v", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 8: Ana - Instantly Leads (Email Path)
+# -----------------------------------------------------------
+# Purpose: Track email-path leads separately
+# Columns: Name, Status, Phone, Email, Emailed By, Tool Type, Voice Memo Sent, Last Contact Date
+
+mutation CreateView_08_AnaInstantlyLeads {
+  create_view_table(
+    board_id: 18390370563
+    name: "Ana - Instantly Leads (Email Path)"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "dropdown_mky6ctrz", compare_value: "Instantly", operator: contains_text }
+        { column_id: "status", compare_value: [16, 17, 18, 19, 101, 102], operator: not_any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky6fwh8", direction: desc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "status", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "email_mky6p7cy", visible: true }
+          { column_id: "text_mky65vj0", visible: true }
+          { column_id: "dropdown_mky6sdtf", visible: true }
+          { column_id: "boolean_mky62p98", visible: true }
+          { column_id: "date_mky6fwh8", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 9: Ana - Event Invite Queue ⬅️
+# -----------------------------------------------------------
+# Purpose: Queue leads for Thursday training invites
+# Columns: Name, Status, Phone, Queue for Event Invite, Last Event Invite, Priority, Notes
+# Sort: Last Event Invite (oldest first)
+#
+# WORKFLOW:
+# 1. Review candidates
+# 2. Check "Queue for Event Invite" for desired leads
+# 3. Make.com processes and sends individual SMS within 15 min
+# 4. Check Updates to confirm sent
+#
+# NOTE: For "empty OR older than 14 days" logic, we show all eligible statuses
+# and sort by Last Event Invite. Ana manually reviews - those at top haven't been invited.
+
+mutation CreateView_09_AnaEventInviteQueue {
+  create_view_table(
+    board_id: 18390370563
+    name: "Ana - Event Invite Queue ⬅️"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [7, 8, 9, 10, 11, 15], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky62mab", direction: asc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "status", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "boolean_mky6k8g8", visible: true }
+          { column_id: "date_mky62mab", visible: true }
+          { column_id: "dropdown_mky64tz0", visible: true }
+          { column_id: "long_text_mky6bj1v", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 10: Ana - Nurture Pipeline (Post-Meeting)
+# -----------------------------------------------------------
+# Purpose: Long-term nurture of warm post-meeting leads
+# Columns: Name, Phone, Timeline, Objections, Business Goals, Last Contact Date, Last Event Invite, Next Action, Next Action Date, Social Intel
+# Sort: Last Contact Date (oldest first)
+# Goal: Build friendship, stay in touch, watch for signs they're ready
+
+mutation CreateView_10_AnaNurturePipeline {
+  create_view_table(
+    board_id: 18390370563
+    name: "Ana - Nurture Pipeline (Post-Meeting)"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [15], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky6fwh8", direction: asc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "dropdown_mky6qt1e", visible: true }
+          { column_id: "long_text_mky6mywa", visible: true }
+          { column_id: "long_text_mky61tn3", visible: true }
+          { column_id: "date_mky6fwh8", visible: true }
+          { column_id: "date_mky62mab", visible: true }
+          { column_id: "text_mky64dyz", visible: true }
+          { column_id: "date_mky6h6ny", visible: true }
+          { column_id: "long_text_mky6kmy9", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# ============================================================
+# DJ'S VIEWS (5 views)
+# ============================================================
+
+# -----------------------------------------------------------
+# VIEW 11: DJ - Upcoming Meetings ⭐
+# -----------------------------------------------------------
+# Purpose: Meeting prep - all context in one view
+# Columns: Name, Phone, Email, Meeting Date, Meeting URL, Meeting Prep Done, Current Brokerage, Deal Count, Priority, Second Meeting Purpose, Notes, Current Tasks
+# Sort: Meeting Date (soonest first)
+
+mutation CreateView_11_DJUpcomingMeetings {
+  create_view_table(
+    board_id: 18390370563
+    name: "DJ - Upcoming Meetings ⭐"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [11], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky6169y", direction: asc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "email_mky6p7cy", visible: true }
+          { column_id: "date_mky6169y", visible: true }
+          { column_id: "link_mky6bxx2", visible: true }
+          { column_id: "boolean_mky6afp7", visible: true }
+          { column_id: "text_mky6grjs", visible: true }
+          { column_id: "numeric_mky68zwz", visible: true }
+          { column_id: "dropdown_mky64tz0", visible: true }
+          { column_id: "dropdown_mky63eh7", visible: true }
+          { column_id: "long_text_mky6bj1v", visible: true }
+          { column_id: "long_text_mky6t22m", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 12: DJ - Post-Meeting Follow-up
+# -----------------------------------------------------------
+# Purpose: Process meeting outcomes within 24h
+# Columns: Name, Status, Phone, Meeting Outcome, Timeline, AI Meeting Notes, Objections, Next Action, Next Action Date, Notes
+# Group by: Status
+
+mutation CreateView_12_DJPostMeeting {
+  create_view_table(
+    board_id: 18390370563
+    name: "DJ - Post-Meeting Follow-up"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [13, 12], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky6fwh8", direction: desc }]
+    settings: {
+      group_by: { column_id: "status" }
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "status", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "dropdown_mky6q11b", visible: true }
+          { column_id: "dropdown_mky6qt1e", visible: true }
+          { column_id: "long_text_mky6ethw", visible: true }
+          { column_id: "long_text_mky6mywa", visible: true }
+          { column_id: "text_mky64dyz", visible: true }
+          { column_id: "date_mky6h6ny", visible: true }
+          { column_id: "long_text_mky6bj1v", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 13: DJ - Offer Pipeline 🎯
+# -----------------------------------------------------------
+# Purpose: Track all open offers and follow-up cadence
+# Columns: Name, Phone, Offer Date, Day 3/7/14/21 Follow-up Done, Last Offer Follow-up, Timeline, Objections, Facebook Connected, Social Intel
+# Sort: Offer Date (oldest first - prioritize stale offers)
+
+mutation CreateView_13_DJOfferPipeline {
+  create_view_table(
+    board_id: 18390370563
+    name: "DJ - Offer Pipeline 🎯"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [14], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky65kn1", direction: asc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "date_mky65kn1", visible: true }
+          { column_id: "boolean_mky68bb9", visible: true }
+          { column_id: "boolean_mky6xcrv", visible: true }
+          { column_id: "boolean_mky62bp0", visible: true }
+          { column_id: "boolean_mky63yrz", visible: true }
+          { column_id: "date_mky64jxa", visible: true }
+          { column_id: "dropdown_mky6qt1e", visible: true }
+          { column_id: "long_text_mky6mywa", visible: true }
+          { column_id: "boolean_mky6r6nn", visible: true }
+          { column_id: "long_text_mky6kmy9", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 14: DJ - Hot Leads 🔥
+# -----------------------------------------------------------
+# Purpose: Focus on closeable leads - these are priority
+# Columns: Name, Phone, Email, Timeline, Current Brokerage, Last Contact Date, Next Action, Notes
+#
+# NOTE: Meeting Outcome filter uses contains_text for dropdown columns
+
+mutation CreateView_14_DJHotLeads {
+  create_view_table(
+    board_id: 18390370563
+    name: "DJ - Hot Leads 🔥"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "dropdown_mky6q11b", compare_value: "Hot", operator: contains_text }
+        { column_id: "status", compare_value: [16, 17, 18, 19], operator: not_any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky6fwh8", direction: desc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "email_mky6p7cy", visible: true }
+          { column_id: "dropdown_mky6qt1e", visible: true }
+          { column_id: "text_mky6grjs", visible: true }
+          { column_id: "date_mky6fwh8", visible: true }
+          { column_id: "text_mky64dyz", visible: true }
+          { column_id: "long_text_mky6bj1v", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 15: DJ - Social Intel Review (Weekly)
+mutation CreateView_15_DJSocialIntel {
+  create_view_table(
+    board_id: 18390370563
+    name: "DJ - Social Intel Review (Weekly)"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "boolean_mky6r6nn", compare_value: [], operator: is_not_empty }
+        { column_id: "status", compare_value: [14, 15], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky65b34", direction: asc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "status", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "boolean_mky6r6nn", visible: true }
+          { column_id: "date_mky65b34", visible: true }
+          { column_id: "long_text_mky6kmy9", visible: true }
+          { column_id: "long_text_mky6bj1v", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# ============================================================
+# SHARED/MANAGEMENT VIEWS (5 views)
+# ============================================================
+
+# -----------------------------------------------------------
+# VIEW 16: Pipeline Overview (Kanban)
+# -----------------------------------------------------------
+# Purpose: Visual pipeline for team meetings
+# NOTE: Kanban views use create_view with type: KANBAN (not create_view_table)
+# This may require manual creation in UI as Kanban API support varies
+
+mutation CreateView_16_PipelineKanban {
+  create_view(
+    board_id: 18390370563
+    name: "Pipeline Overview (Kanban)"
+    type: KANBAN
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 17: Won Leads 🎉
+# -----------------------------------------------------------
+# Purpose: Celebrate wins, analyze what works
+# Columns: Name, Current Brokerage, Deal Count, Lead Source, First Contact Date
+
+mutation CreateView_17_WonLeads {
+  create_view_table(
+    board_id: 18390370563
+    name: "Won Leads 🎉"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [16], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky6fwh8", direction: desc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "text_mky6grjs", visible: true }
+          { column_id: "numeric_mky68zwz", visible: true }
+          { column_id: "dropdown_mky6ctrz", visible: true }
+          { column_id: "date_mky6ky4j", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 18: Lost Analysis
+# -----------------------------------------------------------
+# Purpose: Learn from losses
+# Columns: Name, Status, Lost Reason, Lead Source, Meeting Outcome, Objections
+# Group by: Status (to see different lost types)
+
+mutation CreateView_18_LostAnalysis {
+  create_view_table(
+    board_id: 18390370563
+    name: "Lost Analysis"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [17, 18, 19], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky6fwh8", direction: desc }]
+    settings: {
+      group_by: { column_id: "status" }
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "status", visible: true }
+          { column_id: "dropdown_mky6hvm6", visible: true }
+          { column_id: "dropdown_mky6ctrz", visible: true }
+          { column_id: "dropdown_mky6q11b", visible: true }
+          { column_id: "long_text_mky6mywa", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 19: Hibernation Queue
+# -----------------------------------------------------------
+# Purpose: Track leads cooling off
+# Columns: Name, Hibernation Until, Timeout Count, Last Contact Date, Notes
+# Sort: Hibernation Until (soonest first)
+
+mutation CreateView_19_HibernationQueue {
+  create_view_table(
+    board_id: 18390370563
+    name: "Hibernation Queue"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [102], operator: any_of }
+      ]
+    }
+    sort: [{ column_id: "date_mky68ca2", direction: asc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "date_mky68ca2", visible: true }
+          { column_id: "numeric_mky6c75r", visible: true }
+          { column_id: "date_mky6fwh8", visible: true }
+          { column_id: "long_text_mky6bj1v", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# -----------------------------------------------------------
+# VIEW 20: Dead - Ready for Review
+# -----------------------------------------------------------
+# Purpose: Quarterly review. CAUTION: These opted out. Human decision required.
+# Columns: Name, Phone, Dead Until, Last Contact Date, Notes
+# Sort: Dead Until (oldest first)
+
+mutation CreateView_20_DeadReview {
+  create_view_table(
+    board_id: 18390370563
+    name: "Dead - Ready for Review"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [101], operator: any_of }
+        { column_id: "boolean_mky6nk5e", compare_value: [], operator: is_not_empty }
+      ]
+    }
+    sort: [{ column_id: "date_mky68q9y", direction: asc }]
+    settings: {
+      columns: {
+        column_properties: [
+          { column_id: "name", visible: true }
+          { column_id: "phone_mky6fr9j", visible: true }
+          { column_id: "date_mky68q9y", visible: true }
+          { column_id: "date_mky6fwh8", visible: true }
+          { column_id: "long_text_mky6bj1v", visible: true }
+        ]
+      }
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# ============================================================
+# VIEW SUMMARY BY ROLE
+# ============================================================
+#
+# JENNICA (3 views):
+#   1. Today's Hunt ⭐ - Daily SMS queue
+#   2. Timeout Returning - Preview returning leads
+#   3. SMS Sent - Track pending outreach
+#
+# ANA (7 views):
+#   4. New Replies 🔥 - Immediate action
+#   5. Today's Follow-ups - Scheduled tasks
+#   6. Active Pipeline - Full funnel
+#   7. Stale Leads ⚠️ - Needs attention
+#   8. Instantly Leads - Email path tracking
+#   9. Event Invite Queue - Thursday training invites
+#   10. Nurture Pipeline - Post-meeting warm leads
+#
+# DJ (5 views):
+#   11. Upcoming Meetings ⭐ - Prep queue
+#   12. Post-Meeting - Process outcomes
+#   13. Offer Pipeline 🎯 - Track open offers
+#   14. Hot Leads 🔥 - Close these
+#   15. Social Intel Review - Weekly Facebook check
+#
+# SHARED (5 views):
+#   16. Pipeline Kanban - Team visibility
+#   17. Won - Celebrate
+#   18. Lost Analysis - Learn
+#   19. Hibernation - Cooling off
+#   20. Dead Review - Quarterly review
+#
+# MY DAY VIEWS (3 master views):
+#   🟣 Jennica's Day - Everything Jennica needs
+#   🔵 Ana's Day - Everything Ana needs  
+#   🟢 DJ's Day - Everything DJ needs
+
+# ============================================================
+# DASHBOARD WIDGETS (see monday/05-dashboard-config.md)
+# ============================================================
+
+# ============================================================
+# EXECUTION GUIDE
+# ============================================================
+#
+# HOW TO RUN THESE MUTATIONS:
+#
+# Option 1: Monday API Playground
+#   1. Go to: https://monday.com/developers/v2/try-it-yourself
+#   2. Authenticate with your account
+#   3. Replace 18390370563 with your actual board ID in each mutation
+#   4. Run each mutation one at a time
+#
+# Option 2: cURL / Postman
+#   curl -X POST https://api.monday.com/v2 \
+#     -H "Authorization: YOUR_API_KEY" \
+#     -H "Content-Type: application/json" \
+#     -d '{"query": "mutation { create_view_table(...) { id name } }"}'
+#
+# Option 3: Node.js Script
+#   See the execution script template at the bottom of this file
+#
+# BEFORE RUNNING:
+#   1. Run GetStatusIndices query to get your actual status index numbers
+#   2. Run GetColumnIds query to get your actual column IDs
+#   3. Update the STATUS_INDEX_MAP section with your real values
+#   4. Replace all 18390370563 placeholders with your board ID
+#   5. Replace column_id values with your actual column IDs
+#
+# COLUMN ID NOTE:
+#   The column_id values in this file (like "phone", "status", etc.)
+#   are placeholder names. Your actual column IDs will look like:
+#   - "phone__1" or "phone_mknr8s"
+#   - "status" (usually just "status" for the main status)
+#   - "text__1" or a custom ID
+#
+#   Run GetColumnIds to get your exact column IDs.
+#
+# ============================================================
+
+# ============================================================
+# QUICK REFERENCE: STATUS INDICES (YOUR BOARD)
+# ============================================================
+#
+# JENNICA PHASE:
+#   5   = New Lead
+#   2   = SMS Sent
+#   4   = 30-Day Timeout
+#
+# ANA PHASE:
+#   6   = Replied - Awaiting Ana
+#   7   = Tool Offered
+#   8   = Training Invited
+#   9   = Relationship Building
+#   10  = Ask Made
+#   15  = Nurture (Post-Meeting)
+#
+# DJ PHASE:
+#   11  = Meeting Scheduled
+#   13  = DJ Meeting Complete
+#   14  = Offer Extended
+#   12  = No Show
+#
+# TERMINAL:
+#   16  = Won
+#   17  = Lost - Not Interested
+#   18  = Lost - Competitor
+#   19  = Lost - Not Qualified
+#   101 = Dead - Negative Reply
+#   102 = Hibernation 90-Day
+#
+# ============================================================
+
+# ============================================================
+# NODE.JS EXECUTION SCRIPT (TEMPLATE)
+# ============================================================
+#
+# Save this as run-views.js and execute with: node run-views.js
+#
+# const fetch = require('node-fetch');
+#
+# const API_KEY = 'YOUR_API_KEY';
+# const BOARD_ID = 18390370563;
+#
+# async function createView(mutation) {
+#   const response = await fetch('https://api.monday.com/v2', {
+#     method: 'POST',
+#     headers: {
+#       'Authorization': API_KEY,
+#       'Content-Type': 'application/json',
+#       'API-Version': '2025-04'
+#     },
+#     body: JSON.stringify({ query: mutation })
+#   });
+#   return response.json();
+# }
+#
+# // Example: Create Jennica's Hunt view
+# const mutation = `
+#   mutation {
+#     create_view_table(
+#       board_id: ${BOARD_ID}
+#       name: "Jennica - Today's Hunt ⭐"
+#       filter: {
+#         operator: and
+#         rules: [
+#           { column_id: "status", compare_value: [0], operator: any_of }
+#         ]
+#       }
+#     ) {
+#       id
+#       name
+#     }
+#   }
+# `;
+#
+# createView(mutation).then(console.log);
+#
+# ============================================================

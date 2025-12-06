@@ -1,0 +1,333 @@
+{
+  "name": "REA - Close SMS Reply Received",
+  "description": "When a lead replies to any SMS in the Close CRM workflow, update their Monday status to 'Replied' and move them to the 'Responded' group. The Close workflow auto-stops on reply.",
+  "trigger": "Close CRM Webhook: incoming_sms",
+  "board_id": "18391158354",
+  "close_webhook_setup": {
+    "endpoint": "POST /api/v1/webhook/",
+    "payload": {
+      "url": "YOUR_MAKE_WEBHOOK_URL",
+      "events": ["incoming_sms"]
+    },
+    "curl_example": "curl -X POST 'https://api.close.com/api/v1/webhook/' -u 'api_3U6OkyHlWF2pIcVusIZf2V.1uT08KKRosiYWBy8fH6B4L:' -H 'Content-Type: application/json' -d '{\"url\": \"YOUR_MAKE_WEBHOOK_URL\", \"events\": [\"incoming_sms\"]}'"
+  },
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": null,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Receives Close CRM webhook for incoming SMS"
+    },
+    {
+      "id": 2,
+      "module": "close:getLead",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "leadId": "{{1.lead_id}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Get lead details including custom field with Monday item ID"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "label": "Has Monday Item ID",
+          "flow": [
+            {
+              "id": 4,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{2.custom.monday_item_id}}",
+                "columnId": "color_mkybxbyk",
+                "value": "{\"label\":\"Replied\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 0
+                }
+              },
+              "note": "Set status to Replied"
+            },
+            {
+              "id": 5,
+              "module": "monday:moveItemToGroup",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{2.custom.monday_item_id}}",
+                "groupId": "group_mkyb51b6"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0
+                }
+              },
+              "note": "Move to Responded group"
+            },
+            {
+              "id": 6,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{2.custom.monday_item_id}}",
+                "columnId": "date_mkybnadc",
+                "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0
+                }
+              },
+              "note": "Set Last Response Date to today"
+            },
+            {
+              "id": 7,
+              "module": "monday:createUpdate",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{2.custom.monday_item_id}}",
+                "body": "**SMS Reply Received!**\n\n**From:** {{1.sender_phone}}\n**Message:** {{1.body}}\n**Received:** {{formatDate(1.date_created; 'MMM D, YYYY h:mm A')}}\n\n---\n\n**Next Steps:**\n1. Respond within 24 business hours\n2. Send Calendly link: https://joinkale.com/schedule\n3. If no appointment within 24 hours, start calling"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 0
+                }
+              },
+              "note": "Add SMS content to item updates"
+            },
+            {
+              "id": 8,
+              "module": "slack:postMessage",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "channel": "REA_SLACK_CHANNEL_OR_DM",
+                "text": ":speech_balloon: *New SMS Reply from {{2.display_name}}!*\n\n\"{{1.body}}\"\n\n*Next steps:*\n1. Reply within 24 hrs with Calendly link\n2. https://joinkale.com/schedule\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354/pulses/{{2.custom.monday_item_id}}|Open in Monday>"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0
+                }
+              },
+              "note": "Notify Rea via Slack"
+            }
+          ],
+          "filter": {
+            "name": "Has Monday Item ID",
+            "conditions": [
+              [
+                {
+                  "a": "{{2.custom.monday_item_id}}",
+                  "b": "",
+                  "o": "text:notequal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "label": "No Monday Item ID - Search by email/phone",
+          "flow": [
+            {
+              "id": 9,
+              "module": "monday:searchItems",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "queryParams": {
+                  "rules": [
+                    {
+                      "column_id": "phone_mkyb4cr0",
+                      "compare_value": ["{{1.sender_phone}}"]
+                    }
+                  ]
+                }
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 200
+                }
+              },
+              "note": "Search Monday by phone number"
+            },
+            {
+              "id": 10,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 200
+                }
+              },
+              "routes": [
+                {
+                  "label": "Found in Monday",
+                  "flow": [
+                    {
+                      "id": 11,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "18391158354",
+                        "itemId": "{{9.items[0].id}}",
+                        "columnId": "color_mkybxbyk",
+                        "value": "{\"label\":\"Replied\"}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1500,
+                          "y": 150
+                        }
+                      }
+                    },
+                    {
+                      "id": 12,
+                      "module": "monday:moveItemToGroup",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "18391158354",
+                        "itemId": "{{9.items[0].id}}",
+                        "groupId": "group_mkyb51b6"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1800,
+                          "y": 150
+                        }
+                      }
+                    }
+                  ],
+                  "filter": {
+                    "name": "Found match",
+                    "conditions": [
+                      [
+                        {
+                          "a": "{{length(9.items)}}",
+                          "b": "0",
+                          "o": "number:greater"
+                        }
+                      ]
+                    ]
+                  }
+                },
+                {
+                  "label": "Not Found - Alert Rea",
+                  "flow": [
+                    {
+                      "id": 13,
+                      "module": "slack:postMessage",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "channel": "REA_SLACK_CHANNEL_OR_DM",
+                        "text": ":warning: *SMS Reply from Unknown Lead*\n\nPhone: {{1.sender_phone}}\nMessage: \"{{1.body}}\"\n\nThis phone number wasn't found in Monday. Please check Close CRM directly."
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1500,
+                          "y": 300
+                        }
+                      }
+                    }
+                  ],
+                  "filter": {
+                    "name": "Not found (default)",
+                    "conditions": []
+                  }
+                }
+              ]
+            }
+          ],
+          "filter": {
+            "name": "No Monday Item ID (default)",
+            "conditions": []
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Create webhook in Make.com: Webhooks > Custom webhook > Copy URL",
+    "step_2": "Create Close CRM webhook for incoming_sms event (see curl_example)",
+    "step_3": "Ensure Close leads have 'monday_item_id' custom field populated",
+    "step_4": "Replace REA_SLACK_CHANNEL_OR_DM with Rea's Slack channel/DM",
+    "step_5": "Configure Monday and Close connections",
+    "step_6": "Test by replying to a test SMS",
+    "step_7": "Activate scenario"
+  },
+  "close_custom_field_note": "The 'monday_item_id' custom field should be created in Close CRM and populated when leads are imported from Monday (see scenario 01)"
+}

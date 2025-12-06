@@ -1,0 +1,316 @@
+{
+  "name": "Tool Offered - Checklist & Follow-up Date Reminder",
+  "description": "When Ana moves a lead to 'Tool Offered', this scenario: (1) Populates Current Tasks with a checklist reminding her to send voice memo and set follow-up date, (2) Waits 10 minutes then checks if Next Action Date is set, (3) Pings Ana if she forgot.",
+  "scenarios": {
+    "scenario_1": {
+      "name": "Tool Offered - Populate Checklist",
+      "trigger": "Status changes to Tool Offered",
+      "actions": [
+        "Populate Current Tasks with checklist",
+        "Set default Next Action text"
+      ]
+    },
+    "scenario_2": {
+      "name": "Tool Offered - Follow-up Date Check",
+      "trigger": "Status changes to Tool Offered",
+      "actions": [
+        "Wait 10 minutes",
+        "Check if Next Action Date is empty",
+        "If empty, notify Ana via Slack/email"
+      ]
+    }
+  },
+  "flow_scenario_1": [
+    {
+      "id": 1,
+      "module": "monday:watchColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "status"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Triggers when status changes"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "Status is Tool Offered",
+        "conditions": [
+          [
+            {
+              "a": "{{1.value.label.text}}",
+              "b": "Tool Offered",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "monday:changeColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "current_tasks",
+        "value": "{\"text\":\"📋 TOOL OFFERING CHECKLIST:\\n\\n☐ Send ChatGPT tool link via SMS\\n☐ Send voice memo introducing yourself\\n☐ Set 'Next Action Date' for follow-up call (YOU DECIDE WHEN)\\n☐ Confirm 'Next Action' field has your plan\\n\\n⚠️ DON'T MOVE ON until you've set your follow-up date!\\n\\n💡 Tip: 2-4 days is usually good for tool follow-up.\"}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Populate checklist in Current Tasks"
+    },
+    {
+      "id": 4,
+      "module": "monday:changeColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "next_action",
+        "value": "Call for tool feedback → if no answer, SMS: \"Hey! Did you get a chance to try that tool?\""
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "note": "Set default Next Action text (Ana can edit)"
+    },
+    {
+      "id": 5,
+      "module": "monday:createUpdate",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "itemId": "{{1.itemId}}",
+        "body": "🔧 **Tool Offered**\\n\\nRemember to:\\n1. Send the tool link\\n2. Send a voice memo intro\\n3. **Set your follow-up date!**"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        }
+      },
+      "note": "Also add as an Update for visibility in activity feed"
+    }
+  ],
+  "flow_scenario_2": [
+    {
+      "id": 1,
+      "module": "monday:watchColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "status"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Triggers when status changes"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "Status is Tool Offered",
+        "conditions": [
+          [
+            {
+              "a": "{{1.value.label.text}}",
+              "b": "Tool Offered",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "util:SetVariable",
+      "version": 1,
+      "mapper": {
+        "name": "itemId",
+        "value": "{{1.itemId}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Store item ID for later use after sleep"
+    },
+    {
+      "id": 4,
+      "module": "util:SetVariable",
+      "version": 1,
+      "mapper": {
+        "name": "itemName",
+        "value": "{{1.itemName}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 750,
+          "y": 0
+        }
+      },
+      "note": "Store item name for notification"
+    },
+    {
+      "id": 5,
+      "module": "builtin:Sleep",
+      "version": 1,
+      "mapper": {
+        "delay": 600
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "note": "Wait 10 minutes (600 seconds)"
+    },
+    {
+      "id": 6,
+      "module": "monday:getItem",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "itemId": "{{itemId}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        }
+      },
+      "note": "Re-fetch item to check if Next Action Date was set"
+    },
+    {
+      "id": 7,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "Next Action Date is STILL empty",
+        "conditions": [
+          [
+            {
+              "a": "{{6.column_values.next_action_date.date}}",
+              "b": "",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0
+        }
+      },
+      "note": "Only continue if date wasn't set"
+    },
+    {
+      "id": 8,
+      "module": "slack:postMessage",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "channel": "YOUR_SLACK_CHANNEL_OR_ANA_DM",
+        "text": "⚠️ *Follow-up Date Missing!*\n\nYou offered a tool to *{{itemName}}* but didn't set a follow-up date.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{itemId}}|Set it now →>\n\nRemember: You need to call them in a few days to get feedback!"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0
+        }
+      },
+      "note": "Ping Ana via Slack. Can also use email module instead."
+    }
+  ],
+  "alternative_notification_email": {
+    "module": "email:sendEmail",
+    "note": "Use this instead of Slack if preferred",
+    "mapper": {
+      "to": "ana@kalerealty.com",
+      "subject": "⚠️ Set follow-up date for {{itemName}}",
+      "body": "You offered a tool to {{itemName}} but didn't set a follow-up date.\n\nSet it now: https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{itemId}}\n\nRemember: You need to call them in a few days to get feedback!"
+    }
+  },
+  "metadata": {
+    "instant": true,
+    "version": 1
+  },
+  "setup_instructions": {
+    "step_1": "Create TWO scenarios in Make.com from this blueprint",
+    "step_2": "Scenario 1: 'Tool Offered - Checklist' using flow_scenario_1",
+    "step_3": "Scenario 2: 'Tool Offered - Date Check' using flow_scenario_2",
+    "step_4": "Replace YOUR_BOARD_ID in both scenarios",
+    "step_5": "Update column IDs if different: 'current_tasks', 'next_action', 'next_action_date'",
+    "step_6": "Configure Slack connection and set channel/DM for Ana (or use email alternative)",
+    "step_7": "Configure Monday.com connections",
+    "step_8": "Test: Move a lead to 'Tool Offered', verify checklist appears, wait 10 min without setting date, verify ping",
+    "step_9": "Test again: Set the date within 10 min, verify NO ping",
+    "step_10": "Activate both scenarios"
+  },
+  "checklist_text": {
+    "raw": "📋 TOOL OFFERING CHECKLIST:\n\n☐ Send ChatGPT tool link via SMS\n☐ Send voice memo introducing yourself\n☐ Set 'Next Action Date' for follow-up call (YOU DECIDE WHEN)\n☐ Confirm 'Next Action' field has your plan\n\n⚠️ DON'T MOVE ON until you've set your follow-up date!\n\n💡 Tip: 2-4 days is usually good for tool follow-up."
+  },
+  "default_next_action": {
+    "text": "Call for tool feedback → if no answer, SMS: \"Hey! Did you get a chance to try that tool?\""
+  },
+  "timing_notes": {
+    "delay": "10 minutes gives Ana time to send the tool, record voice memo, and set the date without being rushed",
+    "adjustable": "Change the 'delay' value in the Sleep module if 10 min is too short/long (value is in seconds)"
+  }
+}

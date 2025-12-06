@@ -1,0 +1,160 @@
+{
+  "name": "Timeout Count Manager",
+  "description": "When a lead enters 30-Day Timeout, increments timeout count and auto-hibernates after 3 timeouts.",
+  "trigger": "Monday status change to 30-Day Timeout",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:watchColumnsChange",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "status"
+      },
+      "note": "Watch for status changes"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "filter": {
+        "name": "Status changed to 30-Day Timeout",
+        "conditions": [
+          [
+            {
+              "a": "{{1.value.label.text}}",
+              "b": "30-Day Timeout",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "module": "monday:getItem",
+      "version": 1,
+      "mapper": {
+        "itemId": "{{1.itemId}}"
+      },
+      "note": "Get current timeout count"
+    },
+    {
+      "id": 4,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "timeout_until",
+        "value": "{\"date\":\"{{formatDate(addDays(now; 30); 'YYYY-MM-DD')}}\"}"
+      },
+      "note": "Set Timeout Until = Today + 30 days"
+    },
+    {
+      "id": 5,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "timeout_count",
+        "value": "{{if(3.column_values.timeout_count.text; add(3.column_values.timeout_count.text; 1); 1)}}"
+      },
+      "note": "Increment Timeout Count (or set to 1 if empty)"
+    },
+    {
+      "id": 6,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "do_not_contact",
+        "value": "{\"checked\":\"true\"}"
+      },
+      "note": "Check Do Not Contact"
+    },
+    {
+      "id": 7,
+      "module": "builtin:BasicRouter",
+      "routes": [
+        {
+          "label": "3+ Timeouts - Auto Hibernate",
+          "flow": [
+            {
+              "id": 8,
+              "module": "monday:changeColumnValue",
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "status",
+                "value": "{\"label\":\"Hibernation 90-Day\"}"
+              },
+              "note": "Auto-change to Hibernation"
+            },
+            {
+              "id": 9,
+              "module": "monday:createUpdate",
+              "mapper": {
+                "itemId": "{{1.itemId}}",
+                "body": "⚠️ **Auto-Hibernated (3 Timeouts)**\n\nThis lead has timed out 3 times with no response.\n\nMoving to 90-day hibernation. Will return to pool after hibernation."
+              }
+            },
+            {
+              "id": 10,
+              "module": "slack:postMessage",
+              "mapper": {
+                "channel": "YOUR_SLACK_CHANNEL",
+                "text": "⚠️ *{{3.name}}* auto-hibernated after 3 timeouts with no response."
+              }
+            }
+          ],
+          "filter": {
+            "name": "Timeout count is 3+",
+            "conditions": [
+              [
+                {
+                  "a": "{{if(3.column_values.timeout_count.text; add(3.column_values.timeout_count.text; 1); 1)}}",
+                  "b": "3",
+                  "o": "number:greaterequal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "label": "Normal Timeout (1-2)",
+          "flow": [
+            {
+              "id": 11,
+              "module": "monday:createUpdate",
+              "mapper": {
+                "itemId": "{{1.itemId}}",
+                "body": "⏸️ **30-Day Timeout Started**\n\nTimeout #{{if(3.column_values.timeout_count.text; add(3.column_values.timeout_count.text; 1); 1)}}\nWill return to New Lead on: {{formatDate(addDays(now; 30); 'MMM D, YYYY')}}\n\n{{if(equals(if(3.column_values.timeout_count.text; add(3.column_values.timeout_count.text; 1); 1); 2); '⚠️ Next timeout will trigger auto-hibernation.'; '')}}"
+              }
+            }
+          ],
+          "filter": {
+            "name": "Default route",
+            "conditions": []
+          }
+        }
+      ]
+    }
+  ],
+  "setup_instructions": {
+    "step_1": "Import this blueprint into Make.com",
+    "step_2": "Replace YOUR_BOARD_ID with your Monday board ID",
+    "step_3": "Configure Monday.com and Slack connections",
+    "step_4": "Ensure 'Timeout Count' column exists on your board",
+    "step_5": "Test: Manually change a lead to 30-Day Timeout",
+    "step_6": "Verify timeout count increments and notes are added",
+    "step_7": "Activate scenario"
+  },
+  "auto_hibernation_logic": {
+    "timeout_1": "Normal - will return to New Lead in 30 days",
+    "timeout_2": "Warning note added - next timeout triggers hibernation",
+    "timeout_3": "Auto-changed to Hibernation 90-Day immediately"
+  }
+}

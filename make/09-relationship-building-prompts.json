@@ -1,0 +1,115 @@
+{
+  "name": "Relationship Building - Pivot Prompts",
+  "description": "When Ana moves a lead to 'Relationship Building' (after tool follow-up or training), populate Current Tasks with pivot ideas to keep the conversation going.",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:watchColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "status"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Triggers when status changes"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "Status is Relationship Building",
+        "conditions": [
+          [
+            {
+              "a": "{{1.value.label.text}}",
+              "b": "Relationship Building",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "monday:changeColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "current_tasks",
+        "value": "{\"text\":\"📋 RELATIONSHIP BUILDING - Pivot Ideas:\\n\\n🎯 AFTER TOOL FOLLOW-UP:\\n\\nIf they used it:\\n\\\"Awesome, glad it helped! QQ - [pivot below]\\\"\\n\\nIf they didn't use it:\\n\\\"No problem! QQ - [pivot below]\\\"\\n\\n─────────────────────────\\n\\n💡 PIVOT OPTIONS (pick one):\\n\\n📅 EVENT INVITE:\\n\\\"Hey, we have [event] coming up on [date]. Thought you might find it useful - want me to send the link?\\\"\\n\\n💬 MARKET QUESTION:\\n\\\"How's the [their area] market treating you lately?\\\"\\n\\n🎯 GOALS QUESTION:\\n\\\"What's your focus for the rest of the year?\\\"\\n\\n😤 CHALLENGES QUESTION:\\n\\\"What's the biggest headache in your business right now?\\\"\\n\\n📊 BUSINESS QUESTION:\\n\\\"Are you mostly working buyers or sellers these days?\\\"\\n\\n─────────────────────────\\n\\n⏰ REMEMBER:\\n• Keep it conversational\\n• Listen for pain points\\n• Note anything useful for later\\n• Watch for gratitude moments ⚡\"}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Populate pivot prompts in Current Tasks"
+    },
+    {
+      "id": 4,
+      "module": "monday:changeColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "next_action",
+        "value": "Continue conversation - use pivot question to deepen relationship"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "note": "Set default Next Action"
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "current_tasks_text": {
+    "formatted": "📋 RELATIONSHIP BUILDING - Pivot Ideas:\n\n🎯 AFTER TOOL FOLLOW-UP:\n\nIf they used it:\n\"Awesome, glad it helped! QQ - [pivot below]\"\n\nIf they didn't use it:\n\"No problem! QQ - [pivot below]\"\n\n─────────────────────────\n\n💡 PIVOT OPTIONS (pick one):\n\n📅 EVENT INVITE:\n\"Hey, we have [event] coming up on [date]. Thought you might find it useful - want me to send the link?\"\n\n💬 MARKET QUESTION:\n\"How's the [their area] market treating you lately?\"\n\n🎯 GOALS QUESTION:\n\"What's your focus for the rest of the year?\"\n\n😤 CHALLENGES QUESTION:\n\"What's the biggest headache in your business right now?\"\n\n📊 BUSINESS QUESTION:\n\"Are you mostly working buyers or sellers these days?\"\n\n─────────────────────────\n\n⏰ REMEMBER:\n• Keep it conversational\n• Listen for pain points\n• Note anything useful for later\n• Watch for gratitude moments ⚡"
+  },
+  "setup_instructions": {
+    "step_1": "Import this blueprint into Make.com",
+    "step_2": "Replace YOUR_BOARD_ID with your actual Monday board ID",
+    "step_3": "Update column IDs if different: 'current_tasks', 'next_action'",
+    "step_4": "Configure Monday.com connection",
+    "step_5": "Test: Move a lead to 'Relationship Building', verify prompts appear",
+    "step_6": "Activate scenario"
+  },
+  "notes": {
+    "when_this_fires": "Lead moves to Relationship Building from Tool Offered or Training Invited",
+    "purpose": "Give Ana ready-made conversation pivots so she doesn't have to think of questions on the fly",
+    "customization": "Update the event invite text seasonally or when you have specific events coming up"
+  }
+}

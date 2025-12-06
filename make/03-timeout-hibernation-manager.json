@@ -1,0 +1,292 @@
+{
+  "name": "Timeout & Hibernation Manager",
+  "description": "Daily scheduled scenario that handles 30-day timeouts and 90-day hibernations - sets dates when entering these statuses and resets leads when periods expire.",
+  "flow": [
+    {
+      "id": 1,
+      "module": "builtin:BasicScheduler",
+      "version": 1,
+      "parameters": {
+        "type": "day",
+        "hour": 8,
+        "minute": 0
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Runs daily at 8:00 AM"
+    },
+    {
+      "id": 2,
+      "module": "monday:searchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "status",
+              "compare_value": ["30-Day Timeout", "Hibernation 90-Day"]
+            }
+          ]
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Find all items in timeout or hibernation status"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicIterator",
+      "version": 1,
+      "mapper": {
+        "array": "{{2.items}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Loop through each item"
+    },
+    {
+      "id": 4,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{3.id}}",
+                "columnId": "status",
+                "value": "{\"label\":\"New Lead\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": -200
+                }
+              },
+              "note": "30-day timeout expired - return to New Lead"
+            },
+            {
+              "id": 6,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{3.id}}",
+                "columnId": "timeout_until",
+                "value": "{}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": -200
+                }
+              },
+              "note": "Clear the timeout date"
+            },
+            {
+              "id": 7,
+              "module": "monday:createUpdate",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{3.id}}",
+                "body": "🔄 **30-Day Timeout Expired**\n\nLead returned to hunt pool."
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": -200
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "30-Day Timeout Expired",
+            "conditions": [
+              [
+                {
+                  "a": "{{3.column_values.status.label}}",
+                  "b": "30-Day Timeout",
+                  "o": "text:equal"
+                },
+                {
+                  "a": "{{parseDate(3.column_values.timeout_until.date; 'YYYY-MM-DD')}}",
+                  "b": "{{now}}",
+                  "o": "date:before"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 8,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{3.id}}",
+                "columnId": "status",
+                "value": "{\"label\":\"New Lead\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0
+                }
+              },
+              "note": "90-day hibernation expired - return to New Lead"
+            },
+            {
+              "id": 9,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{3.id}}",
+                "columnId": "hibernation_until",
+                "value": "{}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0
+                }
+              },
+              "note": "Clear the hibernation date"
+            },
+            {
+              "id": 10,
+              "module": "monday:createUpdate",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{3.id}}",
+                "body": "🔄 **90-Day Hibernation Expired**\n\nLead returned to hunt pool for fresh outreach."
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 0
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "90-Day Hibernation Expired",
+            "conditions": [
+              [
+                {
+                  "a": "{{3.column_values.status.label}}",
+                  "b": "Hibernation 90-Day",
+                  "o": "text:equal"
+                },
+                {
+                  "a": "{{parseDate(3.column_values.hibernation_until.date; 'YYYY-MM-DD')}}",
+                  "b": "{{now}}",
+                  "o": "date:before"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "companion_scenario": {
+    "name": "Set Timeout/Hibernation Dates on Status Change",
+    "description": "When status changes to timeout or hibernation, set the expiration date",
+    "trigger": "Monday webhook on status change",
+    "flow": [
+      {
+        "id": 1,
+        "module": "monday:watchColumnValue",
+        "note": "Watch for status column changes"
+      },
+      {
+        "id": 2,
+        "module": "builtin:BasicRouter",
+        "routes": [
+          {
+            "filter": "Status changed to 30-Day Timeout",
+            "action": "Set timeout_until to {{addDays(now; 30)}}"
+          },
+          {
+            "filter": "Status changed to Hibernation 90-Day",
+            "action": "Set hibernation_until to {{addDays(now; 90)}}"
+          }
+        ]
+      }
+    ]
+  },
+  "setup_instructions": {
+    "step_1": "Import this blueprint into Make.com",
+    "step_2": "Replace YOUR_BOARD_ID with actual Monday board ID",
+    "step_3": "Configure Monday.com connection",
+    "step_4": "Verify column IDs match your board (timeout_until, hibernation_until, status)",
+    "step_5": "Set scheduling to run daily at 8:00 AM (or preferred time)",
+    "step_6": "Create the companion scenario (described above) to SET dates when entering timeout/hibernation",
+    "step_7": "Test by manually setting a lead to timeout with a past date",
+    "step_8": "Activate both scenarios"
+  },
+  "column_id_reference": {
+    "status": "Usually 'status' - the main status column",
+    "timeout_until": "Custom date column for 30-day timeout expiration",
+    "hibernation_until": "Custom date column for 90-day hibernation expiration",
+    "note": "Run the column query in Monday API playground to get exact IDs"
+  }
+}

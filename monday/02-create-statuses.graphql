@@ -1,0 +1,128 @@
+# Monday.com Status Column Configuration
+# Run in API Playground: https://monday.com/developers/v2/try-it-yourself
+
+# ============================================================
+# CONFIGURING STATUS LABELS
+# 
+# Monday's API for updating status labels is limited.
+# The easiest approach is to configure manually in the UI:
+# 
+# 1. Click on any Status cell in the board
+# 2. Click "Edit Labels" at the bottom
+# 3. Add/rename labels as listed below
+# 4. Set colors as indicated
+# ============================================================
+
+# STATUS LABELS TO CREATE (in order):
+#
+# ┌─────────────────────────────────────────────────────────────┐
+# │ PHASE 1 - JENNICA (Cold Outreach)                          │
+# ├─────────────────────────────────────────────────────────────┤
+# │ New Lead              │ Gray      │ Ready for Jennica hunt │
+# │ SMS Sent              │ Light Blue│ Awaiting reply         │
+# │ 30-Day Timeout        │ Orange    │ Paused - no reply      │
+# └─────────────────────────────────────────────────────────────┘
+#
+# ┌─────────────────────────────────────────────────────────────┐
+# │ PHASE 2 - ANA (Active Engagement)                          │
+# ├─────────────────────────────────────────────────────────────┤
+# │ Replied - Awaiting Ana│ Purple    │ Lead replied, Ana's turn│
+# │ Tool Offered          │ Teal      │ Tool sent, awaiting f/u │
+# │ Training Invited      │ Lime      │ Thursday training invite│
+# │ Relationship Building │ Gold      │ Deepening connection    │
+# │ Ask Made              │ Orange    │ Recruiting pitch made   │
+# │ Meeting Scheduled     │ Red       │ DJ meeting on calendar  │
+# │ No Show               │ Pink      │ Missed meeting - Ana f/u│
+# │ DJ Meeting Complete   │ Maroon    │ Post-meeting follow-up  │
+# │ Offer Extended        │ Bright Red│ Formal offer made       │
+# │ Nurture (Post-Meeting)│ Soft Blue │ Warm lead back to Ana   │
+# └─────────────────────────────────────────────────────────────┘
+#
+# ┌─────────────────────────────────────────────────────────────┐
+# │ ENDPOINTS (Terminal States)                                 │
+# ├─────────────────────────────────────────────────────────────┤
+# │ Won                   │ Dark Green│ Signed with Kale!       │
+# │ Lost - Not Interested │ Dark Gray │ Declined                │
+# │ Lost - Competitor     │ Dark Red  │ Went elsewhere          │
+# │ Lost - Not Qualified  │ Brown     │ Outside target range    │
+# │ Dead - Negative Reply │ Black     │ Hostile response (1yr)  │
+# │ Hibernation 90-Day    │ Light Gray│ Cool off period         │
+# └─────────────────────────────────────────────────────────────┘
+
+# ============================================================
+# ALTERNATIVE: API-BASED STATUS UPDATE
+# 
+# If you want to try via API, here's the mutation.
+# Note: This can be finicky with Monday's label handling.
+# ============================================================
+
+mutation {
+  change_column_metadata(
+    board_id: BOARD_ID
+    column_id: "status"  # Usually "status" for the default Status column
+    column_property: labels
+    value: "{\"labels\":{\"0\":{\"color\":\"#c4c4c4\",\"border\":\"#b0b0b0\",\"name\":\"New Lead\"},\"1\":{\"color\":\"#579bfc\",\"border\":\"#4387e8\",\"name\":\"SMS Sent\"},\"2\":{\"color\":\"#fdab3d\",\"border\":\"#e99729\",\"name\":\"30-Day Timeout\"},\"3\":{\"color\":\"#a25ddc\",\"border\":\"#9049c8\",\"name\":\"Replied - Awaiting Ana\"},\"4\":{\"color\":\"#00c875\",\"border\":\"#00b461\",\"name\":\"Tool Offered\"},\"5\":{\"color\":\"#9cd326\",\"border\":\"#88bf12\",\"name\":\"Training Invited\"},\"6\":{\"color\":\"#cab641\",\"border\":\"#b6a22d\",\"name\":\"Relationship Building\"},\"7\":{\"color\":\"#ff642e\",\"border\":\"#eb501a\",\"name\":\"Ask Made\"},\"8\":{\"color\":\"#e2445c\",\"border\":\"#ce3048\",\"name\":\"Meeting Scheduled\"},\"9\":{\"color\":\"#ff9ed4\",\"border\":\"#eb8ac0\",\"name\":\"No Show\"},\"10\":{\"color\":\"#bb3354\",\"border\":\"#a71f40\",\"name\":\"DJ Meeting Complete\"},\"11\":{\"color\":\"#ff158a\",\"border\":\"#eb0176\",\"name\":\"Offer Extended\"},\"12\":{\"color\":\"#66ccff\",\"border\":\"#52b8eb\",\"name\":\"Nurture (Post-Meeting)\"},\"13\":{\"color\":\"#00642e\",\"border\":\"#00501a\",\"name\":\"Won\"},\"14\":{\"color\":\"#757575\",\"border\":\"#616161\",\"name\":\"Lost - Not Interested\"},\"15\":{\"color\":\"#d83a52\",\"border\":\"#c4263e\",\"name\":\"Lost - Competitor\"},\"16\":{\"color\":\"#7f5347\",\"border\":\"#6b3f33\",\"name\":\"Lost - Not Qualified\"},\"17\":{\"color\":\"#333333\",\"border\":\"#1f1f1f\",\"name\":\"Dead - Negative Reply\"},\"18\":{\"color\":\"#e8e8e8\",\"border\":\"#d4d4d4\",\"name\":\"Hibernation 90-Day\"}}}"
+  ) {
+    id
+  }
+}
+
+# ============================================================
+# QUERY: Verify current status labels
+# ============================================================
+
+query {
+  boards(ids: [BOARD_ID]) {
+    columns {
+      id
+      title
+      type
+      settings_str
+    }
+  }
+}
+
+# Look for the "status" column and check settings_str for current labels
+
+# ============================================================
+# STATUS TRANSITION RULES (for reference)
+# ============================================================
+
+# ALLOWED TRANSITIONS:
+#
+# New Lead → SMS Sent (Jennica sends congratulations)
+# SMS Sent → Replied - Awaiting Ana (any positive reply)
+# SMS Sent → 30-Day Timeout (no reply after 7 days)
+# SMS Sent → Dead - Negative Reply (hostile response)
+#
+# 30-Day Timeout → New Lead (after 30 days, back in rotation)
+# 30-Day Timeout → Hibernation 90-Day (after 3 timeouts)
+# 30-Day Timeout → Dead - Negative Reply (if they reply negatively during timeout)
+#
+# Replied - Awaiting Ana → Tool Offered (Ana responds + sends tool)
+# Replied - Awaiting Ana → Training Invited (Ana invites to event)
+# Tool Offered → Relationship Building (after tool follow-up)
+# Training Invited → Relationship Building (after training)
+# Relationship Building → Ask Made (when moment is right)
+# Ask Made → Meeting Scheduled (they're interested)
+# Ask Made → Hibernation 90-Day (they say "not now")
+# Meeting Scheduled → No Show (didn't show up)
+# Meeting Scheduled → DJ Meeting Complete (meeting happened)
+# No Show → Meeting Scheduled (rescheduled)
+# No Show → Hibernation 90-Day (2nd no-show = auto-hibernate)
+# DJ Meeting Complete → Offer Extended (hot lead, making offer)
+# DJ Meeting Complete → Hibernation 90-Day (needs time)
+# DJ Meeting Complete → Lost - * (not a fit)
+# Offer Extended → Won (they signed!)
+# Offer Extended → Lost - * (declined offer)
+# Offer Extended → Hibernation 90-Day (needs more time)
+#
+# ANY status → Hibernation 90-Day (cool off)
+# Hibernation 90-Day → New Lead (after 90 days)
+#
+# TERMINAL (no transitions out except manual review):
+# Won
+# Lost - Not Interested
+# Lost - Competitor  
+# Lost - Not Qualified
+# Dead - Negative Reply (1 year minimum, then manual review)

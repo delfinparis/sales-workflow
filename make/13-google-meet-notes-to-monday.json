@@ -1,0 +1,395 @@
+{
+  "name": "Google Meet Notes to Monday",
+  "description": "After a Google Meet ends, this scenario finds the Gemini-generated meeting notes in Google Docs, extracts the content, and pushes it to the lead's Monday record.",
+  "approach": "Calendar-triggered",
+  "how_it_works": {
+    "step_1": "Google Meet meeting ends",
+    "step_2": "Gemini auto-generates notes in Google Doc (attached to calendar event)",
+    "step_3": "Make.com scheduled scenario runs (every 15-30 min)",
+    "step_4": "Checks calendar for recently ended meetings with DJ",
+    "step_5": "For each meeting, finds the attached Google Doc",
+    "step_6": "Extracts doc content",
+    "step_7": "Searches Monday for lead by attendee email",
+    "step_8": "Updates 'AI Meeting Notes' column with doc content"
+  },
+  "prerequisites": {
+    "google_workspace": "Business Standard or higher, OR Gemini add-on",
+    "gemini_notes_enabled": "Must enable 'Take notes with Gemini' in Meet settings or per-meeting",
+    "calendar_integration": "Meetings must be on Google Calendar (Calendly does this)",
+    "make_connections": ["Google Calendar", "Google Drive", "Google Docs", "Monday.com"]
+  },
+  "flow": [
+    {
+      "id": 1,
+      "module": "google-calendar:watchEvents",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "calendarId": "primary"
+      },
+      "mapper": {
+        "filter": {
+          "timeMin": "{{addMinutes(now; -60)}}",
+          "timeMax": "{{now}}",
+          "q": "meet.google.com"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "note": "Option A: Watch for calendar events that recently ended. Run every 15-30 min."
+      }
+    },
+    {
+      "id": "1-alt",
+      "module": "google-calendar:getEvent",
+      "description": "Alternative: Use scheduled scenario to check calendar every 30 min for meetings that ended in the last hour",
+      "parameters": {
+        "connection": null,
+        "calendarId": "primary"
+      },
+      "mapper": {
+        "eventId": "{{triggeredEventId}}"
+      }
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "Has Google Meet link and has ended",
+        "conditions": [
+          [
+            {
+              "a": "{{1.conferenceData.conferenceId}}",
+              "b": "",
+              "o": "text:notequal"
+            },
+            {
+              "a": "{{1.end.dateTime}}",
+              "b": "{{now}}",
+              "o": "date:before"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Only process meetings that have a Meet link and have ended"
+    },
+    {
+      "id": 3,
+      "module": "google-drive:searchFiles",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "query": "name contains '{{1.summary}}' and mimeType = 'application/vnd.google-apps.document' and modifiedTime > '{{formatDate(addHours(now; -2); \"YYYY-MM-DDTHH:mm:ss\")}}'"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Search for Google Doc with meeting name, modified in last 2 hours. Gemini notes are usually named after the meeting."
+    },
+    {
+      "id": "3-alt",
+      "description": "Alternative approach: Get doc from calendar event attachment",
+      "module": "google-calendar:getEvent",
+      "note": "The meeting notes doc is often attached to the calendar event. Check 1.attachments[] for the doc link."
+    },
+    {
+      "id": 4,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "label": "Doc Found",
+          "flow": [
+            {
+              "id": 5,
+              "module": "google-docs:getDocumentContent",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "documentId": "{{3.id}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0
+                }
+              },
+              "note": "Get the content of the meeting notes doc"
+            },
+            {
+              "id": 6,
+              "module": "builtin:BasicTransformer",
+              "version": 1,
+              "mapper": {
+                "attendeeEmail": "{{first(filter(1.attendees; \"self\"; false)).email}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0
+                }
+              },
+              "note": "Extract the external attendee email (not DJ's email). Filter out 'self' attendee."
+            },
+            {
+              "id": 7,
+              "module": "monday:searchItems",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "queryParams": {
+                  "rules": [
+                    {
+                      "column_id": "email",
+                      "compare_value": ["{{6.attendeeEmail}}"]
+                    }
+                  ]
+                }
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 0
+                }
+              },
+              "note": "Search Monday for lead by attendee email"
+            },
+            {
+              "id": 8,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "routes": [
+                {
+                  "label": "Lead Found - Update Notes",
+                  "flow": [
+                    {
+                      "id": 9,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "YOUR_BOARD_ID",
+                        "itemId": "{{7.items[0].id}}",
+                        "columnId": "ai_meeting_notes",
+                        "value": "{{substring(5.content; 0; 50000)}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": -100
+                        }
+                      },
+                      "note": "Update AI Meeting Notes column with doc content (truncated to 50k chars if needed)"
+                    },
+                    {
+                      "id": 10,
+                      "module": "monday:createUpdate",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "itemId": "{{7.items[0].id}}",
+                        "body": "📝 **Google Meet Notes Auto-Imported**\n\nMeeting: {{1.summary}}\nDate: {{formatDate(1.start.dateTime; 'MMM D, YYYY h:mm A')}}\n\n[View full notes in Google Docs]({{3.webViewLink}})\n\n---\n\n{{substring(5.content; 0; 2000)}}..."
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": -100
+                        }
+                      },
+                      "note": "Also add an Update with link to full doc"
+                    },
+                    {
+                      "id": 11,
+                      "module": "slack:postMessage",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "channel": "YOUR_SLACK_CHANNEL_OR_DJ_DM",
+                        "text": "📝 *Meeting notes imported for {{7.items[0].name}}*\n\nGemini notes from your {{1.summary}} meeting have been added to Monday.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{7.items[0].id}}|View in Monday> | <{{3.webViewLink}}|View in Google Docs>"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": -100
+                        }
+                      },
+                      "note": "Notify DJ that notes were imported"
+                    }
+                  ],
+                  "filter": {
+                    "name": "Lead found",
+                    "conditions": [
+                      [
+                        {
+                          "a": "{{length(7.items)}}",
+                          "b": "0",
+                          "o": "number:greater"
+                        }
+                      ]
+                    ]
+                  }
+                },
+                {
+                  "label": "Lead Not Found - Log Warning",
+                  "flow": [
+                    {
+                      "id": 12,
+                      "module": "slack:postMessage",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "channel": "YOUR_SLACK_CHANNEL_OR_DJ_DM",
+                        "text": "⚠️ *Meeting notes not matched*\n\nCouldn't find a Monday lead for attendee: {{6.attendeeEmail}}\n\nMeeting: {{1.summary}}\n\n<{{3.webViewLink}}|View notes in Google Docs>\n\nYou may need to manually copy notes to the lead record."
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 100
+                        }
+                      },
+                      "note": "Warn DJ that notes couldn't be matched"
+                    }
+                  ],
+                  "filter": {
+                    "name": "Lead not found",
+                    "conditions": [
+                      [
+                        {
+                          "a": "{{length(7.items)}}",
+                          "b": "0",
+                          "o": "number:equal"
+                        }
+                      ]
+                    ]
+                  }
+                }
+              ],
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "Doc found",
+            "conditions": [
+              [
+                {
+                  "a": "{{length(3)}}",
+                  "b": "0",
+                  "o": "number:greater"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "label": "No Doc Found",
+          "flow": [
+            {
+              "id": 13,
+              "module": "tools:logger",
+              "version": 1,
+              "mapper": {
+                "message": "No meeting notes doc found for meeting: {{1.summary}}. Either Gemini notes wasn't enabled or doc hasn't been created yet."
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 200
+                }
+              },
+              "note": "Log for debugging - no action needed"
+            }
+          ],
+          "filter": {
+            "name": "No doc found",
+            "conditions": [
+              [
+                {
+                  "a": "{{length(3)}}",
+                  "b": "0",
+                  "o": "number:equal"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "scheduling": {
+    "recommended": "Every 30 minutes",
+    "reason": "Gemini notes are typically generated within 5-10 minutes of meeting end. 30 min interval catches notes without too many API calls.",
+    "alternative": "Every 15 minutes for faster import"
+  },
+  "setup_instructions": {
+    "step_1": "Enable 'Take notes with Gemini' in Google Meet settings (Admin Console or per-meeting)",
+    "step_2": "Create Make.com scenario from this blueprint",
+    "step_3": "Connect Google Calendar, Google Drive, Google Docs, Monday.com",
+    "step_4": "Replace YOUR_BOARD_ID with your Monday board ID",
+    "step_5": "Configure which calendar to watch (DJ's primary calendar)",
+    "step_6": "Set schedule: Every 30 minutes",
+    "step_7": "Test: Have a short Google Meet with notes enabled, wait 30 min, check Monday",
+    "step_8": "Activate scenario"
+  },
+  "enable_gemini_notes": {
+    "per_meeting": "During meeting, click 'Take notes with Gemini' at top right",
+    "auto_enable": "In Google Calendar event settings, enable 'Take notes' under 'Meeting records'",
+    "admin_default": "Google Workspace admin can enable by default for all meetings"
+  },
+  "finding_the_notes_doc": {
+    "option_1": "Search Google Drive for doc with meeting name",
+    "option_2": "Check calendar event attachments (notes doc is often attached)",
+    "option_3": "Search for docs in a specific 'Meeting Notes' folder if you configure one",
+    "note": "The scenario uses option 1 (search by name). You may need to adjust based on how your Gemini notes are organized."
+  },
+  "limitations": {
+    "timing": "Notes take 5-10 min to generate after meeting ends. Scenario may need to run multiple times.",
+    "matching": "Relies on attendee email matching Monday lead. If emails don't match, won't auto-import.",
+    "doc_naming": "Assumes doc is named after meeting. If naming is different, search query needs adjustment.",
+    "content_length": "Monday long text columns have limits. Very long notes may be truncated."
+  },
+  "cost": {
+    "google_workspace": "Gemini notes requires Business Standard ($12/user/mo) or Gemini add-on ($20/user/mo)",
+    "make_operations": "~5-10 operations per meeting processed"
+  }
+}

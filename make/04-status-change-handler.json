@@ -1,0 +1,383 @@
+{
+  "name": "Status Change → Set Timeout/Hibernation Dates",
+  "description": "When a lead enters 30-Day Timeout or 90-Day Hibernation status, automatically set the expiration date.",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:watchColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "status"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Triggers when status column changes on any item"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "timeout_until",
+                "value": "{\"date\":\"{{formatDate(addDays(now; 30); 'YYYY-MM-DD')}}\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": -150
+                }
+              },
+              "note": "Set Timeout Until to 30 days from now"
+            },
+            {
+              "id": 4,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "assigned_to",
+                "value": "{}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": -150
+                }
+              },
+              "note": "Unassign - nobody owns leads in timeout"
+            },
+            {
+              "id": 5,
+              "module": "monday:createUpdate",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{1.itemId}}",
+                "body": "⏸️ **Entered 30-Day Timeout**\n\nNo reply received. Will return to hunt pool on {{formatDate(addDays(now; 30); 'MMM D, YYYY')}}."
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": -150
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "Entered 30-Day Timeout",
+            "conditions": [
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "30-Day Timeout",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 6,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "hibernation_until",
+                "value": "{\"date\":\"{{formatDate(addDays(now; 90); 'YYYY-MM-DD')}}\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": 0
+                }
+              },
+              "note": "Set Hibernation Until to 90 days from now"
+            },
+            {
+              "id": 7,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "assigned_to",
+                "value": "{}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 0
+                }
+              },
+              "note": "Unassign"
+            },
+            {
+              "id": 8,
+              "module": "monday:createUpdate",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{1.itemId}}",
+                "body": "❄️ **Entered 90-Day Hibernation**\n\nLead needs cooling off. Will return to pool on {{formatDate(addDays(now; 90); 'MMM D, YYYY')}}."
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "Entered 90-Day Hibernation",
+            "conditions": [
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "Hibernation 90-Day",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 9,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "assigned_to",
+                "value": "{\"personsAndTeams\":[{\"id\":JENNICA_USER_ID,\"kind\":\"person\"}]}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": 150
+                }
+              },
+              "note": "Assign to Jennica when entering SMS Sent"
+            },
+            {
+              "id": 10,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "last_contact_date",
+                "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 150
+                }
+              },
+              "note": "Update last contact date"
+            }
+          ],
+          "filter": {
+            "name": "Entered SMS Sent",
+            "conditions": [
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "SMS Sent",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 11,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "assigned_to",
+                "value": "{\"personsAndTeams\":[{\"id\":ANA_USER_ID,\"kind\":\"person\"}]}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": 300
+                }
+              },
+              "note": "Assign to Ana"
+            },
+            {
+              "id": 12,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "last_contact_date",
+                "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 300
+                }
+              }
+            },
+            {
+              "id": 13,
+              "module": "slack:postMessage",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "channel": "YOUR_SLACK_CHANNEL",
+                "text": "🔔 *New Lead Reply!*\n\nLead *{{1.itemName}}* just replied and is ready for follow-up.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{1.itemId}}|Open in Monday>"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 300
+                }
+              },
+              "note": "Optional Slack notification"
+            }
+          ],
+          "filter": {
+            "name": "Entered Replied - Awaiting Ana",
+            "conditions": [
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "Replied - Awaiting Ana",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 14,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "next_action",
+                "value": "Call for tool feedback → if no answer, SMS: \"Hey! Did you get a chance to try that tool?\""
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": 450
+                }
+              },
+              "note": "Auto-populate Next Action with default follow-up instructions"
+            }
+          ],
+          "filter": {
+            "name": "Entered Tool Offered",
+            "conditions": [
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "Tool Offered",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Import this blueprint into Make.com",
+    "step_2": "Replace YOUR_BOARD_ID with actual Monday board ID",
+    "step_3": "Replace JENNICA_USER_ID and ANA_USER_ID with actual Monday user IDs",
+    "step_4": "Configure Monday.com connection (uses webhook trigger)",
+    "step_5": "Optional: Configure Slack module or remove if not needed",
+    "step_6": "Test by manually changing a lead's status to each target status",
+    "step_7": "Activate scenario"
+  },
+  "user_id_lookup": {
+    "query": "Run this in Monday API playground to get user IDs:",
+    "graphql": "query { users { id name email } }"
+  }
+}

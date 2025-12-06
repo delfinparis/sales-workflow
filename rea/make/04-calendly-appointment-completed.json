@@ -1,0 +1,128 @@
+{
+  "name": "REA - Calendly Appointment Completed",
+  "description": "When a scheduled appointment time passes (and is not marked as no-show), update Monday status to 'Completed Appointment'. DJ takes over from here.",
+  "trigger": "Scheduled - Daily check for past appointments",
+  "board_id": "18391158354",
+  "note": "This scenario runs daily to check for appointments that have passed. Alternatively, DJ can manually mark appointments complete, or use a different trigger.",
+  "flow": [
+    {
+      "id": 1,
+      "module": "builtin:BasicScheduler",
+      "version": 1,
+      "parameters": {
+        "schedule": {
+          "type": "daily",
+          "time": "18:00"
+        }
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Run daily at 6 PM to check completed appointments"
+    },
+    {
+      "id": 2,
+      "module": "monday:searchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "18391158354",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "color_mkybxbyk",
+              "compare_value": [3],
+              "operator": "any_of"
+            },
+            {
+              "column_id": "date_mkyb9hr1",
+              "compare_value": {
+                "from": "{{formatDate(addDays(now; -1); 'YYYY-MM-DD')}}",
+                "to": "{{formatDate(now; 'YYYY-MM-DD')}}"
+              },
+              "operator": "between"
+            }
+          ],
+          "operator": "and"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Find items with status 'Appointment Scheduled' and appointment date in past 24 hours"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicIterator",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "array": "{{2.items}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Iterate through found appointments"
+    },
+    {
+      "id": 4,
+      "module": "slack:postMessage",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "channel": "DJ_SLACK_CHANNEL_OR_DM",
+        "text": ":question: *Appointment Status Check*\n\n*Lead:* {{3.name}}\n*Scheduled:* Yesterday/Today\n\nDid this appointment happen?\n\n:white_check_mark: Mark as *Completed* in Monday\n:x: Mark as *No Show* in Monday\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354/pulses/{{3.id}}|Open in Monday>"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "note": "Remind DJ to mark appointment status"
+    }
+  ],
+  "alternative_approach": {
+    "description": "Instead of auto-completing, prompt DJ to manually update. This is safer as it requires confirmation.",
+    "monday_native_option": "DJ can set status to 'Completed Appointment' directly in Monday, which triggers native automation for notification."
+  },
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Configure Monday connection",
+    "step_2": "Replace DJ_SLACK_CHANNEL_OR_DM with DJ's Slack channel",
+    "step_3": "Adjust schedule time if needed (default 6 PM)",
+    "step_4": "Consider using native Monday automation instead if DJ prefers manual status changes",
+    "step_5": "Test scenario",
+    "step_6": "Activate scenario"
+  },
+  "recommended_native_automation": {
+    "trigger": "When status changes to 'Completed Appointment'",
+    "actions": [
+      "Notify DJ: 'Ready to follow up with {item name}'",
+      "Create task for DJ follow-up"
+    ],
+    "note": "This approach lets DJ manually mark completion, avoiding false positives"
+  }
+}

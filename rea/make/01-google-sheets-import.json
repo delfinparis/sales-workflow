@@ -1,0 +1,285 @@
+{
+  "name": "REA - Google Sheets Import to Monday",
+  "description": "When Rea clicks 'Import to Monday' button in Google Sheets, this webhook receives the cleaned/de-duped lead data and creates items in the Newly Licensed Leads board.",
+  "trigger": "Custom Webhook (called from Google Apps Script)",
+  "board_id": "18391158354",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": null,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Receives webhook from Google Apps Script with array of leads"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicIterator",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "array": "{{1.leads}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Iterate through each lead in the array"
+    },
+    {
+      "id": 3,
+      "module": "monday:searchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "18391158354",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "email_mkybfqax",
+              "compare_value": ["{{2.email}}"]
+            }
+          ]
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Check if lead already exists by email (de-dupe)"
+    },
+    {
+      "id": 4,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "label": "Lead Already Exists - Skip",
+          "flow": [
+            {
+              "id": 5,
+              "module": "builtin:Logger",
+              "version": 1,
+              "mapper": {
+                "message": "Skipping duplicate lead: {{2.email}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": -100
+                }
+              },
+              "note": "Log duplicate for debugging"
+            }
+          ],
+          "filter": {
+            "name": "Lead exists",
+            "conditions": [
+              [
+                {
+                  "a": "{{length(3.items)}}",
+                  "b": "0",
+                  "o": "number:greater"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "label": "New Lead - Create in Monday",
+          "flow": [
+            {
+              "id": 6,
+              "module": "monday:createItem",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "groupId": "group_mkyb6hgy",
+                "itemName": "{{2.firstName}} {{2.lastName}}",
+                "columnValues": {
+                  "text_mkybe1vc": "{{2.firstName}}",
+                  "text_mkyb85z9": "{{2.lastName}}",
+                  "email_mkybfqax": {"email": "{{2.email}}", "text": "{{2.email}}"},
+                  "phone_mkyb4cr0": {"phone": "{{2.phone}}", "countryShortName": "US"},
+                  "color_mkybxbyk": {"label": "New Lead"},
+                  "date_mkybk1hp": {"date": "{{formatDate(now; 'YYYY-MM-DD')}}"},
+                  "multiple_person_mkyb4wzn": {"personsAndTeams": [{"id": "REA_USER_ID", "kind": "person"}]}
+                }
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 100
+                }
+              },
+              "note": "Create new lead in Never Responded group"
+            },
+            {
+              "id": 7,
+              "module": "close:createLead",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "name": "{{2.firstName}} {{2.lastName}}",
+                "contacts": [
+                  {
+                    "name": "{{2.firstName}} {{2.lastName}}",
+                    "emails": [{"email": "{{2.email}}", "type": "office"}],
+                    "phones": [{"phone": "{{2.phone}}", "type": "mobile"}]
+                  }
+                ],
+                "custom_fields": {
+                  "monday_item_id": "{{6.id}}"
+                }
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 100
+                }
+              },
+              "note": "Create lead in Close CRM"
+            },
+            {
+              "id": 8,
+              "module": "close:createSequenceSubscription",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "sequence_id": "seq_7TUbe0qzdkzDqHMTy63BMb",
+                "contact_id": "{{7.contacts[0].id}}",
+                "sender_account_id": "REA_SENDER_ACCOUNT_ID",
+                "sender_email_account_id": "REA_EMAIL_ACCOUNT_ID"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 100
+                }
+              },
+              "note": "Enroll contact in 'New Amp Passer Leads' workflow"
+            },
+            {
+              "id": 9,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{6.id}}",
+                "columnId": "text_mkyb1a5v",
+                "value": "{{7.id}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 100
+                }
+              },
+              "note": "Store Close CRM Lead ID in Monday"
+            },
+            {
+              "id": 10,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{6.id}}",
+                "columnId": "color_mkybxbyk",
+                "value": "{\"label\":\"In Workflow\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 100
+                }
+              },
+              "note": "Update status to In Workflow"
+            }
+          ],
+          "filter": {
+            "name": "Lead does not exist (default)",
+            "conditions": []
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Create webhook in Make.com: Webhooks > Custom webhook > Copy URL",
+    "step_2": "Update Google Apps Script with the webhook URL",
+    "step_3": "Replace REA_USER_ID with Rea's Monday user ID",
+    "step_4": "Replace REA_SENDER_ACCOUNT_ID with Rea's Close sender account",
+    "step_5": "Replace REA_EMAIL_ACCOUNT_ID with Rea's Close email account",
+    "step_6": "Configure Monday and Close connections",
+    "step_7": "Test with a small batch of leads",
+    "step_8": "Activate scenario"
+  },
+  "google_apps_script_update": {
+    "note": "Update the webhookUrl in the Google Apps Script (see 01-newly-licensed-workflow.md)",
+    "webhook_url_placeholder": "YOUR_MAKE_WEBHOOK_URL"
+  },
+  "column_mapping": {
+    "firstName": "text_mkybe1vc",
+    "lastName": "text_mkyb85z9",
+    "email": "email_mkybfqax",
+    "phone": "phone_mkyb4cr0",
+    "importDate": "date_mkybk1hp",
+    "leadStatus": "color_mkybxbyk",
+    "leadOwner": "multiple_person_mkyb4wzn",
+    "closeCrmId": "text_mkyb1a5v"
+  },
+  "group_mapping": {
+    "neverResponded": "group_mkyb6hgy",
+    "responded": "group_mkyb51b6",
+    "scheduledAppointments": "group_mkybxtds",
+    "disappeared": "group_mkyb64mg"
+  },
+  "close_crm_reference": {
+    "sequence_id": "seq_7TUbe0qzdkzDqHMTy63BMb",
+    "sequence_name": "New Amp Passer Leads"
+  }
+}

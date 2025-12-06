@@ -1,0 +1,211 @@
+{
+  "name": "Do Not Contact Checkbox Manager",
+  "description": "Automatically checks/unchecks the 'Do Not Contact' checkbox based on status changes. This is Jennica's primary visual cue to avoid contacting leads in timeout, hibernation, or terminal statuses.",
+  "critical_note": "This automation is essential for preventing Jennica from accidentally contacting leads who should not be contacted. The checkbox provides an instant visual cue in any Monday view.",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:watchColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "status"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Triggers whenever status column changes on any item"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "do_not_contact",
+                "value": "{\"checked\":\"true\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": -150
+                }
+              },
+              "note": "CHECK the Do Not Contact box"
+            }
+          ],
+          "filter": {
+            "name": "Status requires DO NOT CONTACT",
+            "conditions": [
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "30-Day Timeout",
+                  "o": "text:equal"
+                }
+              ],
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "Hibernation 90-Day",
+                  "o": "text:equal"
+                }
+              ],
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "Dead - Negative Reply",
+                  "o": "text:equal"
+                }
+              ],
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "Lost - Not Interested",
+                  "o": "text:equal"
+                }
+              ],
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "Lost - Competitor",
+                  "o": "text:equal"
+                }
+              ],
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "Lost - Not Qualified",
+                  "o": "text:equal"
+                }
+              ],
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "Won",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 4,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "do_not_contact",
+                "value": "{\"checked\":\"false\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 600,
+                  "y": 100
+                }
+              },
+              "note": "UNCHECK the Do Not Contact box - lead is contactable again"
+            }
+          ],
+          "filter": {
+            "name": "Status allows contact (New Lead)",
+            "conditions": [
+              [
+                {
+                  "a": "{{1.value.label.text}}",
+                  "b": "New Lead",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "logic_summary": {
+    "checkbox_CHECKED_when_status_is": [
+      "30-Day Timeout",
+      "Hibernation 90-Day", 
+      "Dead - Negative Reply",
+      "Lost - Not Interested",
+      "Lost - Competitor",
+      "Lost - Not Qualified",
+      "Won"
+    ],
+    "checkbox_UNCHECKED_when_status_is": [
+      "New Lead"
+    ],
+    "checkbox_UNCHANGED_when_status_is": [
+      "SMS Sent",
+      "Replied - Awaiting Ana",
+      "Ana Engaged",
+      "Tool Offered",
+      "Tool Engaged",
+      "Training Invited",
+      "Pain Point Identified",
+      "Relationship Building",
+      "Ask Made",
+      "Meeting Scheduled",
+      "DJ Meeting Complete"
+    ],
+    "note": "Active pipeline statuses don't change the checkbox - it stays in whatever state it was. Only entry to timeout/hibernation/terminal checks it, and only New Lead unchecks it."
+  },
+  "setup_instructions": {
+    "step_1": "Import this blueprint into Make.com",
+    "step_2": "Replace YOUR_BOARD_ID with your actual Monday board ID",
+    "step_3": "Get the column ID for 'Do Not Contact' checkbox and replace 'do_not_contact' if different",
+    "step_4": "Configure Monday.com connection",
+    "step_5": "Test by manually changing a lead to '30-Day Timeout' - checkbox should auto-check",
+    "step_6": "Test by changing that lead back to 'New Lead' - checkbox should auto-uncheck",
+    "step_7": "Activate scenario"
+  },
+  "jennica_usage": {
+    "how_jennica_uses_this": [
+      "1. Find superlative on Courted.ai",
+      "2. Search Monday by agent name or phone",
+      "3. If 'Do Not Contact' is checked → STOP, do not SMS",
+      "4. If 'Do Not Contact' is unchecked (or not found) → Safe to SMS",
+      "5. The checkbox is her instant visual signal"
+    ],
+    "view_setup": "Jennica's 'Today's Hunt' view should filter: Status = 'New Lead' AND Do Not Contact = unchecked"
+  }
+}

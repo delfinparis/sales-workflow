@@ -1,0 +1,242 @@
+{
+  "name": "JustCall SMS Sent → Monday Update",
+  "description": "When Jennica sends an SMS via JustCall, update the lead's status in Monday to 'SMS Sent' and log the timestamp.",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": null,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "hook": {
+              "label": "JustCall SMS Sent Webhook"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook:gateway-webhook",
+            "label": "Webhook",
+            "required": true
+          },
+          {
+            "name": "maxResults",
+            "type": "number",
+            "label": "Maximum number of results"
+          }
+        ],
+        "interface": [
+          {
+            "name": "to",
+            "type": "text",
+            "label": "To Phone Number"
+          },
+          {
+            "name": "from",
+            "type": "text",
+            "label": "From Phone Number"
+          },
+          {
+            "name": "body",
+            "type": "text",
+            "label": "Message Body"
+          },
+          {
+            "name": "direction",
+            "type": "text",
+            "label": "Direction"
+          },
+          {
+            "name": "timestamp",
+            "type": "text",
+            "label": "Timestamp"
+          },
+          {
+            "name": "agent_name",
+            "type": "text",
+            "label": "Agent Name"
+          }
+        ]
+      },
+      "note": "Receives webhook from JustCall when outbound SMS is sent. Configure webhook URL in JustCall: Settings > Integrations > Webhooks"
+    },
+    {
+      "id": 2,
+      "module": "monday:searchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "phone",
+        "value": "{{1.to}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "connection": {
+              "label": "Monday.com Connection"
+            }
+          }
+        }
+      },
+      "note": "Search Monday board for item matching the phone number that received the SMS"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 4,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{2.id}}",
+                "columnId": "status",
+                "value": "{\"label\":\"SMS Sent\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": -100
+                }
+              },
+              "note": "Update status to SMS Sent"
+            },
+            {
+              "id": 5,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{2.id}}",
+                "columnId": "last_contact_date",
+                "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": -100
+                }
+              },
+              "note": "Set Last Contact Date to today"
+            }
+          ],
+          "filter": {
+            "name": "Lead found",
+            "conditions": [
+              [
+                {
+                  "a": "{{2.id}}",
+                  "b": "",
+                  "o": "exist"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 6,
+              "module": "util:SetVariable",
+              "version": 1,
+              "mapper": {
+                "name": "error_log",
+                "value": "No lead found for phone: {{1.to}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 100
+                }
+              },
+              "note": "Log error - phone number not found in Monday board"
+            }
+          ],
+          "filter": {
+            "name": "Lead not found",
+            "conditions": [
+              [
+                {
+                  "a": "{{2.id}}",
+                  "b": "",
+                  "o": "notexist"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false,
+      "freshVariables": false
+    },
+    "designer": {
+      "orphans": []
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Create this scenario in Make.com: Scenarios > Create > Import Blueprint",
+    "step_2": "Configure the webhook module - click it and copy the generated webhook URL",
+    "step_3": "In JustCall, go to Settings > Integrations > Webhooks",
+    "step_4": "Add webhook: Event = 'SMS Sent', URL = (paste from step 2), Method = POST",
+    "step_5": "Replace YOUR_BOARD_ID with your actual Monday board ID in all modules",
+    "step_6": "Configure Monday.com connection in each Monday module",
+    "step_7": "Test by sending a test SMS, verify Monday updates",
+    "step_8": "Activate the scenario"
+  },
+  "expected_webhook_payload": {
+    "to": "+1234567890",
+    "from": "+0987654321",
+    "body": "Hey John - saw you just got a new listing...",
+    "direction": "outbound",
+    "timestamp": "2024-01-15T10:30:00Z",
+    "agent_name": "Jennica"
+  }
+}

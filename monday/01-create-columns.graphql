@@ -1,0 +1,758 @@
+# Monday.com Column Setup
+# Run these mutations in the Monday API Playground: https://monday.com/developers/v2/try-it-yourself
+
+# ============================================================
+# STEP 1: Get your board ID
+# After creating the board manually, run this query to get its ID
+# ============================================================
+
+query {
+  boards(limit: 10) {
+    id
+    name
+  }
+}
+
+# Find your "Jennica Superlative Leads" board and note the ID
+# Replace BOARD_ID in all mutations below with your actual board ID
+
+# ============================================================
+# STEP 2: Create columns
+# Run each mutation separately
+# ============================================================
+
+# --- Lead Source (Dropdown) ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Lead Source"
+    column_type: dropdown
+    defaults: "{\"labels\":[{\"id\":1,\"name\":\"Jennica SMS (Superlative)\"},{\"id\":2,\"name\":\"Instantly Email (Cold)\"},{\"id\":3,\"name\":\"Both\"}]}"
+  ) {
+    id
+    title
+  }
+}
+
+# --- Priority (Lead importance based on deal count/potential) ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Priority"
+    column_type: dropdown
+    defaults: "{\"labels\":[{\"id\":1,\"name\":\"High (8-12 deals)\"},{\"id\":2,\"name\":\"Medium (5-7 deals)\"},{\"id\":3,\"name\":\"Low (2-4 deals)\"}]}"
+  ) {
+    id
+    title
+  }
+}
+
+# --- First Contact Date (when lead first entered funnel) ---
+# Set once when status first changes from New Lead
+# Used for calculating days-to-close and lead age
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "First Contact Date"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+# --- Last Superlative Date (when Jennica last sent congrats) ---
+# Helps Jennica know when they last had an achievement
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Last Superlative Date"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+# --- Timeout Count (tracks how many 30-day timeouts) ---
+# After 3 timeouts with no reply, move to Hibernation
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Timeout Count"
+    column_type: numbers
+  ) {
+    id
+    title
+  }
+}
+
+# --- Superlative Type (Dropdown) ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Superlative Type"
+    column_type: dropdown
+    defaults: "{\"labels\":[{\"id\":1,\"name\":\"New Listing\"},{\"id\":2,\"name\":\"Pending/Under Contract\"},{\"id\":3,\"name\":\"Closed Sale\"},{\"id\":4,\"name\":\"Closed Rental\"},{\"id\":5,\"name\":\"YoY Growth\"},{\"id\":6,\"name\":\"Other\"}]}"
+  ) {
+    id
+    title
+  }
+}
+
+# --- Phone ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Phone"
+    column_type: phone
+  ) {
+    id
+    title
+  }
+}
+
+# --- Email ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Email"
+    column_type: email
+  ) {
+    id
+    title
+  }
+}
+
+# --- Courted Profile (Link) ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Courted Profile"
+    column_type: link
+  ) {
+    id
+    title
+  }
+}
+
+# --- Last Contact Date ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Last Contact Date"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+# --- Next Action Date ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Next Action Date"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+# --- Next Action (Text) ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Next Action"
+    column_type: text
+  ) {
+    id
+    title
+  }
+}
+
+# --- Assigned To ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Assigned To"
+    column_type: people
+  ) {
+    id
+    title
+  }
+}
+
+# --- Deal Count ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Deal Count"
+    column_type: numbers
+    defaults: "{\"unit\":\"deals/year\"}"
+  ) {
+    id
+    title
+  }
+}
+
+# --- Notes (Long Text) ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Notes"
+    column_type: long_text
+  ) {
+    id
+    title
+  }
+}
+
+# --- Timeout Until ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Timeout Until"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+# --- Hibernation Until ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Hibernation Until"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+# --- Lost Reason (for tracking why leads are lost) ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Lost Reason"
+    column_type: dropdown
+    defaults: "{\"labels\":[{\"id\":1,\"name\":\"Not interested\"},{\"id\":2,\"name\":\"Signed with competitor\"},{\"id\":3,\"name\":\"Not qualified (deal count)\"},{\"id\":4,\"name\":\"Bad timing\"},{\"id\":5,\"name\":\"No response after multiple attempts\"},{\"id\":6,\"name\":\"Negative/hostile reply\"},{\"id\":7,\"name\":\"Other\"}]}"
+  ) {
+    id
+    title
+  }
+}
+
+# --- Do Not Contact (CRITICAL - Jennica's visual cue) ---
+# This checkbox is automatically managed by automations:
+# - CHECKED when: 30-Day Timeout, Hibernation, Dead, any Lost status
+# - UNCHECKED when: New Lead (returned from timeout/hibernation)
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Do Not Contact"
+    column_type: checkbox
+  ) {
+    id
+    title
+  }
+}
+
+# --- Dead Until (1-year exclusion period) ---
+# Auto-set to Today + 365 days when status changes to Dead - Negative Reply
+# After this date, lead becomes eligible for manual review (not auto-return)
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Dead Until"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+# --- Review Eligible (for Dead leads past 1 year) ---
+# Auto-checked when Dead Until date has passed
+# Signals that a human should review whether to re-engage
+# Lead does NOT auto-return to pool - manual decision required
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Review Eligible"
+    column_type: checkbox
+  ) {
+    id
+    title
+  }
+}
+
+# --- Current Tasks (contextual prompts for Ana/DJ) ---
+# Auto-populated by Make.com based on status
+# Shows relevant tasks, scripts, and prompts for current stage
+# Content changes based on status:
+#   - Replied: Response templates based on Superlative Type
+#   - Tool Offered: Checklist + voice memo reminder
+#   - Relationship Building: Pivot question options
+#   - Meeting Scheduled: DJ's prep questions
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Current Tasks"
+    column_type: long_text
+  ) {
+    id
+    title
+  }
+}
+
+# --- No Show Count (tracks meeting no-shows) ---
+# Incremented each time lead no-shows a DJ meeting
+# On 2nd no-show, lead auto-moves to Hibernation 90-Day
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "No Show Count"
+    column_type: numbers
+  ) {
+    id
+    title
+  }
+}
+
+# ============================================================
+# CALENDLY INTEGRATION COLUMNS
+# ============================================================
+# These columns are populated by the "Calendly Event Management" app
+# when a meeting is scheduled, rescheduled, or canceled.
+# Install from Monday.com marketplace: "Calendly Event Management"
+
+# --- Meeting Date (from Calendly) ---
+# Auto-populated when lead books via Calendly
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Meeting Date"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+# --- Meeting URL (from Calendly) ---
+# Zoom, Google Meet, Teams, etc. link for the meeting
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Meeting URL"
+    column_type: link
+  ) {
+    id
+    title
+  }
+}
+
+# --- Calendly Cancel Link ---
+# Link for lead to cancel their meeting
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Calendly Cancel Link"
+    column_type: link
+  ) {
+    id
+    title
+  }
+}
+
+# --- Calendly Reschedule Link ---
+# Link for lead to reschedule their meeting
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Calendly Reschedule Link"
+    column_type: link
+  ) {
+    id
+    title
+  }
+}
+
+# ============================================================
+# INSTANTLY EMAIL INTEGRATION COLUMNS
+# ============================================================
+# These columns support the Instantly cold email path
+
+# --- Emailed By (Instantly persona) ---
+# Tracks which "fake persona" emailed them via Instantly
+# e.g., "Sarah", "Mike", "Alex"
+# Helps Ana know who supposedly sent the tool
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Emailed By"
+    column_type: text
+  ) {
+    id
+    title
+  }
+}
+
+# --- Tool Type (which tool was offered) ---
+# Tracks which tool was offered to the lead
+# Useful for both SMS and Email paths
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Tool Type"
+    column_type: dropdown
+    defaults: "{\"labels\":[{\"id\":1,\"name\":\"ChatGPT Prompts\"},{\"id\":2,\"name\":\"Listing Description Generator\"},{\"id\":3,\"name\":\"Market Analysis Tool\"},{\"id\":4,\"name\":\"Other\"}]}"
+  ) {
+    id
+    title
+  }
+}
+
+# --- Voice Memo Sent (Ana accountability) ---
+# Ana checks this after sending voice memo to lead
+# Used for Instantly leads and Tool Offered follow-ups
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Voice Memo Sent"
+    column_type: checkbox
+  ) {
+    id
+    title
+  }
+}
+
+# ============================================================
+# DJ MEETING COLUMNS
+# ============================================================
+# These columns capture DJ's meeting notes and lead qualification
+
+# --- Meeting Outcome ---
+# DJ's assessment after the recruiting meeting
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Meeting Outcome"
+    column_type: dropdown
+    defaults: "{\"labels\":[{\"id\":1,\"name\":\"Hot - Ready to Sign\"},{\"id\":2,\"name\":\"Warm - Needs Follow-up\"},{\"id\":3,\"name\":\"Cool - Not Now\"},{\"id\":4,\"name\":\"Cold - Not a Fit\"},{\"id\":5,\"name\":\"No Show\"}]}"
+  ) {
+    id
+    title
+  }
+}
+
+# --- Current Brokerage ---
+# Where they currently hang their license
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Current Brokerage"
+    column_type: text
+  ) {
+    id
+    title
+  }
+}
+
+# --- Why Considering Change ---
+# Their pain points with current brokerage
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Why Considering Change"
+    column_type: long_text
+  ) {
+    id
+    title
+  }
+}
+
+# --- Business Goals ---
+# What they want to achieve (deals, income, support, etc.)
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Business Goals"
+    column_type: long_text
+  ) {
+    id
+    title
+  }
+}
+
+# --- Timeline ---
+# When they might be ready to make a move
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Timeline"
+    column_type: dropdown
+    defaults: "{\"labels\":[{\"id\":1,\"name\":\"Immediately\"},{\"id\":2,\"name\":\"1-3 Months\"},{\"id\":3,\"name\":\"3-6 Months\"},{\"id\":4,\"name\":\"6-12 Months\"},{\"id\":5,\"name\":\"Not Sure\"}]}"
+  ) {
+    id
+    title
+  }
+}
+
+# --- Objections ---
+# Any concerns or objections raised
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Objections"
+    column_type: long_text
+  ) {
+    id
+    title
+  }
+}
+
+# --- AI Meeting Notes ---
+# Auto-populated by MeetGeek or similar tool
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "AI Meeting Notes"
+    column_type: long_text
+  ) {
+    id
+    title
+  }
+}
+
+# ============================================================
+# DJ MEETING PREP & FOLLOW-UP COLUMNS
+# ============================================================
+
+# --- Meeting Prep Done ---
+# DJ checks this after reviewing prep materials
+# Triggers: Reminders at 24h, 1h, 10min if unchecked
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Meeting Prep Done"
+    column_type: checkbox
+  ) {
+    id
+    title
+  }
+}
+
+# --- Second Meeting Purpose ---
+# When scheduling follow-up meeting, what's the goal?
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Second Meeting Purpose"
+    column_type: dropdown
+    defaults: "{\"labels\":[{\"id\":1,\"name\":\"Address commission/split concerns\"},{\"id\":2,\"name\":\"Meet the team\"},{\"id\":3,\"name\":\"Tour office\"},{\"id\":4,\"name\":\"Review paperwork/next steps\"},{\"id\":5,\"name\":\"Follow up on pending deal timing\"},{\"id\":6,\"name\":\"Bring spouse/partner into conversation\"},{\"id\":7,\"name\":\"Other (see notes)\"}]}"
+  ) {
+    id
+    title
+  }
+}
+
+# --- Second Meeting Purpose (Custom) ---
+# Free text when "Other" is selected
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Second Meeting Notes"
+    column_type: text
+  ) {
+    id
+    title
+  }
+}
+
+# ============================================================
+# OFFER EXTENDED FOLLOW-UP COLUMNS
+# ============================================================
+
+# --- Offer Date ---
+# Auto-set when status changes to Offer Extended
+# Used to calculate follow-up stages
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Offer Date"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+# --- Day 3 Follow-up Done ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Day 3 Follow-up Done"
+    column_type: checkbox
+  ) {
+    id
+    title
+  }
+}
+
+# --- Day 7 Follow-up Done ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Day 7 Follow-up Done"
+    column_type: checkbox
+  ) {
+    id
+    title
+  }
+}
+
+# --- Day 14 Follow-up Done ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Day 14 Follow-up Done"
+    column_type: checkbox
+  ) {
+    id
+    title
+  }
+}
+
+# --- Day 21 Follow-up Done ---
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Day 21 Follow-up Done"
+    column_type: checkbox
+  ) {
+    id
+    title
+  }
+}
+
+# --- Last Offer Follow-up ---
+# Auto-updated when any follow-up checkbox is checked
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Last Offer Follow-up"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+# ============================================================
+# ANA EVENT INVITE COLUMNS
+# ============================================================
+
+# --- Queue for Event Invite ---
+# Ana checks this to queue lead for bulk event invite
+# Make.com processes and sends individual SMS
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Queue for Event Invite"
+    column_type: checkbox
+  ) {
+    id
+    title
+  }
+}
+
+# --- Last Event Invite ---
+# Tracks when last invited to prevent over-inviting
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Last Event Invite"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+# ============================================================
+# SOCIAL SELLING COLUMNS (Phase 2 Prep)
+# ============================================================
+
+# --- Facebook Connected ---
+# DJ checks when he's friended them on Facebook
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Facebook Connected"
+    column_type: checkbox
+  ) {
+    id
+    title
+  }
+}
+
+# --- Last Social Check ---
+# When DJ last reviewed their social media
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Last Social Check"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+# --- Social Intel ---
+# DJ notes interesting social media updates for outreach opptys
+# e.g., "Posted about Montreal trip 3/15", "Kid graduated 3/20"
+mutation {
+  create_column(
+    board_id: BOARD_ID
+    title: "Social Intel"
+    column_type: long_text
+  ) {
+    id
+    title
+  }
+}
+
+# ============================================================
+# STEP 3: Verify all columns were created
+# ============================================================
+
+query {
+  boards(ids: [BOARD_ID]) {
+    columns {
+      id
+      title
+      type
+    }
+  }
+}
+
+# ============================================================
+# STEP 4: Get column IDs for automation setup
+# You'll need these IDs for Make.com scenarios
+# ============================================================
+
+# Run the query above and save the column IDs:
+# - status (default) → for status changes
+# - phone → for JustCall matching
+# - last_contact_date → for timestamp updates
+# - assigned_to → for Jennica/Ana assignment
+# - timeout_until → for 30-day logic
+# - hibernation_until → for 90-day logic
+
+# Save these IDs in your Make.com scenarios!

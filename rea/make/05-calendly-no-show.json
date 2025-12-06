@@ -1,0 +1,219 @@
+{
+  "name": "REA - Calendly No Show Handler",
+  "description": "When DJ marks a lead as 'No Show' in Monday, increment the no-show count and create a task for Rea to reschedule.",
+  "trigger": "Monday Webhook: Status changes to 'No Show'",
+  "board_id": "18391158354",
+  "note": "This scenario watches for Monday status changes. DJ marks no-shows manually after appointments.",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:watchColumnValues",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "boardId": "18391158354",
+        "columnId": "color_mkybxbyk"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Watch for status column changes"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "conditions": [
+          [
+            {
+              "a": "{{1.value.label.text}}",
+              "b": "No Show",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Only proceed if new status is 'No Show'"
+    },
+    {
+      "id": 3,
+      "module": "monday:getItem",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "itemId": "{{1.itemId}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Get current item details including No Show Count"
+    },
+    {
+      "id": 4,
+      "module": "monday:changeColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "18391158354",
+        "itemId": "{{1.itemId}}",
+        "columnId": "numeric_mkybzb1j",
+        "value": "{{add(3.column_values.numeric_mkybzb1j.value; 1)}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "note": "Increment No Show Count by 1"
+    },
+    {
+      "id": 5,
+      "module": "monday:changeColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "18391158354",
+        "itemId": "{{1.itemId}}",
+        "columnId": "color_mkybxbyk",
+        "value": "{\"label\":\"Rescheduling\"}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        }
+      },
+      "note": "Change status to Rescheduling"
+    },
+    {
+      "id": 6,
+      "module": "monday:createUpdate",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "itemId": "{{1.itemId}}",
+        "body": ":x: **No Show - Reschedule Needed**\n\n**No Show Count:** {{add(3.column_values.numeric_mkybzb1j.value; 1)}}\n**Date:** {{formatDate(now; 'MMM D, YYYY')}}\n\n---\n\n**Rea's Tasks:**\n1. Call lead to reschedule\n2. If no answer, try again next business day\n3. After 3 no-shows, consider moving to 'Lost'\n\n**Calendly Link:** https://joinkale.com/schedule"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0
+        }
+      },
+      "note": "Add no-show details and reschedule instructions"
+    },
+    {
+      "id": 7,
+      "module": "slack:postMessage",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "channel": "REA_SLACK_CHANNEL_OR_DM",
+        "text": ":x: *No Show Alert*\n\n*Lead:* {{3.name}}\n*No Show Count:* {{add(3.column_values.numeric_mkybzb1j.value; 1)}}\n\n*Action:* Please call to reschedule\n*Calendly:* https://joinkale.com/schedule\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354/pulses/{{1.itemId}}|Open in Monday>"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1800,
+          "y": 0
+        }
+      },
+      "note": "Notify Rea to reschedule"
+    },
+    {
+      "id": 8,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "label": "3+ No Shows - Consider Lost",
+          "flow": [
+            {
+              "id": 9,
+              "module": "slack:postMessage",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "channel": "REA_SLACK_CHANNEL_OR_DM",
+                "text": ":warning: *Multiple No Shows Alert*\n\n*Lead:* {{3.name}} has {{add(3.column_values.numeric_mkybzb1j.value; 1)}} no-shows.\n\nConsider marking as 'Lost - No Response' if they don't reschedule after one more attempt."
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": -100
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "3 or more no-shows",
+            "conditions": [
+              [
+                {
+                  "a": "{{add(3.column_values.numeric_mkybzb1j.value; 1)}}",
+                  "b": "3",
+                  "o": "number:greaterequal"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Connect Monday account and select board 18391158354",
+    "step_2": "Configure webhook to watch status column (color_mkybxbyk)",
+    "step_3": "Replace REA_SLACK_CHANNEL_OR_DM with Rea's Slack channel",
+    "step_4": "Test by changing a lead's status to 'No Show'",
+    "step_5": "Activate scenario"
+  },
+  "no_show_escalation": {
+    "1_no_show": "Call to reschedule",
+    "2_no_shows": "Call again, send SMS reminder",
+    "3_no_shows": "Alert - consider moving to Lost if no response"
+  }
+}

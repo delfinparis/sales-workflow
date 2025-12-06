@@ -1,0 +1,127 @@
+{
+  "name": "Stale Lead Alert - Daily Check",
+  "description": "Every morning, finds leads that have been sitting without activity for 7+ days and alerts Ana via Slack.",
+  "trigger": "Scheduled - Daily at 9:00 AM",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:searchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "status",
+              "compare_value": ["Tool Offered", "Training Invited", "Relationship Building", "Ask Made"]
+            },
+            {
+              "column_id": "last_contact_date",
+              "compare_value": {
+                "from": null,
+                "to": "{{formatDate(addDays(now; -7); 'YYYY-MM-DD')}}"
+              }
+            }
+          ]
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Find leads in active Ana statuses with Last Contact Date older than 7 days"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "filter": {
+        "name": "Has stale leads",
+        "conditions": [
+          [
+            {
+              "a": "{{length(1.items)}}",
+              "b": "0",
+              "o": "number:greater"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Only proceed if there are stale leads"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicAggregator",
+      "version": 1,
+      "mapper": {
+        "structure": "{{1.items}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Aggregate all stale leads into one message"
+    },
+    {
+      "id": 4,
+      "module": "slack:postMessage",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "channel": "YOUR_SLACK_CHANNEL_OR_ANA_DM",
+        "text": "🚨 *Stale Leads Alert*\n\nThese leads haven't been touched in 7+ days:\n\n{{join(map(1.items; 'item'; '• ' + item.name + ' (' + item.column_values.status.text + ') - Last contact: ' + item.column_values.last_contact_date.text); '\n')}}\n\n*Action needed:* Follow up or move to Hibernation if cold.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID|Open Board>"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "note": "Send Slack message listing all stale leads"
+    }
+  ],
+  "scheduling": {
+    "type": "recurring",
+    "interval": "daily",
+    "time": "09:00",
+    "timezone": "America/Chicago"
+  },
+  "setup_instructions": {
+    "step_1": "Import this blueprint into Make.com",
+    "step_2": "Replace YOUR_BOARD_ID with your Monday board ID",
+    "step_3": "Configure Slack connection and channel (Ana's DM or team channel)",
+    "step_4": "Set schedule: Daily at 9:00 AM",
+    "step_5": "Test by temporarily changing the date filter to 1 day",
+    "step_6": "Activate scenario"
+  },
+  "stale_criteria": {
+    "statuses_checked": [
+      "Tool Offered",
+      "Training Invited", 
+      "Relationship Building",
+      "Ask Made"
+    ],
+    "days_threshold": 7,
+    "why": "These are active Ana statuses where momentum matters. 7+ days of silence = lead going cold."
+  },
+  "what_ana_should_do": {
+    "option_1": "Follow up immediately - call or SMS",
+    "option_2": "If they've been unresponsive for 14+ days, consider Hibernation",
+    "option_3": "Check Notes for context - did they say they'd be busy?"
+  }
+}

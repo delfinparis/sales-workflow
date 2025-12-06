@@ -1,0 +1,202 @@
+{
+  "name": "REA - Week 3 Never Responded Calling Reminder",
+  "description": "On Week 3 of each month (around the 15th-21st), remind Rea to manually call leads in the 'Never Responded' group who haven't engaged with the automated workflow.",
+  "trigger": "Scheduled - Every Monday during Week 3 of month at 9 AM",
+  "board_id": "18391158354",
+  "flow": [
+    {
+      "id": 1,
+      "module": "builtin:BasicScheduler",
+      "version": 1,
+      "parameters": {
+        "schedule": {
+          "type": "weekly",
+          "day": 1,
+          "time": "09:00"
+        }
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Run every Monday at 9 AM"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "conditions": [
+          [
+            {
+              "a": "{{formatDate(now; 'D')}}",
+              "b": "15",
+              "o": "number:greaterequal"
+            },
+            {
+              "a": "{{formatDate(now; 'D')}}",
+              "b": "21",
+              "o": "number:lesserequal"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Only proceed if today is between 15th-21st of month (Week 3)"
+    },
+    {
+      "id": 3,
+      "module": "monday:searchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "18391158354",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "color_mkybxbyk",
+              "compare_value": [5, 1],
+              "operator": "any_of"
+            }
+          ]
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Find leads with status 'New Lead' or 'In Workflow' (never responded)"
+    },
+    {
+      "id": 4,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "label": "Has Never Responded Leads",
+          "flow": [
+            {
+              "id": 5,
+              "module": "builtin:TextAggregator",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "array": "{{3.items}}",
+                "separator": "\n",
+                "text": "• {{item.name}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0
+                }
+              },
+              "note": "Create list of lead names"
+            },
+            {
+              "id": 6,
+              "module": "slack:postMessage",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "channel": "REA_SLACK_CHANNEL_OR_DM",
+                "text": ":telephone_receiver: *Week 3 Calling Reminder!*\n\nIt's the 3rd week of the month - time to call your \"Never Responded\" leads!\n\n*{{length(3.items)}} leads* waiting for a call:\n\n{{5.text}}\n\n---\n\n*Strategy:*\n1. Call each lead\n2. If they answer - send Calendly link: https://joinkale.com/schedule\n3. If no answer - leave voicemail, try again tomorrow\n4. If they respond - move to \"Responded\" group\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354|Open Board - Never Responded View>"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0
+                }
+              },
+              "note": "Send comprehensive reminder to Rea"
+            }
+          ],
+          "filter": {
+            "name": "Has leads to call",
+            "conditions": [
+              [
+                {
+                  "a": "{{length(3.items)}}",
+                  "b": "0",
+                  "o": "number:greater"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "label": "No Never Responded Leads",
+          "flow": [
+            {
+              "id": 7,
+              "module": "slack:postMessage",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "channel": "REA_SLACK_CHANNEL_OR_DM",
+                "text": ":white_check_mark: *Week 3 Status*\n\nGreat news! No leads in \"Never Responded\" status right now. All leads have either responded or been processed.\n\nKeep up the great work! :star2:"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 200
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "No leads (default)",
+            "conditions": []
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Configure Monday connection",
+    "step_2": "Replace REA_SLACK_CHANNEL_OR_DM with Rea's Slack channel",
+    "step_3": "Test by temporarily adjusting the date filter",
+    "step_4": "Activate scenario"
+  },
+  "week_3_logic": {
+    "definition": "Days 15-21 of each month",
+    "why": "By week 3, the automated workflow has run its course (12 steps over ~30 days). Manual calling is the last effort before marking as Lost.",
+    "goal": "Give leads one more human touchpoint before giving up"
+  },
+  "alternative_schedule": {
+    "note": "If you want this to run every week instead of just Week 3, remove the date filter (step 2)"
+  }
+}

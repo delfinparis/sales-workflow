@@ -1,0 +1,283 @@
+{
+  "name": "REA - Hibernation Expiration Check",
+  "description": "Daily check for leads whose 'Hibernation Until' date has passed (primarily 'Chose Another Firm' leads after 90 days). Returns them to active status for re-engagement.",
+  "trigger": "Scheduled - Daily at 9 AM",
+  "board_id": "18391158354",
+  "flow": [
+    {
+      "id": 1,
+      "module": "builtin:BasicScheduler",
+      "version": 1,
+      "parameters": {
+        "schedule": {
+          "type": "daily",
+          "time": "09:00"
+        }
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Run daily at 9 AM CT"
+    },
+    {
+      "id": 2,
+      "module": "monday:searchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "18391158354",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "color_mkybxbyk",
+              "compare_value": [8],
+              "operator": "any_of"
+            },
+            {
+              "column_id": "date_mkyb1317",
+              "compare_value": {
+                "to": "{{formatDate(now; 'YYYY-MM-DD')}}"
+              },
+              "operator": "lesser_than_or_equal"
+            }
+          ],
+          "operator": "and"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Find leads with status 'Chose Another Firm' AND hibernation date is today or past"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "label": "Found Expired Hibernations",
+          "flow": [
+            {
+              "id": 4,
+              "module": "builtin:BasicIterator",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "array": "{{2.items}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 0
+                }
+              },
+              "note": "Iterate through expired hibernations"
+            },
+            {
+              "id": 5,
+              "module": "monday:getItem",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{4.id}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0
+                }
+              },
+              "note": "Get full item details including Chose Firm"
+            },
+            {
+              "id": 6,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{4.id}}",
+                "columnId": "color_mkybxbyk",
+                "value": "{\"label\":\"Attempting Contact\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0
+                }
+              },
+              "note": "Set status to Attempting Contact (re-engagement)"
+            },
+            {
+              "id": 7,
+              "module": "monday:moveItemToGroup",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{4.id}}",
+                "groupId": "group_mkyb51b6"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 0
+                }
+              },
+              "note": "Move to Responded group for Rea to work"
+            },
+            {
+              "id": 8,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{4.id}}",
+                "columnId": "boolean_mkyb12v8",
+                "value": "{\"checked\":\"false\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 0
+                }
+              },
+              "note": "Uncheck 'Do Not Contact' - safe to reach out again"
+            },
+            {
+              "id": 9,
+              "module": "monday:createUpdate",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{4.id}}",
+                "body": ":arrows_counterclockwise: **Hibernation Expired - Ready for Re-engagement!**\n\n**Original Status:** Chose Another Firm\n**Firm They Joined:** {{5.column_values.text_mkybb8mk.value}}\n**Hibernation Period:** 90 days\n**Today:** {{formatDate(now; 'MMM D, YYYY')}}\n\n---\n\n**Re-engagement Strategy:**\n1. Check their social media for updates\n2. Call to check in: \"Hey! It's been a few months - how's everything going at [firm]?\"\n3. Don't pitch immediately - just reconnect\n4. If unhappy with current firm, offer to chat about Kale"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 0
+                }
+              },
+              "note": "Add re-engagement instructions"
+            }
+          ],
+          "filter": {
+            "name": "Has expired hibernations",
+            "conditions": [
+              [
+                {
+                  "a": "{{length(2.items)}}",
+                  "b": "0",
+                  "o": "number:greater"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 2700,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "label": "Had Expirations - Notify Rea",
+          "flow": [
+            {
+              "id": 11,
+              "module": "slack:postMessage",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "channel": "REA_SLACK_CHANNEL_OR_DM",
+                "text": ":arrows_counterclockwise: *Hibernation Expiration Alert*\n\n*{{length(2.items)}} lead(s)* are ready for re-engagement!\n\nThese agents chose another firm 90 days ago. Time to check in and see how it's going.\n\n*Strategy:* Don't pitch - just reconnect. If they're unhappy, they'll tell you.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354|View Board>"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 0
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "Had at least one expiration",
+            "conditions": [
+              [
+                {
+                  "a": "{{length(2.items)}}",
+                  "b": "0",
+                  "o": "number:greater"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Configure Monday connection",
+    "step_2": "Replace REA_SLACK_CHANNEL_OR_DM with Rea's Slack channel",
+    "step_3": "Adjust schedule time if needed (default 9 AM)",
+    "step_4": "Test by setting a lead's hibernation date to today",
+    "step_5": "Activate scenario"
+  },
+  "status_index_reference": {
+    "8": "Chose Another Firm",
+    "2": "Attempting Contact"
+  },
+  "re_engagement_tips": {
+    "dont_do": "Don't immediately pitch Kale",
+    "do_instead": "Check in, ask how things are going, listen for pain points",
+    "timing": "90 days is enough time for them to have experienced issues with their firm",
+    "goal": "Reopen relationship, not close a deal immediately"
+  }
+}

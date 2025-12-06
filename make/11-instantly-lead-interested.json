@@ -1,0 +1,549 @@
+{
+  "name": "Instantly Lead Interested - Monday Integration",
+  "description": "When a lead replies 'yes' to an Instantly email and is marked as 'interested', this scenario updates their Monday record, adds email thread to notes, and creates tasks for Ana to follow up via SMS.",
+  "trigger": "Instantly webhook: lead_interested event",
+  "instantly_webhook_setup": {
+    "endpoint": "POST /api/v2/webhooks",
+    "payload": {
+      "target_hook_url": "YOUR_MAKE_WEBHOOK_URL",
+      "event_type": "lead_interested"
+    },
+    "note": "Create this webhook in Instantly via API or Settings > Integrations > Webhooks"
+  },
+  "webhook_payload_fields": {
+    "lead_email": "Email address of the lead",
+    "email_account": "The persona/account that sent the email (e.g., sarah@kale.com)",
+    "reply_text": "Full text of their reply",
+    "reply_text_snippet": "Short preview of reply",
+    "campaign_name": "Name of the Instantly campaign",
+    "unibox_url": "URL to view conversation in Instantly"
+  },
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": null,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Receives Instantly webhook for lead_interested event"
+    },
+    {
+      "id": 2,
+      "module": "monday:searchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "email",
+              "compare_value": ["{{1.lead_email}}"]
+            }
+          ]
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Search for existing lead by email"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "label": "Lead NOT Found - Create New Item",
+          "flow": [
+            {
+              "id": 4,
+              "module": "monday:createItem",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemName": "{{1.lead_email}}",
+                "columnValues": {
+                  "email": {"email": "{{1.lead_email}}", "text": "{{1.lead_email}}"},
+                  "status": {"label": "Replied - Awaiting Ana"},
+                  "lead_source": {"label": "Instantly"},
+                  "assigned_to": {"personsAndTeams": [{"id": "ANA_USER_ID", "kind": "person"}]},
+                  "emailed_by": "{{replace(1.email_account; '@.*'; '')}}",
+                  "current_tasks": {"text": "📧 NEW INSTANTLY LEAD - INTRO TASKS:\n\n☐ Send intro SMS:\n\"Hi! {{replace(1.email_account; '@.*'; '')}} from our team just sent over the [tool name] via email! I'm Ana @ Kale (I work with D.J.) and I'll be reaching out in the next few days to get your feedback! Thanks! :)\"\n\n☐ Send voice memo introducing yourself\n\n☐ Set Next Action Date for follow-up (2-4 days)\n\n📧 EMAIL THREAD SUMMARY:\nEmailed by: {{1.email_account}}\nTheir reply: {{1.reply_text_snippet}}\n\n🔗 Full thread: {{1.unibox_url}}"},
+                  "next_action": "Send intro SMS + voice memo, then set follow-up date for tool feedback",
+                  "next_action_date": {"date": "{{formatDate(now; 'YYYY-MM-DD')}}"}
+                }
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": -200
+                }
+              },
+              "note": "Create new lead in Monday - genuinely new Instantly responder"
+            },
+            {
+              "id": 5,
+              "module": "monday:createUpdate",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{4.id}}",
+                "body": "📧 **New Lead from Instantly Email!**\n\n**Emailed By:** {{1.email_account}}\n**Campaign:** {{1.campaign_name}}\n**Their Reply:**\n{{1.reply_text}}\n\n🔗 [View full thread in Instantly]({{1.unibox_url}})\n\n---\n\n**Ana's Tasks:**\n1. Send intro SMS (template in Current Tasks)\n2. Send voice memo\n3. Set follow-up date (2-4 days)\n4. Follow up for feedback → Relationship Building\n\n⚠️ *This is a NEW lead - not previously in our system*"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": -200
+                }
+              },
+              "note": "Add email thread and instructions to Notes/Updates"
+            },
+            {
+              "id": 6,
+              "module": "slack:postMessage",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "channel": "YOUR_SLACK_CHANNEL_OR_ANA_DM",
+                "text": "🆕 *New Instantly Lead Created: {{1.lead_email}}*\n\nThis is a NEW lead (not previously in Monday) who replied to an Instantly email!\n\nEmailed by: {{1.email_account}}\nTheir reply: \"{{1.reply_text_snippet}}\"\n\n*Tasks:*\n1. Send intro SMS\n2. Send voice memo\n3. Set follow-up date\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{4.id}}|Open in Monday>"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": -200
+                }
+              },
+              "note": "Notify Ana via Slack about new lead"
+            }
+          ],
+          "filter": {
+            "name": "No items found",
+            "conditions": [
+              [
+                {
+                  "a": "{{length(2.items)}}",
+                  "b": "0",
+                  "o": "number:equal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "label": "Lead Found - Check Status & Update",
+          "flow": [
+            {
+              "id": 6,
+              "module": "monday:getItem",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{2.items[0].id}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 100
+                }
+              },
+              "note": "Get full item details including current status"
+            },
+            {
+              "id": 7,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 100
+                }
+              },
+              "routes": [
+                {
+                  "label": "Already in Active Ana Status - Just Add Note",
+                  "flow": [
+                    {
+                      "id": 8,
+                      "module": "monday:createUpdate",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "itemId": "{{2.items[0].id}}",
+                        "body": "📧 **Instantly Email Update**\n\nThis lead also received a tool offer via email!\n\n**Emailed By:** {{1.email_account}}\n**Their Reply:** {{1.reply_text}}\n**Campaign:** {{1.campaign_name}}\n\n🔗 [View in Instantly]({{1.unibox_url}})\n\n*Note: Lead is already being worked by Ana, so not changing status. Just FYI!*"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1500,
+                          "y": -50
+                        }
+                      },
+                      "note": "Just add a note, don't interrupt existing flow"
+                    },
+                    {
+                      "id": 9,
+                      "module": "slack:postMessage",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "channel": "YOUR_SLACK_CHANNEL_OR_ANA_DM",
+                        "text": "ℹ️ *FYI: {{2.items[0].name}}* also got a tool via Instantly email!\n\nYou're already working this lead, so no status change. Just letting you know they now have the tool from {{1.email_account}}.\n\nTheir reply: \"{{1.reply_text_snippet}}\""
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1800,
+                          "y": -50
+                        }
+                      }
+                    }
+                  ],
+                  "filter": {
+                    "name": "Status is active Ana status",
+                    "conditions": [
+                      [
+                        {
+                          "a": "{{6.column_values.status.text}}",
+                          "b": "Ana Engaged",
+                          "o": "text:equal"
+                        }
+                      ],
+                      [
+                        {
+                          "a": "{{6.column_values.status.text}}",
+                          "b": "Tool Offered",
+                          "o": "text:equal"
+                        }
+                      ],
+                      [
+                        {
+                          "a": "{{6.column_values.status.text}}",
+                          "b": "Training Invited",
+                          "o": "text:equal"
+                        }
+                      ],
+                      [
+                        {
+                          "a": "{{6.column_values.status.text}}",
+                          "b": "Relationship Building",
+                          "o": "text:equal"
+                        }
+                      ],
+                      [
+                        {
+                          "a": "{{6.column_values.status.text}}",
+                          "b": "Ask Made",
+                          "o": "text:equal"
+                        }
+                      ],
+                      [
+                        {
+                          "a": "{{6.column_values.status.text}}",
+                          "b": "Meeting Scheduled",
+                          "o": "text:equal"
+                        }
+                      ]
+                    ]
+                  }
+                },
+                {
+                  "label": "Not in Active Ana Status - Full Update",
+                  "flow": [
+                    {
+                      "id": 10,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "YOUR_BOARD_ID",
+                        "itemId": "{{2.items[0].id}}",
+                        "columnId": "status",
+                        "value": "{\"label\":\"Tool Offered\"}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1500,
+                          "y": 250
+                        }
+                      },
+                      "note": "Set status to Tool Offered"
+                    },
+                    {
+                      "id": 11,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "YOUR_BOARD_ID",
+                        "itemId": "{{2.items[0].id}}",
+                        "columnId": "emailed_by",
+                        "value": "{{replace(1.email_account; '@.*'; '')}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1800,
+                          "y": 250
+                        }
+                      },
+                      "note": "Set Emailed By to the persona name (strip domain)"
+                    },
+                    {
+                      "id": 12,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "YOUR_BOARD_ID",
+                        "itemId": "{{2.items[0].id}}",
+                        "columnId": "lead_source",
+                        "value": "{\"label\":\"Instantly Email\"}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2100,
+                          "y": 250
+                        }
+                      },
+                      "note": "Set Lead Source to Instantly Email"
+                    },
+                    {
+                      "id": 13,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "YOUR_BOARD_ID",
+                        "itemId": "{{2.items[0].id}}",
+                        "columnId": "assigned_to",
+                        "value": "{\"personsAndTeams\":[{\"id\":ANA_USER_ID,\"kind\":\"person\"}]}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": 250
+                        }
+                      },
+                      "note": "Assign to Ana"
+                    },
+                    {
+                      "id": 14,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "YOUR_BOARD_ID",
+                        "itemId": "{{2.items[0].id}}",
+                        "columnId": "current_tasks",
+                        "value": "{\"text\":\"📧 INSTANTLY LEAD - INTRO TASKS:\\n\\n☐ Send intro SMS:\\n\\\"Hi! {{replace(1.email_account; '@.*'; '')}} from our team just sent over the [tool name] via email! I'm Ana @ Kale (I work with D.J.) and I'll be reaching out in the next few days to get your feedback! Thanks! :)\\\"\\n\\n☐ Send voice memo introducing yourself\\n\\n☐ Set Next Action Date for follow-up (2-4 days)\\n\\n📧 EMAIL THREAD SUMMARY:\\nEmailed by: {{1.email_account}}\\nTheir reply: {{1.reply_text_snippet}}\\n\\n🔗 Full thread: {{1.unibox_url}}\"}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2700,
+                          "y": 250
+                        }
+                      },
+                      "note": "Set response suggestions with intro SMS template"
+                    },
+                    {
+                      "id": 15,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "YOUR_BOARD_ID",
+                        "itemId": "{{2.items[0].id}}",
+                        "columnId": "next_action",
+                        "value": "Send intro SMS + voice memo, then set follow-up date for tool feedback"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3000,
+                          "y": 250
+                        }
+                      }
+                    },
+                    {
+                      "id": 16,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "YOUR_BOARD_ID",
+                        "itemId": "{{2.items[0].id}}",
+                        "columnId": "next_action_date",
+                        "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3300,
+                          "y": 250
+                        }
+                      },
+                      "note": "Set Next Action Date to today"
+                    },
+                    {
+                      "id": 17,
+                      "module": "monday:createUpdate",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "itemId": "{{2.items[0].id}}",
+                        "body": "📧 **Instantly Email - Lead Said YES!**\n\n**Emailed By:** {{1.email_account}}\n**Campaign:** {{1.campaign_name}}\n**Their Reply:**\n{{1.reply_text}}\n\n🔗 [View full thread in Instantly]({{1.unibox_url}})\n\n---\n\n**Ana's Tasks:**\n1. Send intro SMS (template in Current Tasks)\n2. Send voice memo\n3. Set follow-up date (2-4 days)\n4. Follow up for feedback → Relationship Building"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3600,
+                          "y": 250
+                        }
+                      },
+                      "note": "Add email thread and instructions to Notes/Updates"
+                    },
+                    {
+                      "id": 18,
+                      "module": "slack:postMessage",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "channel": "YOUR_SLACK_CHANNEL_OR_ANA_DM",
+                        "text": "🎉 *New Instantly Lead: {{2.items[0].name}}*\n\nThey said YES to the tool offer!\n\nEmailed by: {{1.email_account}}\nTheir reply: \"{{1.reply_text_snippet}}\"\n\n*Tasks:*\n1. Send intro SMS\n2. Send voice memo\n3. Set follow-up date\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{2.items[0].id}}|Open in Monday>"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 3900,
+                          "y": 250
+                        }
+                      },
+                      "note": "Notify Ana via Slack"
+                    }
+                  ],
+                  "filter": {
+                    "name": "Status is NOT active Ana status (default route)",
+                    "conditions": []
+                  }
+                }
+              ]
+            }
+          ],
+          "filter": {
+            "name": "At least one item found",
+            "conditions": [
+              [
+                {
+                  "a": "{{length(2.items)}}",
+                  "b": "0",
+                  "o": "number:greater"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Create webhook in Make.com: Webhooks > Custom webhook > Copy URL",
+    "step_2": "Create Instantly webhook via API or Settings > Integrations > Webhooks",
+    "step_3": "Set Instantly webhook target_hook_url to your Make.com webhook URL",
+    "step_4": "Set Instantly webhook event_type to 'lead_interested'",
+    "step_5": "Import this blueprint into Make.com",
+    "step_6": "Replace YOUR_BOARD_ID with your Monday board ID",
+    "step_7": "Replace ANA_USER_ID with Ana's Monday user ID",
+    "step_8": "Configure email and Slack connections",
+    "step_9": "Update column IDs if different from defaults",
+    "step_10": "Test: Mark a lead as 'interested' in Instantly, verify Monday updates",
+    "step_11": "Activate scenario"
+  },
+  "instantly_webhook_creation": {
+    "method": "POST",
+    "url": "https://api.instantly.ai/api/v2/webhooks",
+    "headers": {
+      "Authorization": "Bearer YOUR_INSTANTLY_API_KEY",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "target_hook_url": "YOUR_MAKE_WEBHOOK_URL",
+      "event_type": "lead_interested"
+    }
+  },
+  "collision_handling": {
+    "scenario": "Lead is already being worked by Ana (Ana Engaged, Tool Offered, Relationship Building, etc.)",
+    "behavior": "Don't change status, just add a note to let Ana know they also received the tool via email",
+    "reason": "Don't interrupt existing conversation flow"
+  },
+  "lead_not_found_handling": {
+    "scenario": "Lead replied 'yes' but isn't in Monday (genuinely new lead from Instantly)",
+    "behavior": "Create new item in Monday with Status='Replied - Awaiting Ana', Assigned To=Ana, Lead Source='Instantly', then notify Ana via Slack",
+    "fields_populated": "Email, Status, Lead Source, Assigned To, Emailed By, Current Tasks (with intro SMS template), Next Action, Next Action Date, Notes (with email thread)"
+  },
+  "ana_intro_sms_template": {
+    "text": "Hi! [Persona] from our team just sent over the [tool name] via email! I'm Ana @ Kale (I work with D.J.) and I'll be reaching out in the next few days to get your feedback! Thanks! :)"
+  },
+  "next_steps_after_intro": {
+    "1": "Ana sends intro SMS (same day as lead says yes)",
+    "2": "Ana sends voice memo introducing herself",
+    "3": "Ana sets follow-up date (2-4 days)",
+    "4": "Ana follows up for feedback",
+    "5": "Flow continues: Relationship Building → Ask Made → Meeting → DJ"
+  }
+}

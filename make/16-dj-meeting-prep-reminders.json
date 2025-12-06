@@ -1,0 +1,147 @@
+{
+  "name": "DJ Meeting Prep Reminders",
+  "description": "Sends DJ reminders to prep for meetings at 24h, 1h, and 10min before if Meeting Prep Done is unchecked.",
+  "trigger": "Scheduled - Every 15 minutes",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:searchItems",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "status",
+              "compare_value": ["Meeting Scheduled"]
+            },
+            {
+              "column_id": "meeting_prep_done",
+              "compare_value": false
+            }
+          ]
+        }
+      },
+      "note": "Find all Meeting Scheduled leads where prep not done"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicIterator",
+      "mapper": {
+        "array": "{{1.items}}"
+      },
+      "note": "Loop through each meeting"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicRouter",
+      "routes": [
+        {
+          "label": "24 Hours Before",
+          "filter": {
+            "conditions": [
+              [
+                {
+                  "a": "{{parseDate(2.column_values.meeting_date.date + ' ' + 2.column_values.meeting_date.time; 'YYYY-MM-DD HH:mm')}}",
+                  "b": "{{addHours(now; 24)}}",
+                  "o": "date:before"
+                },
+                {
+                  "a": "{{parseDate(2.column_values.meeting_date.date + ' ' + 2.column_values.meeting_date.time; 'YYYY-MM-DD HH:mm')}}",
+                  "b": "{{addHours(now; 23)}}",
+                  "o": "date:after"
+                }
+              ]
+            ]
+          },
+          "flow": [
+            {
+              "id": 4,
+              "module": "slack:postMessage",
+              "mapper": {
+                "channel": "DJ_SLACK_DM_OR_CHANNEL",
+                "text": "📅 *Meeting Prep Reminder - 24 Hours*\n\n*{{2.name}}* - Meeting tomorrow\n\n*Time:* {{formatDate(parseDate(2.column_values.meeting_date.date; 'YYYY-MM-DD'); 'MMM D')}} at {{2.column_values.meeting_date.time}}\n\n*Prep Tasks:*\n• Review their Current Brokerage & Deal Count\n• Check Notes for context from Ana\n• Review Current Tasks for meeting questions\n• Have Kale value props ready\n\n<{{2.column_values.meeting_url.url}}|Join Meeting Link>\n\n✅ Mark *Meeting Prep Done* when ready"
+              }
+            }
+          ]
+        },
+        {
+          "label": "1 Hour Before",
+          "filter": {
+            "conditions": [
+              [
+                {
+                  "a": "{{parseDate(2.column_values.meeting_date.date + ' ' + 2.column_values.meeting_date.time; 'YYYY-MM-DD HH:mm')}}",
+                  "b": "{{addMinutes(now; 60)}}",
+                  "o": "date:before"
+                },
+                {
+                  "a": "{{parseDate(2.column_values.meeting_date.date + ' ' + 2.column_values.meeting_date.time; 'YYYY-MM-DD HH:mm')}}",
+                  "b": "{{addMinutes(now; 45)}}",
+                  "o": "date:after"
+                }
+              ]
+            ]
+          },
+          "flow": [
+            {
+              "id": 5,
+              "module": "slack:postMessage",
+              "mapper": {
+                "channel": "DJ_SLACK_DM_OR_CHANNEL",
+                "text": "⚠️ *Meeting in 1 Hour - Prep Not Done!*\n\n*{{2.name}}*\n\n*Quick Prep:*\n• They do {{2.column_values.deal_count.text}} deals/year\n• Currently at: {{2.column_values.current_brokerage.text}}\n• Priority: {{2.column_values.priority.text}}\n\n<{{2.column_values.meeting_url.url}}|Join Meeting>\n\n✅ Mark *Meeting Prep Done* now!"
+              }
+            }
+          ]
+        },
+        {
+          "label": "10 Minutes Before",
+          "filter": {
+            "conditions": [
+              [
+                {
+                  "a": "{{parseDate(2.column_values.meeting_date.date + ' ' + 2.column_values.meeting_date.time; 'YYYY-MM-DD HH:mm')}}",
+                  "b": "{{addMinutes(now; 10)}}",
+                  "o": "date:before"
+                },
+                {
+                  "a": "{{parseDate(2.column_values.meeting_date.date + ' ' + 2.column_values.meeting_date.time; 'YYYY-MM-DD HH:mm')}}",
+                  "b": "{{now}}",
+                  "o": "date:after"
+                }
+              ]
+            ]
+          },
+          "flow": [
+            {
+              "id": 6,
+              "module": "slack:postMessage",
+              "mapper": {
+                "channel": "DJ_SLACK_DM_OR_CHANNEL",
+                "text": "🚨 *MEETING IN 10 MINUTES!*\n\n*{{2.name}}*\n\n<{{2.column_values.meeting_url.url}}|JOIN NOW>\n\nKey questions:\n• \"What made you interested in chatting?\"\n• \"What's the biggest challenge you're facing?\"\n• \"Have you thought about making a change?\""
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scheduling": {
+    "type": "recurring",
+    "interval": 15,
+    "unit": "minutes"
+  },
+  "setup_instructions": {
+    "step_1": "Import into Make.com",
+    "step_2": "Replace YOUR_BOARD_ID",
+    "step_3": "Set DJ_SLACK_DM_OR_CHANNEL to DJ's Slack DM or a dedicated channel",
+    "step_4": "Verify column IDs match your board",
+    "step_5": "Test with a meeting scheduled for 25 hours from now",
+    "step_6": "Activate scenario"
+  },
+  "reminder_logic": {
+    "24h_window": "Between 24h and 23h before meeting",
+    "1h_window": "Between 60min and 45min before meeting", 
+    "10min_window": "Between 10min and 0min before meeting",
+    "prevents_spam": "Each window is checked once per 15min cycle"
+  }
+}

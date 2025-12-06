@@ -1,0 +1,256 @@
+{
+  "name": "REA - 30-Day Timeout Check",
+  "description": "Daily check for leads imported 30+ days ago who are still in 'Never Responded' group. Moves them to 'Lost - No Response' status and adds to event invite list.",
+  "trigger": "Scheduled - Daily at 9 AM",
+  "board_id": "18391158354",
+  "flow": [
+    {
+      "id": 1,
+      "module": "builtin:BasicScheduler",
+      "version": 1,
+      "parameters": {
+        "schedule": {
+          "type": "daily",
+          "time": "09:00"
+        }
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Run daily at 9 AM CT"
+    },
+    {
+      "id": 2,
+      "module": "monday:searchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "18391158354",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "color_mkybxbyk",
+              "compare_value": [5, 1],
+              "operator": "any_of"
+            },
+            {
+              "column_id": "date_mkybk1hp",
+              "compare_value": {
+                "to": "{{formatDate(addDays(now; -30); 'YYYY-MM-DD')}}"
+              },
+              "operator": "lesser_than_or_equal"
+            }
+          ],
+          "operator": "and"
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Find leads with status 'New Lead' or 'In Workflow' AND import date 30+ days ago"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "label": "Found Expired Leads",
+          "flow": [
+            {
+              "id": 4,
+              "module": "builtin:BasicIterator",
+              "version": 1,
+              "parameters": {},
+              "mapper": {
+                "array": "{{2.items}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 0
+                }
+              },
+              "note": "Iterate through expired leads"
+            },
+            {
+              "id": 5,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{4.id}}",
+                "columnId": "color_mkybxbyk",
+                "value": "{\"label\":\"Lost - No Response\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0
+                }
+              },
+              "note": "Set status to Lost - No Response"
+            },
+            {
+              "id": 6,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "18391158354",
+                "itemId": "{{4.id}}",
+                "columnId": "boolean_mkybat8",
+                "value": "{\"checked\":\"true\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 0
+                }
+              },
+              "note": "Check 'Add to Event List' for future event invites"
+            },
+            {
+              "id": 7,
+              "module": "monday:createUpdate",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{4.id}}",
+                "body": ":hourglass: **30-Day Timeout - Marked as Lost**\n\n**Reason:** No response after 30 days in workflow\n**Date:** {{formatDate(now; 'MMM D, YYYY')}}\n\n---\n\n**Status:** Added to Event Invite List for future outreach opportunities."
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 0
+                }
+              },
+              "note": "Add note explaining timeout"
+            }
+          ],
+          "filter": {
+            "name": "Has expired leads",
+            "conditions": [
+              [
+                {
+                  "a": "{{length(2.items)}}",
+                  "b": "0",
+                  "o": "number:greater"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "module": "builtin:BasicAggregator",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "array": "{{2.items}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 2100,
+          "y": 0
+        }
+      },
+      "note": "Aggregate results for summary"
+    },
+    {
+      "id": 9,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 2400,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "label": "Had Timeouts - Notify Rea",
+          "flow": [
+            {
+              "id": 10,
+              "module": "slack:postMessage",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "channel": "REA_SLACK_CHANNEL_OR_DM",
+                "text": ":hourglass: *Daily Timeout Report*\n\n*{{length(2.items)}} leads* moved to 'Lost - No Response' after 30 days.\n\nThey've been added to the Event Invite List for future outreach.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354|View Board>"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 0
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "Had at least one timeout",
+            "conditions": [
+              [
+                {
+                  "a": "{{length(2.items)}}",
+                  "b": "0",
+                  "o": "number:greater"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Configure Monday connection",
+    "step_2": "Replace REA_SLACK_CHANNEL_OR_DM with Rea's Slack channel",
+    "step_3": "Adjust schedule time if needed (default 9 AM)",
+    "step_4": "Test by temporarily setting a lead's import date to 31 days ago",
+    "step_5": "Activate scenario"
+  },
+  "status_index_reference": {
+    "5": "New Lead",
+    "1": "In Workflow",
+    "9": "Lost - No Response"
+  }
+}

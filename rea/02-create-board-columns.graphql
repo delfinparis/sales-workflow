@@ -1,0 +1,354 @@
+# Rea's Newly Licensed Board - Column Creation
+# Run these mutations in Monday.com API Playground: https://monday.com/developers/v2/try-it-yourself
+
+# STEP 1: First create the board (run this first, note the board ID returned)
+mutation CreateNewlyLicensedBoard {
+  create_board(
+    board_name: "Newly Licensed Leads"
+    board_kind: public
+    workspace_id: YOUR_WORKSPACE_ID  # Replace with your workspace ID
+  ) {
+    id
+    name
+  }
+}
+
+# ============================================
+# STEP 2: Create all columns (replace BOARD_ID with the ID from Step 1)
+# ============================================
+
+# --- Lead Info Columns ---
+
+mutation CreateFirstNameColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "First Name"
+    column_type: text
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateLastNameColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Last Name"
+    column_type: text
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateEmailColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Email"
+    column_type: email
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreatePhoneColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Phone"
+    column_type: phone
+  ) {
+    id
+    title
+  }
+}
+
+# --- Status Column with all statuses ---
+# Note: Status column is created by default as "Status"
+# You'll need to configure the labels manually in Monday.com UI or use this mutation:
+
+mutation CreateLeadStatusColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Lead Status"
+    column_type: status
+    defaults: {
+      labels: {
+        0: {color: "#c4c4c4", label: "New Lead"},
+        1: {color: "#0086c0", label: "In Workflow"},
+        2: {color: "#a25ddc", label: "Replied"},
+        3: {color: "#fdab3d", label: "Attempting Contact"},
+        4: {color: "#00c875", label: "Appointment Scheduled"},
+        5: {color: "#037f4c", label: "Completed Appointment"},
+        6: {color: "#e2445c", label: "No Show"},
+        7: {color: "#ffcb00", label: "Rescheduling"},
+        8: {color: "#7f5347", label: "Chose Another Firm"},
+        9: {color: "#757575", label: "Lost - No Response"},
+        10: {color: "#333333", label: "Do Not Contact"},
+        11: {color: "#00c875", label: "Won"}
+      }
+    }
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateLeadSourceColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Lead Source"
+    column_type: dropdown
+    defaults: {
+      labels: [
+        {name: "AMP Passer List"}
+      ]
+    }
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateLeadOwnerColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Lead Owner"
+    column_type: people
+  ) {
+    id
+    title
+  }
+}
+
+# --- Workflow Tracking Columns ---
+
+mutation CreateImportDateColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Import Date"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateLastContactDateColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Last Contact Date"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateLastResponseDateColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Last Response Date"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateCallAttemptCountColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Call Attempt Count"
+    column_type: numbers
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateWorkflowStatusColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Workflow Status"
+    column_type: dropdown
+    defaults: {
+      labels: [
+        {name: "In Workflow"},
+        {name: "Stopped"},
+        {name: "Complete"}
+      ]
+    }
+  ) {
+    id
+    title
+  }
+}
+
+# --- Appointment Columns ---
+
+mutation CreateAppointmentDateColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Appointment Date"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateAppointmentURLColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Appointment URL"
+    column_type: link
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateNoShowCountColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "No Show Count"
+    column_type: numbers
+  ) {
+    id
+    title
+  }
+}
+
+# --- Special Handling Columns ---
+
+mutation CreateDoNotContactColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Do Not Contact"
+    column_type: checkbox
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateHibernationUntilColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Hibernation Until"
+    column_type: date
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateChoseFirmColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Chose Firm"
+    column_type: text
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateAddToEventListColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Add to Event List"
+    column_type: checkbox
+  ) {
+    id
+    title
+  }
+}
+
+# --- Notes Columns ---
+
+mutation CreateNotesColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Notes"
+    column_type: long_text
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateCurrentTasksColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Current Tasks"
+    column_type: long_text
+  ) {
+    id
+    title
+  }
+}
+
+# --- Close CRM Integration Column ---
+
+mutation CreateCloseCRMIdColumn {
+  create_column(
+    board_id: BOARD_ID
+    title: "Close CRM Lead ID"
+    column_type: text
+  ) {
+    id
+    title
+  }
+}
+
+# ============================================
+# STEP 3: Create Groups
+# ============================================
+
+mutation CreateNeverRespondedGroup {
+  create_group(
+    board_id: BOARD_ID
+    group_name: "Never Responded"
+    group_color: "#c4c4c4"
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateRespondedGroup {
+  create_group(
+    board_id: BOARD_ID
+    group_name: "Responded"
+    group_color: "#a25ddc"
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateScheduledAppointmentsGroup {
+  create_group(
+    board_id: BOARD_ID
+    group_name: "Scheduled Appointments"
+    group_color: "#00c875"
+  ) {
+    id
+    title
+  }
+}
+
+mutation CreateDisappearedGroup {
+  create_group(
+    board_id: BOARD_ID
+    group_name: "Initially Responded, Then Disappeared"
+    group_color: "#fdab3d"
+  ) {
+    id
+    title
+  }
+}
+
+# You may want to delete the default "New Group" that Monday creates

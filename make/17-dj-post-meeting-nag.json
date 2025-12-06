@@ -1,0 +1,129 @@
+{
+  "name": "DJ Post-Meeting Processing Nag",
+  "description": "Nags DJ to fill in meeting fields within 24 hours of meeting completion. Also runs daily 5pm reminder.",
+  "scenarios": [
+    {
+      "name": "Scenario A: 24-Hour Nag",
+      "trigger": "Scheduled - Every hour",
+      "description": "Checks for DJ Meeting Complete leads where meeting was 24+ hours ago and fields are empty"
+    },
+    {
+      "name": "Scenario B: Daily 5pm Summary",
+      "trigger": "Scheduled - Daily at 5:00 PM",
+      "description": "Summarizes all incomplete meeting processing"
+    }
+  ],
+  "flow_scenario_a": [
+    {
+      "id": 1,
+      "module": "monday:searchItems",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "status",
+              "compare_value": ["DJ Meeting Complete"]
+            }
+          ]
+        }
+      },
+      "note": "Find all DJ Meeting Complete leads"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicIterator",
+      "mapper": {
+        "array": "{{1.items}}"
+      }
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicFilter",
+      "filter": {
+        "name": "Meeting Outcome is empty AND status changed 24+ hours ago",
+        "conditions": [
+          [
+            {
+              "a": "{{2.column_values.meeting_outcome.text}}",
+              "b": "",
+              "o": "text:equal"
+            },
+            {
+              "a": "{{2.updated_at}}",
+              "b": "{{addHours(now; -24)}}",
+              "o": "date:before"
+            }
+          ]
+        ]
+      },
+      "note": "Filter to only those needing processing for 24+ hours"
+    },
+    {
+      "id": 4,
+      "module": "slack:postMessage",
+      "mapper": {
+        "channel": "DJ_SLACK_DM_OR_CHANNEL",
+        "text": "⏰ *Meeting Processing Overdue - 24+ Hours*\n\n*{{2.name}}* had a meeting and needs processing:\n\n*Missing fields:*\n{{if(equals(2.column_values.meeting_outcome.text; ''); '• Meeting Outcome\n'; '')}}{{if(equals(2.column_values.current_brokerage.text; ''); '• Current Brokerage\n'; '')}}{{if(equals(2.column_values.why_considering_change.text; ''); '• Why Considering Change\n'; '')}}{{if(equals(2.column_values.timeline.text; ''); '• Timeline\n'; '')}}\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{2.id}}|Open in Monday>\n\n⚠️ Don't let this lead fall through the cracks!"
+      }
+    }
+  ],
+  "flow_scenario_b": [
+    {
+      "id": 1,
+      "module": "monday:searchItems",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "status",
+              "compare_value": ["DJ Meeting Complete", "Offer Extended"]
+            }
+          ]
+        }
+      },
+      "note": "Find all leads in DJ's processing/follow-up statuses"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicAggregator",
+      "mapper": {
+        "filter": {
+          "conditions": [
+            [
+              {
+                "a": "{{1.items[].column_values.meeting_outcome.text}}",
+                "b": "",
+                "o": "text:equal"
+              }
+            ]
+          ]
+        }
+      },
+      "note": "Count leads missing Meeting Outcome"
+    },
+    {
+      "id": 3,
+      "module": "slack:postMessage",
+      "mapper": {
+        "channel": "DJ_SLACK_DM_OR_CHANNEL",
+        "text": "📊 *Daily 5pm Meeting Check*\n\n*Needs Processing:* {{length(filter(1.items; 'item'; equals(item.column_values.meeting_outcome.text; '')))}} leads\n\n*In Offer Extended:* {{length(filter(1.items; 'item'; equals(item.column_values.status.text; 'Offer Extended')))}} leads\n\n{{if(length(filter(1.items; 'item'; equals(item.column_values.meeting_outcome.text; ''))) > 0; '⚠️ Complete meeting processing before EOD!'; '✅ All meetings processed!')}}\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID|Open Board>"
+      }
+    }
+  ],
+  "setup_instructions": {
+    "step_1": "Import Scenario A (hourly check)",
+    "step_2": "Import Scenario B (daily 5pm)",
+    "step_3": "Replace YOUR_BOARD_ID and YOUR_MONDAY_URL",
+    "step_4": "Set DJ_SLACK_DM_OR_CHANNEL",
+    "step_5": "Test Scenario A by creating a DJ Meeting Complete lead with empty fields",
+    "step_6": "Activate both scenarios"
+  },
+  "fields_checked": [
+    "Meeting Outcome",
+    "Current Brokerage", 
+    "Why Considering Change",
+    "Timeline"
+  ]
+}

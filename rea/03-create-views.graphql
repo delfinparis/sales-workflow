@@ -1,0 +1,199 @@
+# Rea's Newly Licensed Board - Views Creation
+# Run these in Monday.com API Playground after creating the board and columns
+# Replace BOARD_ID with your actual board ID
+
+# ============================================
+# REA'S VIEWS
+# ============================================
+
+# View 1: My Day (Daily priority queue)
+# Filter: Status = "Replied" OR "Attempting Contact" OR "Rescheduling"
+# Sort: Last Response Date (newest first)
+mutation CreateMyDayView {
+  create_view_table(
+    board_id: BOARD_ID
+    name: "🟠 Rea's Day"
+    filter: {
+      operator: or
+      rules: [
+        { column_id: "status", compare_value: [2], operator: any_of },
+        { column_id: "status", compare_value: [3], operator: any_of },
+        { column_id: "status", compare_value: [7], operator: any_of }
+      ]
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# View 2: Never Responded (Week 3 calling list)
+# Filter: Group = "Never Responded"
+# Sort: Import Date (oldest first)
+# Note: Group filtering may need to be done manually in Monday UI
+mutation CreateNeverRespondedView {
+  create_view_table(
+    board_id: BOARD_ID
+    name: "Rea - Never Responded"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [0, 1], operator: any_of }
+      ]
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# View 3: Scheduled Appointments
+# Filter: Status = "Appointment Scheduled"
+# Sort: Appointment Date (soonest first)
+mutation CreateScheduledView {
+  create_view_table(
+    board_id: BOARD_ID
+    name: "Rea - Scheduled Appointments"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [4], operator: any_of }
+      ]
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# View 4: No Shows (Needs reschedule)
+# Filter: Status = "No Show"
+# Sort: Appointment Date (newest first)
+mutation CreateNoShowsView {
+  create_view_table(
+    board_id: BOARD_ID
+    name: "Rea - No Shows"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [6], operator: any_of }
+      ]
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# View 5: Initially Responded Then Disappeared (Re-engagement)
+# Filter: Status in group "Initially Responded, Then Disappeared"
+# Sort: Last Response Date (oldest first)
+mutation CreateDisappearedView {
+  create_view_table(
+    board_id: BOARD_ID
+    name: "Rea - Disappeared"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [3], operator: any_of }
+      ]
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# View 6: Chose Another Firm (90-day check-ins)
+# Filter: Status = "Chose Another Firm"
+# Sort: Hibernation Until (soonest first)
+mutation CreateChoseAnotherFirmView {
+  create_view_table(
+    board_id: BOARD_ID
+    name: "Rea - Chose Another Firm"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [8], operator: any_of }
+      ]
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# View 7: Do Not Contact (Reference only)
+# Filter: Status = "Do Not Contact"
+# Sort: Name (A-Z)
+mutation CreateDoNotContactView {
+  create_view_table(
+    board_id: BOARD_ID
+    name: "Rea - Do Not Contact"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [10], operator: any_of }
+      ]
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# View 8: Lost Leads (Event invite list)
+# Filter: Status = "Lost - No Response"
+# Sort: Import Date (newest first)
+mutation CreateLostLeadsView {
+  create_view_table(
+    board_id: BOARD_ID
+    name: "Rea - Lost Leads"
+    filter: {
+      operator: and
+      rules: [
+        { column_id: "status", compare_value: [9], operator: any_of }
+      ]
+    }
+  ) {
+    id
+    name
+  }
+}
+
+# ============================================
+# MANUAL CONFIGURATION NEEDED
+# ============================================
+# After creating views via API, manually configure in Monday.com UI:
+#
+# 1. Rea's Day:
+#    - Sort by: Last Response Date (descending/newest)
+#    - Show columns: Name, Phone, Lead Status, Last Response Date, Notes
+#
+# 2. Never Responded:
+#    - Sort by: Import Date (ascending/oldest)
+#    - Filter by Group: "Never Responded" (may need manual setup)
+#
+# 3. Scheduled Appointments:
+#    - Sort by: Appointment Date (ascending/soonest)
+#    - Show columns: Name, Phone, Appointment Date, Appointment URL
+#
+# 4. No Shows:
+#    - Sort by: Appointment Date (descending/newest)
+#    - Show columns: Name, Phone, No Show Count, Notes
+#
+# 5. Disappeared:
+#    - Sort by: Last Response Date (ascending/oldest)
+#    - Filter by Group: "Initially Responded, Then Disappeared"
+#
+# 6. Chose Another Firm:
+#    - Sort by: Hibernation Until (ascending/soonest)
+#    - Show columns: Name, Chose Firm, Hibernation Until
+#
+# 7. Do Not Contact:
+#    - Sort by: Name (A-Z)
+#    - READ ONLY - never contact these people
+#
+# 8. Lost Leads:
+#    - Sort by: Import Date (descending/newest)
+#    - Show columns: Name, Email, Add to Event List

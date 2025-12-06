@@ -1,0 +1,178 @@
+{
+  "name": "Offer Extended Setup",
+  "description": "When status changes to Offer Extended, sets Offer Date, resets follow-up checkboxes, and prompts DJ.",
+  "trigger": "Monday status change to Offer Extended",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:watchColumnsChange",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "status"
+      },
+      "note": "Watch for status changes"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "filter": {
+        "name": "Status is Offer Extended",
+        "conditions": [
+          [
+            {
+              "a": "{{1.value.label.text}}",
+              "b": "Offer Extended",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "offer_date",
+        "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
+      },
+      "note": "Set Offer Date to today"
+    },
+    {
+      "id": 4,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "day_3_followup_done",
+        "value": "{\"checked\":\"false\"}"
+      },
+      "note": "Reset Day 3 checkbox"
+    },
+    {
+      "id": 5,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "day_7_followup_done",
+        "value": "{\"checked\":\"false\"}"
+      },
+      "note": "Reset Day 7 checkbox"
+    },
+    {
+      "id": 6,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "day_14_followup_done",
+        "value": "{\"checked\":\"false\"}"
+      },
+      "note": "Reset Day 14 checkbox"
+    },
+    {
+      "id": 7,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "day_21_followup_done",
+        "value": "{\"checked\":\"false\"}"
+      },
+      "note": "Reset Day 21 checkbox"
+    },
+    {
+      "id": 8,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "current_tasks",
+        "value": "\"📋 **OFFER EXTENDED - FOLLOW-UP CADENCE**\\n\\n**Day 3:** Quick check-in, surface objections\\n• \\\"Have you had a chance to look over the details?\\\"\\n• \\\"Any questions I can answer?\\\"\\n\\n**Day 7:** Add value (don't just check in)\\n• Share relevant insight/content\\n• Invite to event\\n• Offer agent reference call\\n\\n**Day 14:** Direct conversation\\n• \\\"Where are you at in your thinking?\\\"\\n• \\\"Is there something holding you back?\\\"\\n\\n**Day 21:** Create urgency\\n• Reference timing/onboarding\\n• Address specific objections\\n\\n**Day 30:** Decision time\\n• Close, nurture, or hibernate\\n\\n**Remember:** System will remind you. Check boxes as you complete each follow-up.\""
+      },
+      "note": "Populate follow-up cadence guide"
+    },
+    {
+      "id": 9,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "next_action",
+        "value": "\"Day 3 follow-up call\""
+      },
+      "note": "Set next action"
+    },
+    {
+      "id": 10,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "next_action_date",
+        "value": "{\"date\":\"{{formatDate(addDays(now; 3); 'YYYY-MM-DD')}}\"}"
+      },
+      "note": "Set next action date to Day 3"
+    },
+    {
+      "id": 11,
+      "module": "monday:createUpdate",
+      "mapper": {
+        "itemId": "{{1.itemId}}",
+        "body": "🎯 **Offer Extended**\n\nOffer Date: {{formatDate(now; 'MMM D, YYYY')}}\n\nFollow-up cadence started:\n• Day 3 ({{formatDate(addDays(now; 3); 'MMM D')}}): Check-in call\n• Day 7 ({{formatDate(addDays(now; 7); 'MMM D')}}): Add value\n• Day 14 ({{formatDate(addDays(now; 14); 'MMM D')}}): Decision conversation\n• Day 21 ({{formatDate(addDays(now; 21); 'MMM D')}}): Create urgency\n• Day 30 ({{formatDate(addDays(now; 30); 'MMM D')}}): Final decision\n\nCheck boxes as you complete each follow-up!"
+      }
+    },
+    {
+      "id": 12,
+      "module": "slack:postMessage",
+      "mapper": {
+        "channel": "DJ_SLACK_DM_OR_CHANNEL",
+        "text": "🎯 *Offer Extended to {{1.itemName}}*\n\nFollow-up cadence started. First check-in: *{{formatDate(addDays(now; 3); 'MMM D')}}* (Day 3)\n\nI'll remind you at each milestone. Good luck! 🍀"
+      }
+    },
+    {
+      "id": 13,
+      "module": "monday:getItem",
+      "mapper": {
+        "itemId": "{{1.itemId}}"
+      },
+      "note": "Get lead details for Facebook prompt"
+    },
+    {
+      "id": 14,
+      "module": "builtin:BasicFilter",
+      "filter": {
+        "name": "Not yet Facebook connected",
+        "conditions": [
+          [
+            {
+              "a": "{{13.column_values.facebook_connected.checked}}",
+              "b": "false",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "flow": [
+        {
+          "id": 15,
+          "module": "slack:postMessage",
+          "mapper": {
+            "channel": "DJ_SLACK_DM_OR_CHANNEL",
+            "text": "💡 *Tip:* Consider connecting with *{{1.itemName}}* on Facebook. Social intel can help with personalized follow-ups!\n\nCheck the *Facebook Connected* box in Monday once done."
+          }
+        }
+      ]
+    }
+  ],
+  "setup_instructions": {
+    "step_1": "Import into Make.com",
+    "step_2": "Replace YOUR_BOARD_ID",
+    "step_3": "Set DJ_SLACK_DM_OR_CHANNEL",
+    "step_4": "Verify all column IDs match your board",
+    "step_5": "Test by changing a lead's status to 'Offer Extended'",
+    "step_6": "Activate scenario"
+  }
+}

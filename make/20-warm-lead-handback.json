@@ -1,0 +1,95 @@
+{
+  "name": "Warm Lead Handback to Ana",
+  "description": "When DJ marks Meeting Outcome as Warm, automatically transitions lead to Nurture status and assigns to Ana.",
+  "trigger": "Monday column change - Meeting Outcome",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:watchColumnsChange",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "meeting_outcome"
+      },
+      "note": "Watch for Meeting Outcome changes"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "filter": {
+        "name": "Meeting Outcome is Warm",
+        "conditions": [
+          [
+            {
+              "a": "{{1.value.label.text}}",
+              "b": "Warm - Needs Follow-up",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "status",
+        "value": "{\"label\":\"Nurture (Post-Meeting)\"}"
+      },
+      "note": "Change status to Nurture"
+    },
+    {
+      "id": 4,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "assigned_to",
+        "value": "{\"personsAndTeams\":[{\"id\":ANA_USER_ID,\"kind\":\"person\"}]}"
+      },
+      "note": "Assign to Ana"
+    },
+    {
+      "id": 5,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "current_tasks",
+        "value": "\"📋 **NURTURE TASKS (Post-Meeting)**\\n\\nThis lead met with DJ but isn't ready yet. Your goal: become their friend.\\n\\n**Context from DJ meeting:**\\n• Timeline: Check Timeline field\\n• Objections: Check Objections field\\n• Their goals: Check Business Goals field\\n\\n**Nurture Activities:**\\n☐ Casual check-in (not about brokerage)\\n☐ Invite to Thursday training\\n☐ Share relevant content/articles\\n☐ Watch for life updates (Social Intel)\\n☐ Be a resource, not a salesperson\\n\\n**Signs they're warming up:**\\n• Asking questions about Kale\\n• Mentioning frustrations with current brokerage\\n• Engaging more frequently\\n• Life circumstances changing\\n\\n**When ready:** Flag for DJ for another meeting\""
+      },
+      "note": "Populate nurture prompts"
+    },
+    {
+      "id": 6,
+      "module": "monday:createUpdate",
+      "mapper": {
+        "itemId": "{{1.itemId}}",
+        "body": "🔄 **Handed Back to Ana for Nurture**\n\nMeeting Outcome: Warm - Needs Follow-up\n\nDJ's notes: Check AI Meeting Notes and Objections fields.\n\nGoal: Build friendship, stay in touch, watch for signs they're ready for another conversation."
+      }
+    },
+    {
+      "id": 7,
+      "module": "slack:postMessage",
+      "mapper": {
+        "channel": "ANA_SLACK_DM_OR_CHANNEL",
+        "text": "🔄 *Warm Lead Handed Back to You*\n\n*{{1.itemName}}* met with DJ - outcome: *Warm*\n\nThey're not ready yet, but interested. Your job: nurture the relationship.\n\n*Check these fields:*\n• Timeline: When might they be ready?\n• Objections: What's holding them back?\n• Business Goals: What do they want?\n\n*Suggested actions:*\n• Casual check-in\n• Invite to events\n• Be a friend, not a salesperson\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{1.itemId}}|Open in Monday>"
+      }
+    }
+  ],
+  "setup_instructions": {
+    "step_1": "Import into Make.com",
+    "step_2": "Replace YOUR_BOARD_ID and YOUR_MONDAY_URL",
+    "step_3": "Replace ANA_USER_ID with Ana's Monday user ID",
+    "step_4": "Set ANA_SLACK_DM_OR_CHANNEL",
+    "step_5": "Test by changing a lead's Meeting Outcome to 'Warm - Needs Follow-up'",
+    "step_6": "Activate scenario"
+  },
+  "nurture_philosophy": {
+    "goal": "Build genuine friendship and trust",
+    "not_goal": "Keep selling or pushing",
+    "timeline": "Could be weeks to months",
+    "success_signal": "They reach out to Ana asking questions about Kale"
+  }
+}

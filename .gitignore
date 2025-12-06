@@ -1,0 +1,32 @@
+# API Keys and Credentials
+docs/API_CREDENTIALS.md
+
+# Progress files (regenerated on run)
+scripts/import_progress.json
+
+# Close CRM export data (contains PII and is large)
+scripts/close_export_*.json
+
+# Python scripts - TEMPORARILY EXCLUDED until API keys are removed
+# TODO: After sanitizing, remove this line and commit scripts
+scripts/*.py
+
+# Export data (large files)
+scripts/exports/
+*.csv
+
+# Python
+__pycache__/
+*.pyc
+.env
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.log

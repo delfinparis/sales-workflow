@@ -1,0 +1,327 @@
+{
+  "name": "Ana Current Tasks - Auto-Populate",
+  "description": "When a lead enters 'Replied - Awaiting Ana' status, automatically populate the 'Current Tasks' column with contextual reply options based on the Superlative Type (what Jennica originally congratulated them on).",
+  "purpose": "Gives Ana instant access to relevant response templates without referencing external docs. Suggestions appear right in the lead record.",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:watchColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "status"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Triggers when status changes"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "Status is Replied - Awaiting Ana",
+        "conditions": [
+          [
+            {
+              "a": "{{1.value.label.text}}",
+              "b": "Replied - Awaiting Ana",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "monday:getItem",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "itemId": "{{1.itemId}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Get full item details including Superlative Type"
+    },
+    {
+      "id": 4,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "current_tasks",
+                "value": "{\"text\":\"📋 NEW LISTING - Response Options:\\n\\n1️⃣ Listings are everything right now! Getting any action on it yet?\\n\\n2️⃣ YW - market's picking up! How was summer biz?\\n\\n3️⃣ Exciting! Working mostly with sellers these days?\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": -300
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "Superlative = New Listing",
+            "conditions": [
+              [
+                {
+                  "a": "{{3.column_values.superlative_type.text}}",
+                  "b": "New Listing",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 6,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "current_tasks",
+                "value": "{\"text\":\"📋 PENDING/UNDER CONTRACT - Response Options:\\n\\n1️⃣ Exciting! Any roadblocks on this one or smooth sailing?\\n\\n2️⃣ Awesome job! Working more buyers/sellers these days? (check Courted for list/buy side)\\n\\n3️⃣ YW - market's picking up! How was summer biz?\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": -150
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "Superlative = Pending/Under Contract",
+            "conditions": [
+              [
+                {
+                  "a": "{{3.column_values.superlative_type.text}}",
+                  "b": "Pending/Under Contract",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 7,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "current_tasks",
+                "value": "{\"text\":\"📋 CLOSED SALE - Response Options:\\n\\n1️⃣ YW - market's picking up! How was summer biz?\\n\\n2️⃣ Congrats again - working more buyers/sellers these days? (check Courted for list/buy side)\\n\\n3️⃣ Awesome - any roadblocks or was this one easy?\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 0
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "Superlative = Closed Sale",
+            "conditions": [
+              [
+                {
+                  "a": "{{3.column_values.superlative_type.text}}",
+                  "b": "Closed Sale",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 8,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "current_tasks",
+                "value": "{\"text\":\"📋 CLOSED RENTAL - Response Options:\\n\\n1️⃣ YW - market's picking up! How was summer biz?\\n\\n2️⃣ Do you think they could buy when lease up?\\n\\n3️⃣ Nice! How's rental market right now - competitive?\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 150
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "Superlative = Closed Rental",
+            "conditions": [
+              [
+                {
+                  "a": "{{3.column_values.superlative_type.text}}",
+                  "b": "Closed Rental",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 9,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "current_tasks",
+                "value": "{\"text\":\"📋 GENERAL - Response Options:\\n\\n1️⃣ YW - market's picking up! How was summer biz?\\n\\n2️⃣ Thanks for the reply! How long have you been in the business?\\n\\n3️⃣ Appreciate you! Anything exciting going on in your market right now?\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 300
+                }
+              }
+            }
+          ],
+          "filter": {
+            "name": "Superlative = Other/YoY Growth/Empty",
+            "conditions": [
+              [
+                {
+                  "a": "{{3.column_values.superlative_type.text}}",
+                  "b": "YoY Growth",
+                  "o": "text:equal"
+                }
+              ],
+              [
+                {
+                  "a": "{{3.column_values.superlative_type.text}}",
+                  "b": "Other",
+                  "o": "text:equal"
+                }
+              ],
+              [
+                {
+                  "a": "{{3.column_values.superlative_type.text}}",
+                  "b": "",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "response_library": {
+    "New Listing": [
+      "Listings are everything right now! Getting any action on it yet?",
+      "YW - market's picking up! How was summer biz?",
+      "Exciting! Working mostly with sellers these days?"
+    ],
+    "Pending/Under Contract": [
+      "Exciting! Any roadblocks on this one or smooth sailing?",
+      "Awesome job! Working more buyers/sellers these days? (check Courted for list/buy side)",
+      "YW - market's picking up! How was summer biz?"
+    ],
+    "Closed Sale": [
+      "YW - market's picking up! How was summer biz?",
+      "Congrats again - working more buyers/sellers these days? (check Courted for list/buy side)",
+      "Awesome - any roadblocks or was this one easy?"
+    ],
+    "Closed Rental": [
+      "YW - market's picking up! How was summer biz?",
+      "Do you think they could buy when lease up?",
+      "Nice! How's rental market right now - competitive?"
+    ],
+    "General/Other": [
+      "YW - market's picking up! How was summer biz?",
+      "Thanks for the reply! How long have you been in the business?",
+      "Appreciate you! Anything exciting going on in your market right now?"
+    ]
+  },
+  "setup_instructions": {
+    "step_1": "Import this blueprint into Make.com",
+    "step_2": "Replace YOUR_BOARD_ID with your actual Monday board ID",
+    "step_3": "Get column ID for 'Current Tasks' (long text) and 'Superlative Type' (dropdown)",
+    "step_4": "Update column IDs in the scenario if different from 'current_tasks' and 'superlative_type'",
+    "step_5": "Configure Monday.com connection",
+    "step_6": "Test: Create a lead with Superlative Type = 'New Listing', change status to 'Replied - Awaiting Ana'",
+    "step_7": "Verify Current Tasks column populates with New Listing options",
+    "step_8": "Test other Superlative Types",
+    "step_9": "Activate scenario"
+  },
+  "customization_notes": {
+    "updating_responses": "To change the suggested responses, edit the 'value' field in each router branch. Keep the JSON format with escaped newlines (\\n).",
+    "adding_superlative_types": "Add a new router branch with the appropriate filter and response text.",
+    "seasonal_updates": "The responses reference 'summer biz' - update seasonally if desired (e.g., 'holiday season', 'spring market')."
+  }
+}

@@ -1,0 +1,204 @@
+{
+  "name": "Bulk Event Invite Sender (Individual SMS)",
+  "description": "Processes leads queued for event invite and sends individual SMS via JustCall API to avoid bulk pricing.",
+  "trigger": "Scheduled - Every 15 minutes",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:searchItems",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "queue_for_event_invite",
+              "compare_value": true
+            }
+          ]
+        }
+      },
+      "note": "Find all leads queued for event invite"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "filter": {
+        "name": "Has queued leads",
+        "conditions": [
+          [
+            {
+              "a": "{{length(1.items)}}",
+              "b": "0",
+              "o": "number:greater"
+            }
+          ]
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicIterator",
+      "mapper": {
+        "array": "{{1.items}}"
+      },
+      "note": "Loop through each queued lead"
+    },
+    {
+      "id": 4,
+      "module": "builtin:BasicFilter",
+      "filter": {
+        "name": "Not invited in last 14 days",
+        "conditions": [
+          [
+            {
+              "a": "{{3.column_values.last_event_invite.date}}",
+              "b": "",
+              "o": "text:equal"
+            }
+          ],
+          [
+            {
+              "a": "{{parseDate(3.column_values.last_event_invite.date; 'YYYY-MM-DD')}}",
+              "b": "{{addDays(now; -14)}}",
+              "o": "date:before"
+            }
+          ]
+        ]
+      },
+      "note": "Skip if invited within last 14 days (prevents over-inviting)"
+    },
+    {
+      "id": 5,
+      "module": "http:ActionSendData",
+      "mapper": {
+        "url": "https://api.justcall.io/v1/texts/new",
+        "method": "POST",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer YOUR_JUSTCALL_API_KEY"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "from": "YOUR_JUSTCALL_PHONE_NUMBER",
+          "to": "{{3.column_values.phone.phone}}",
+          "body": "Hey {{3.name}}! Quick heads up - we've got a free training this Thursday on [TOPIC]. No pitch, just value. Want me to send the link? - Ana @ Kale"
+        }
+      },
+      "note": "Send individual SMS via JustCall API (not bulk endpoint)"
+    },
+    {
+      "id": 6,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{3.id}}",
+        "columnId": "queue_for_event_invite",
+        "value": "{\"checked\":\"false\"}"
+      },
+      "note": "Uncheck the queue checkbox"
+    },
+    {
+      "id": 7,
+      "module": "monday:changeColumnValue",
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{3.id}}",
+        "columnId": "last_event_invite",
+        "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
+      },
+      "note": "Set Last Event Invite to today"
+    },
+    {
+      "id": 8,
+      "module": "monday:createUpdate",
+      "mapper": {
+        "itemId": "{{3.id}}",
+        "body": "📅 **Event Invite Sent**\n\nInvited to Thursday training on {{formatDate(now; 'MMM D, YYYY')}}"
+      },
+      "note": "Log the invite in Updates"
+    },
+    {
+      "id": 9,
+      "module": "builtin:BasicFilter",
+      "filter": {
+        "name": "Was skipped due to recent invite",
+        "conditions": [
+          [
+            {
+              "a": "{{parseDate(3.column_values.last_event_invite.date; 'YYYY-MM-DD')}}",
+              "b": "{{addDays(now; -14)}}",
+              "o": "date:after"
+            }
+          ]
+        ]
+      },
+      "flow": [
+        {
+          "id": 10,
+          "module": "monday:changeColumnValue",
+          "mapper": {
+            "boardId": "YOUR_BOARD_ID",
+            "itemId": "{{3.id}}",
+            "columnId": "queue_for_event_invite",
+            "value": "{\"checked\":\"false\"}"
+          },
+          "note": "Uncheck anyway so they don't stay stuck in queue"
+        },
+        {
+          "id": 11,
+          "module": "slack:postMessage",
+          "mapper": {
+            "channel": "ANA_SLACK_DM_OR_CHANNEL",
+            "text": "⚠️ Skipped event invite for *{{3.name}}* - already invited {{floor(divide(subtract(now; parseDate(3.column_values.last_event_invite.date; 'YYYY-MM-DD')); 86400000))}} days ago. Wait until 14 days have passed."
+          }
+        }
+      ]
+    }
+  ],
+  "scheduling": {
+    "type": "recurring",
+    "interval": 15,
+    "unit": "minutes"
+  },
+  "setup_instructions": {
+    "step_1": "Import into Make.com",
+    "step_2": "Replace YOUR_BOARD_ID",
+    "step_3": "Get JustCall API key from JustCall dashboard → Settings → API",
+    "step_4": "Replace YOUR_JUSTCALL_API_KEY and YOUR_JUSTCALL_PHONE_NUMBER",
+    "step_5": "Set ANA_SLACK_DM_OR_CHANNEL for skip notifications",
+    "step_6": "Update the SMS body text with current event topic",
+    "step_7": "Test with one lead queued",
+    "step_8": "Activate scenario"
+  },
+  "sms_template_customization": {
+    "location": "Module 5 body",
+    "placeholders": {
+      "[TOPIC]": "Replace weekly with current training topic",
+      "{{3.name}}": "Auto-filled from Monday"
+    },
+    "example_topics": [
+      "listing presentations that actually win",
+      "using AI to write property descriptions",
+      "social media strategies that don't suck",
+      "handling objections like a pro"
+    ]
+  },
+  "safeguards": {
+    "14_day_cooldown": "Won't invite same person within 14 days",
+    "individual_sends": "Each SMS sent as individual message via API, not bulk campaign",
+    "logging": "Every invite logged in Monday Updates for audit trail",
+    "skip_notification": "Ana notified when someone is skipped due to recent invite"
+  },
+  "ana_workflow": {
+    "step_1": "Go to 'Event Invite Queue' view",
+    "step_2": "Check 'Queue for Event Invite' for desired leads",
+    "step_3": "Wait 15 minutes (or less)",
+    "step_4": "Scenario processes and sends individual SMS",
+    "step_5": "Check Updates to confirm sent"
+  }
+}

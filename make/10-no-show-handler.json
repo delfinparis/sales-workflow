@@ -1,0 +1,401 @@
+{
+  "name": "No Show Handler",
+  "description": "When DJ marks a lead as 'No Show' in Monday, this scenario checks the No Show Count and either (1) notifies Ana for follow-up on 1st no-show, or (2) auto-moves to Hibernation on 2nd no-show.",
+  "trigger": "DJ changes status to 'No Show' in Monday after marking no-show in Calendly",
+  "logic": {
+    "1st_no_show": "Increment count, notify Ana, set follow-up prompts",
+    "2nd_no_show": "Auto-move to Hibernation 90-Day (they're not ready)"
+  },
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:watchColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "status"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Triggers when status changes"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "Status is No Show",
+        "conditions": [
+          [
+            {
+              "a": "{{1.value.label.text}}",
+              "b": "No Show",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "monday:getItem",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "itemId": "{{1.itemId}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Get current No Show Count"
+    },
+    {
+      "id": 4,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "status",
+                "value": "{\"label\":\"Hibernation 90-Day\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": -150
+                }
+              },
+              "note": "2nd no-show → Auto-hibernate"
+            },
+            {
+              "id": 6,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "no_show_count",
+                "value": "2"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": -150
+                }
+              },
+              "note": "Set count to 2"
+            },
+            {
+              "id": 7,
+              "module": "monday:createUpdate",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{1.itemId}}",
+                "body": "❄️ **Auto-Hibernated: 2nd No-Show**\n\nThis lead has no-showed twice. They're not ready.\n\nMoving to 90-day hibernation. Will return to pool after cooling off."
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": -150
+                }
+              }
+            },
+            {
+              "id": 8,
+              "module": "slack:postMessage",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "channel": "YOUR_SLACK_CHANNEL",
+                "text": "❄️ *Auto-Hibernated: {{1.itemName}}*\n\n2nd no-show. Moving to 90-day hibernation."
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": -150
+                }
+              },
+              "note": "Optional: Notify team"
+            }
+          ],
+          "filter": {
+            "name": "2nd No Show (count >= 1)",
+            "conditions": [
+              [
+                {
+                  "a": "{{3.column_values.no_show_count.value}}",
+                  "b": "1",
+                  "o": "number:greaterequal"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 9,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "no_show_count",
+                "value": "1"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1200,
+                  "y": 100
+                }
+              },
+              "note": "Set No Show Count to 1"
+            },
+            {
+              "id": 10,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "assigned_to",
+                "value": "{\"personsAndTeams\":[{\"id\":ANA_USER_ID,\"kind\":\"person\"}]}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1500,
+                  "y": 100
+                }
+              },
+              "note": "Assign to Ana for follow-up"
+            },
+            {
+              "id": 11,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "current_tasks",
+                "value": "{\"text\":\"📋 NO SHOW FOLLOW-UP:\\n\\n🎯 REACH OUT TO RESCHEDULE:\\n\\n\\\"Hey [Name]! We missed you earlier - hope everything's okay. Want to find another time that works better?\\\"\\n\\n\\\"Hey! No worries about today. Let me know when you're free and we can reschedule.\\\"\\n\\n⚠️ IMPORTANT:\\n• Be friendly, not guilt-trippy\\n• Stuff happens - assume good intent\\n• If they reschedule → back to Meeting Scheduled\\n• If they ghost → wait 3 days, try once more, then Hibernation\\n\\n⏰ Next Action: Follow up within 24 hours\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 1800,
+                  "y": 100
+                }
+              },
+              "note": "Set follow-up suggestions for Ana"
+            },
+            {
+              "id": 12,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "next_action",
+                "value": "Follow up on no-show - reach out to reschedule"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2100,
+                  "y": 100
+                }
+              }
+            },
+            {
+              "id": 13,
+              "module": "monday:changeColumnValue",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemId": "{{1.itemId}}",
+                "columnId": "next_action_date",
+                "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2400,
+                  "y": 100
+                }
+              },
+              "note": "Set Next Action Date to today"
+            },
+            {
+              "id": 14,
+              "module": "monday:createUpdate",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "itemId": "{{1.itemId}}",
+                "body": "⚠️ **No Show - 1st Occurrence**\n\nLead didn't show for scheduled meeting.\n\n**Ana:** Please reach out to reschedule. Be friendly - stuff happens!\n\nIf they no-show again, they'll be auto-hibernated."
+              },
+              "metadata": {
+                "designer": {
+                  "x": 2700,
+                  "y": 100
+                }
+              }
+            },
+            {
+              "id": 15,
+              "module": "slack:postMessage",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "channel": "YOUR_SLACK_CHANNEL_OR_ANA_DM",
+                "text": "⚠️ *No Show: {{1.itemName}}*\n\nThey missed their meeting with DJ. Please follow up to reschedule.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{1.itemId}}|Open in Monday>"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 3000,
+                  "y": 100
+                }
+              },
+              "note": "Notify Ana"
+            }
+          ],
+          "filter": {
+            "name": "1st No Show (count = 0 or empty)",
+            "conditions": [
+              [
+                {
+                  "a": "{{3.column_values.no_show_count.value}}",
+                  "b": "1",
+                  "o": "number:less"
+                }
+              ],
+              [
+                {
+                  "a": "{{3.column_values.no_show_count.value}}",
+                  "b": "",
+                  "o": "text:equal"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "current_tasks_text": {
+    "formatted": "📋 NO SHOW FOLLOW-UP:\n\n🎯 REACH OUT TO RESCHEDULE:\n\n\"Hey [Name]! We missed you earlier - hope everything's okay. Want to find another time that works better?\"\n\n\"Hey! No worries about today. Let me know when you're free and we can reschedule.\"\n\n⚠️ IMPORTANT:\n• Be friendly, not guilt-trippy\n• Stuff happens - assume good intent\n• If they reschedule → back to Meeting Scheduled\n• If they ghost → wait 3 days, try once more, then Hibernation\n\n⏰ Next Action: Follow up within 24 hours"
+  },
+  "setup_instructions": {
+    "step_1": "Import this blueprint into Make.com",
+    "step_2": "Replace YOUR_BOARD_ID with your actual Monday board ID",
+    "step_3": "Replace ANA_USER_ID with Ana's Monday user ID",
+    "step_4": "Update column IDs if different: 'no_show_count', 'current_tasks', 'next_action', 'next_action_date', 'assigned_to'",
+    "step_5": "Configure Slack connection (or remove Slack modules if not using)",
+    "step_6": "Configure Monday.com connection",
+    "step_7": "Test: Create a lead, set status to 'Meeting Scheduled', then change to 'No Show'",
+    "step_8": "Verify: No Show Count = 1, Ana assigned, suggestions populated, Slack notification",
+    "step_9": "Test 2nd no-show: Change status back to 'Meeting Scheduled', then 'No Show' again",
+    "step_10": "Verify: Auto-moved to 'Hibernation 90-Day', count = 2",
+    "step_11": "Activate scenario"
+  },
+  "dj_workflow": {
+    "steps": [
+      "1. Meeting time arrives, lead doesn't show",
+      "2. DJ waits ~15 min (reasonable grace period)",
+      "3. DJ marks as no-show in Calendly (stops Calendly's native workflows)",
+      "4. DJ changes Monday status: Meeting Scheduled → No Show",
+      "5. Automation handles the rest (Ana notified, count tracked, etc.)"
+    ]
+  },
+  "ana_follow_up_workflow": {
+    "1st_no_show": [
+      "1. Ana gets Slack notification",
+      "2. Ana reaches out same day: 'Hey, we missed you! Want to reschedule?'",
+      "3. If they respond → reschedule → status back to Meeting Scheduled",
+      "4. If no response after 3 days → one more attempt",
+      "5. If still no response → manually move to Hibernation"
+    ],
+    "2nd_no_show": [
+      "Automatic - no Ana action needed",
+      "Lead goes straight to Hibernation 90-Day",
+      "They'll return to pool in 90 days for fresh start"
+    ]
+  },
+  "status_transitions": {
+    "after_1st_no_show": {
+      "reschedule": "No Show → Meeting Scheduled (keep No Show Count at 1)",
+      "ghost": "No Show → Hibernation 90-Day (manual after failed follow-up)"
+    },
+    "after_2nd_no_show": {
+      "automatic": "No Show → Hibernation 90-Day (instant, no follow-up)"
+    }
+  }
+}

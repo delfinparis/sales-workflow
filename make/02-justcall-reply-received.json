@@ -1,0 +1,415 @@
+{
+  "name": "JustCall Reply Received → Monday + Notify Ana",
+  "description": "When a lead replies via SMS, update Monday status to 'Replied - Awaiting Ana', assign Ana, and send notification.",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": null,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        },
+        "restore": {
+          "parameters": {
+            "hook": {
+              "label": "JustCall SMS Received Webhook"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook:gateway-webhook",
+            "label": "Webhook",
+            "required": true
+          }
+        ],
+        "interface": [
+          {
+            "name": "from",
+            "type": "text",
+            "label": "From Phone Number (lead)"
+          },
+          {
+            "name": "to",
+            "type": "text",
+            "label": "To Phone Number (our number)"
+          },
+          {
+            "name": "body",
+            "type": "text",
+            "label": "Message Body"
+          },
+          {
+            "name": "direction",
+            "type": "text",
+            "label": "Direction"
+          },
+          {
+            "name": "timestamp",
+            "type": "text",
+            "label": "Timestamp"
+          }
+        ]
+      },
+      "note": "Receives webhook from JustCall when inbound SMS is received"
+    },
+    {
+      "id": 2,
+      "module": "monday:searchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "phone",
+        "value": "{{1.from}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Find the lead in Monday by their phone number"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicRouter",
+      "version": 1,
+      "mapper": null,
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 4,
+              "module": "builtin:BasicRouter",
+              "version": 1,
+              "mapper": null,
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": -150
+                }
+              },
+              "routes": [
+                {
+                  "flow": [
+                    {
+                      "id": 5,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "YOUR_BOARD_ID",
+                        "itemId": "{{2.id}}",
+                        "columnId": "status",
+                        "value": "{\"label\":\"Dead - Negative Reply\"}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1200,
+                          "y": -300
+                        }
+                      },
+                      "note": "Negative reply detected - mark as Dead"
+                    }
+                  ],
+                  "filter": {
+                    "name": "Negative reply detected",
+                    "conditions": [
+                      [
+                        {
+                          "a": "{{lower(1.body)}}",
+                          "b": "stop",
+                          "o": "text:contain"
+                        }
+                      ],
+                      [
+                        {
+                          "a": "{{lower(1.body)}}",
+                          "b": "unsubscribe",
+                          "o": "text:contain"
+                        }
+                      ],
+                      [
+                        {
+                          "a": "{{lower(1.body)}}",
+                          "b": "leave me alone",
+                          "o": "text:contain"
+                        }
+                      ],
+                      [
+                        {
+                          "a": "{{lower(1.body)}}",
+                          "b": "not interested",
+                          "o": "text:contain"
+                        }
+                      ],
+                      [
+                        {
+                          "a": "{{lower(1.body)}}",
+                          "b": "remove me",
+                          "o": "text:contain"
+                        }
+                      ],
+                      [
+                        {
+                          "a": "{{lower(1.body)}}",
+                          "b": "don't text",
+                          "o": "text:contain"
+                        }
+                      ],
+                      [
+                        {
+                          "a": "{{lower(1.body)}}",
+                          "b": "fuck off",
+                          "o": "text:contain"
+                        }
+                      ]
+                    ]
+                  }
+                },
+                {
+                  "flow": [
+                    {
+                      "id": 6,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "YOUR_BOARD_ID",
+                        "itemId": "{{2.id}}",
+                        "columnId": "status",
+                        "value": "{\"label\":\"Replied - Awaiting Ana\"}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1200,
+                          "y": -100
+                        }
+                      },
+                      "note": "Update status to Replied - Awaiting Ana"
+                    },
+                    {
+                      "id": 7,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "YOUR_BOARD_ID",
+                        "itemId": "{{2.id}}",
+                        "columnId": "assigned_to",
+                        "value": "{\"personsAndTeams\":[{\"id\":ANA_USER_ID,\"kind\":\"person\"}]}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1500,
+                          "y": -100
+                        }
+                      },
+                      "note": "Assign to Ana - replace ANA_USER_ID with actual Monday user ID"
+                    },
+                    {
+                      "id": 8,
+                      "module": "monday:changeColumnValue",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "boardId": "YOUR_BOARD_ID",
+                        "itemId": "{{2.id}}",
+                        "columnId": "last_contact_date",
+                        "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 1800,
+                          "y": -100
+                        }
+                      },
+                      "note": "Update Last Contact Date"
+                    },
+                    {
+                      "id": 9,
+                      "module": "monday:createUpdate",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "itemId": "{{2.id}}",
+                        "body": "📱 **Lead Reply Received**\n\nMessage: {{1.body}}\n\nTimestamp: {{1.timestamp}}"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2100,
+                          "y": -100
+                        }
+                      },
+                      "note": "Add the reply message as an update/note on the item"
+                    },
+                    {
+                      "id": 10,
+                      "module": "slack:postMessage",
+                      "version": 1,
+                      "parameters": {
+                        "connection": null
+                      },
+                      "mapper": {
+                        "channel": "YOUR_SLACK_CHANNEL",
+                        "text": "🔔 *New Lead Reply!*\n\n*Lead:* {{2.name}}\n*Message:* {{1.body}}\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{2.id}}|View in Monday>"
+                      },
+                      "metadata": {
+                        "designer": {
+                          "x": 2400,
+                          "y": -100
+                        }
+                      },
+                      "note": "Optional: Notify Slack channel. Remove this module if not using Slack."
+                    }
+                  ],
+                  "filter": {
+                    "name": "Positive/neutral reply",
+                    "conditions": [
+                      [
+                        {
+                          "a": "{{lower(1.body)}}",
+                          "b": "stop",
+                          "o": "text:notcontain"
+                        },
+                        {
+                          "a": "{{lower(1.body)}}",
+                          "b": "unsubscribe",
+                          "o": "text:notcontain"
+                        },
+                        {
+                          "a": "{{lower(1.body)}}",
+                          "b": "not interested",
+                          "o": "text:notcontain"
+                        }
+                      ]
+                    ]
+                  }
+                }
+              ]
+            }
+          ],
+          "filter": {
+            "name": "Lead found in Monday",
+            "conditions": [
+              [
+                {
+                  "a": "{{2.id}}",
+                  "b": "",
+                  "o": "exist"
+                }
+              ]
+            ]
+          }
+        },
+        {
+          "flow": [
+            {
+              "id": 11,
+              "module": "monday:createItem",
+              "version": 1,
+              "parameters": {
+                "connection": null
+              },
+              "mapper": {
+                "boardId": "YOUR_BOARD_ID",
+                "itemName": "Unknown Lead - {{1.from}}",
+                "columnValues": {
+                  "phone": "{\"phone\":\"{{1.from}}\",\"countryShortName\":\"US\"}",
+                  "status": "{\"label\":\"Replied - Awaiting Ana\"}",
+                  "lead_source": "{\"label\":\"Unknown - Inbound\"}",
+                  "notes": "Received unsolicited reply: {{1.body}}"
+                }
+              },
+              "metadata": {
+                "designer": {
+                  "x": 900,
+                  "y": 150
+                }
+              },
+              "note": "Create new lead if phone not found - could be someone replying to old campaign"
+            }
+          ],
+          "filter": {
+            "name": "Lead NOT found - create new",
+            "conditions": [
+              [
+                {
+                  "a": "{{2.id}}",
+                  "b": "",
+                  "o": "notexist"
+                }
+              ]
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Import this blueprint into Make.com",
+    "step_2": "Configure webhook and copy URL",
+    "step_3": "In JustCall: Settings > Webhooks > Add webhook for 'SMS Received' event",
+    "step_4": "Replace YOUR_BOARD_ID with actual Monday board ID",
+    "step_5": "Replace ANA_USER_ID with Ana's Monday user ID (query users endpoint to find)",
+    "step_6": "Optional: Configure Slack module or delete it if not using Slack",
+    "step_7": "Test by replying to your JustCall number",
+    "step_8": "Activate scenario"
+  },
+  "negative_keywords": [
+    "stop",
+    "unsubscribe", 
+    "leave me alone",
+    "not interested",
+    "remove me",
+    "don't text",
+    "do not text",
+    "fuck off",
+    "go away",
+    "no thanks",
+    "remove from list"
+  ],
+  "notes": {
+    "negative_detection": "The filter checks for common opt-out phrases. Add more as needed.",
+    "unknown_leads": "If someone replies but isn't in the system, a new lead is created. Review these manually.",
+    "slack_optional": "Remove the Slack module if you prefer email notifications or Monday-native notifications only."
+  }
+}

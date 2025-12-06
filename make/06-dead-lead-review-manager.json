@@ -1,0 +1,305 @@
+{
+  "name": "Dead Lead Review Manager",
+  "description": "Manages the 1-year exclusion period for Dead leads. Sets 'Dead Until' date when entering Dead status, and flags leads as 'Review Eligible' after 1 year. Does NOT auto-return leads to pool - requires manual human decision.",
+  "critical_note": "Dead leads explicitly opted out. This automation surfaces them for review after 1 year but never auto-contacts them. A human must consciously decide to re-engage.",
+  "scenarios": {
+    "scenario_1": {
+      "name": "Set Dead Until Date on Status Change",
+      "trigger": "Status changes to Dead - Negative Reply",
+      "action": "Set Dead Until to Today + 365 days"
+    },
+    "scenario_2": {
+      "name": "Daily Check for Review Eligible",
+      "trigger": "Scheduled daily at 8am",
+      "action": "Find Dead leads where Dead Until < Today, check Review Eligible box"
+    }
+  },
+  "flow_scenario_1": [
+    {
+      "id": 1,
+      "module": "monday:watchColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "boardId": "YOUR_BOARD_ID",
+        "columnId": "status"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Triggers when status column changes"
+    },
+    {
+      "id": 2,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "Status is Dead - Negative Reply",
+        "conditions": [
+          [
+            {
+              "a": "{{1.value.label.text}}",
+              "b": "Dead - Negative Reply",
+              "o": "text:equal"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "module": "monday:changeColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "dead_until",
+        "value": "{\"date\":\"{{formatDate(addDays(now; 365); 'YYYY-MM-DD')}}\"}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "note": "Set Dead Until to 1 year from now"
+    },
+    {
+      "id": 4,
+      "module": "monday:changeColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{1.itemId}}",
+        "columnId": "review_eligible",
+        "value": "{\"checked\":\"false\"}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "note": "Ensure Review Eligible is unchecked (fresh dead lead)"
+    },
+    {
+      "id": 5,
+      "module": "monday:createUpdate",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "itemId": "{{1.itemId}}",
+        "body": "🚫 **Marked as Dead - Negative Reply**\n\nThis lead explicitly opted out. Do not contact until at least {{formatDate(addDays(now; 365); 'MMM D, YYYY')}}.\n\nAfter that date, they will be flagged for manual review - but will NOT auto-return to the pool."
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        }
+      }
+    }
+  ],
+  "flow_scenario_2": [
+    {
+      "id": 1,
+      "module": "builtin:BasicScheduler",
+      "version": 1,
+      "parameters": {
+        "type": "day",
+        "hour": 8,
+        "minute": 0
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Runs daily at 8:00 AM"
+    },
+    {
+      "id": 2,
+      "module": "monday:searchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "queryParams": {
+          "rules": [
+            {
+              "column_id": "status",
+              "compare_value": ["Dead - Negative Reply"]
+            }
+          ]
+        }
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Find all Dead leads"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicIterator",
+      "version": 1,
+      "mapper": {
+        "array": "{{2.items}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 4,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "filter": {
+        "name": "Dead Until has passed AND not already flagged",
+        "conditions": [
+          [
+            {
+              "a": "{{parseDate(3.column_values.dead_until.date; 'YYYY-MM-DD')}}",
+              "b": "{{now}}",
+              "o": "date:before"
+            },
+            {
+              "a": "{{3.column_values.review_eligible.checked}}",
+              "b": "true",
+              "o": "text:notequal"
+            }
+          ]
+        ]
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      }
+    },
+    {
+      "id": 5,
+      "module": "monday:changeColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "YOUR_BOARD_ID",
+        "itemId": "{{3.id}}",
+        "columnId": "review_eligible",
+        "value": "{\"checked\":\"true\"}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        }
+      },
+      "note": "Check Review Eligible box"
+    },
+    {
+      "id": 6,
+      "module": "monday:createUpdate",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "itemId": "{{3.id}}",
+        "body": "📋 **Review Eligible**\n\n1 year has passed since this lead opted out. They are now eligible for manual review.\n\n⚠️ **This does NOT mean contact them.** A human should review the situation and decide whether re-engagement is appropriate."
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1
+  },
+  "setup_instructions": {
+    "step_1": "Create TWO scenarios in Make.com from this blueprint",
+    "step_2": "Scenario 1: 'Dead Lead - Set Date' using flow_scenario_1",
+    "step_3": "Scenario 2: 'Dead Lead - Review Check' using flow_scenario_2 (scheduled)",
+    "step_4": "Replace YOUR_BOARD_ID in both scenarios",
+    "step_5": "Get column IDs for 'dead_until' and 'review_eligible' and update if different",
+    "step_6": "Configure Monday.com connections",
+    "step_7": "Test Scenario 1: Change a lead to 'Dead - Negative Reply', verify Dead Until is set to 1 year out",
+    "step_8": "Test Scenario 2: Manually set a lead's Dead Until to yesterday, run scenario, verify Review Eligible checks",
+    "step_9": "Activate both scenarios"
+  },
+  "manual_review_process": {
+    "when_review_eligible_is_checked": [
+      "1. Look at the lead's history in Notes",
+      "2. What did they say when they opted out?",
+      "3. Was it a soft 'not interested' or hard 'never contact me'?",
+      "4. Has anything changed? (new brokerage, market shift, etc.)",
+      "5. If appropriate: Uncheck Review Eligible, uncheck Do Not Contact, change Status to New Lead",
+      "6. If not appropriate: Leave as-is, add note explaining decision",
+      "7. Consider setting Dead Until to another year out if still not appropriate"
+    ],
+    "red_flags_do_not_re_engage": [
+      "Explicitly said 'never contact me again'",
+      "Threatened legal action",
+      "Used profanity/hostility",
+      "Reported as spam",
+      "Multiple opt-outs in history"
+    ],
+    "green_flags_consider_re_engagement": [
+      "Said 'not right now' vs hard no",
+      "Circumstances may have changed (left old brokerage)",
+      "Was polite in opt-out",
+      "Only one opt-out, no repeat issues",
+      "Significant time has passed (1+ year)"
+    ]
+  },
+  "monday_view": {
+    "name": "Dead - Ready for Review",
+    "filters": [
+      "Status = 'Dead - Negative Reply'",
+      "Review Eligible = checked"
+    ],
+    "columns": [
+      "Name",
+      "Phone", 
+      "Dead Until",
+      "Review Eligible",
+      "Last Contact Date",
+      "Notes"
+    ],
+    "purpose": "Quarterly review queue for Dead leads past their 1-year exclusion"
+  }
+}
