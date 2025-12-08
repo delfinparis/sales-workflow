@@ -285,24 +285,46 @@ When DJ marks "No Show":
 | Column | What It Means | When to Update |
 |--------|---------------|----------------|
 | Pain Points | Their frustrations in their words | When they complain about brokerage |
+| Pain Signals | Count of frustration signals (auto-increments) | AUTO when Pain Points updated |
 | Current Split | Their commission split (e.g., "70/30") | If they mention it |
 | Trigger Event | What triggered their interest | When you identify the trigger |
+
+### Referral Tracking (Update If Applicable)
+| Column | What It Means | When to Update |
+|--------|---------------|----------------|
+| Referral Source | How they found us | AUTO from Lead Source |
+| Referred By | Name of person who referred them | If they mention a referral |
 
 ### Competitive Intel (Update When Mentioned)
 | Column | What It Means | When to Update |
 |--------|---------------|----------------|
 | Competitor Name | Brokerage they're at or considering | When they mention one |
 | Competitor Reason | Why they like that competitor | When they explain their interest |
+| Win-Back Date | 90 days from when they chose competitor | AUTO when Competitor Name set |
 
 ### Ghost Prevention (Auto-Updated, But Check)
 | Column | What It Means | Do You Update It? |
 |--------|---------------|-------------------|
-| Ghost Risk | Low/Medium/High/Ghosted | AUTO - but check daily |
-| Last Meaningful Reply | When they last really engaged | AUTO - based on status |
+| Ghost Risk | Low/Medium/High/Ghosted | AUTO - updated daily |
+| Last Meaningful Reply | When they last really engaged | AUTO - based on replies |
+| Re-engagement Attempts | How many times you've re-engaged | AUTO - counts follow-ups |
 | Temperature | Cold/Warm/Hot | AUTO - based on status |
 | Lead Score | 0-100 engagement score | AUTO - read for priority |
 
 **TIP:** Sort your view by Lead Score (highest first) to work the hottest leads first!
+
+### Pipeline Tracking (Fully Automatic - For Reporting)
+| Column | What It Means | Do You Update It? |
+|--------|---------------|-------------------|
+| First Contact Date | When Jennica first reached out | AUTO |
+| Stage Entry Date | When they entered current status | AUTO |
+| Days In Stage | How long in current status | AUTO - updated daily |
+| Reply Received At | Timestamp when they replied | AUTO |
+| First Response At | When Ana first responded | AUTO |
+| Response Time Mins | How fast Ana responded | AUTO - for speed-to-lead tracking |
+| Total Days in Pipeline | Days from first contact to close | AUTO - set on Won/Lost |
+
+**NOTE:** These columns help DJ track performance metrics. You don't need to touch them!
 
 ---
 

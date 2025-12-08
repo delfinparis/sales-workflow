@@ -219,6 +219,27 @@ Dead - Negative Reply 💀 (1 year minimum)
 
 ---
 
+## Auto-Tracked Columns (For Reporting)
+
+These update automatically - no action needed:
+
+| Column | What It Does |
+|--------|--------------|
+| Lead Score | 0-100 engagement score (status + temperature + pain signals) |
+| Temperature | Cold/Warm/Hot based on status |
+| Ghost Risk | Low→Medium→High→Ghosted based on days since reply |
+| Days In Stage | Days in current status (updates daily) |
+| Stage Entry Date | When status last changed |
+| First Contact Date | When Jennica first texted |
+| Response Time Mins | How fast Ana responded to reply |
+| Total Days in Pipeline | Full cycle length (set on Won/Lost) |
+| Re-engagement Attempts | Count of follow-up attempts |
+| Win-Back Date | 90 days after choosing competitor |
+
+**TIP:** Sort by Lead Score to prioritize hottest leads!
+
+---
+
 ## Emergency Contacts
 
 ```

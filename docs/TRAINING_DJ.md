@@ -355,12 +355,15 @@ When someone misses their meeting:
 | Column | What It Tells You |
 |--------|-------------------|
 | Notes | Full history from Ana |
-| Pain Points | Their frustrations |
+| Pain Points | Their frustrations (exact words) |
+| Pain Signals | Count of frustration signals |
 | Current Split | What they're getting |
 | Trigger Event | Why they're looking |
 | Deal Count | Their production level |
 | Current Brokerage | Where they are now |
 | Competitor Name | Who else they're considering |
+| Lead Score | 0-100 engagement score (higher = more engaged) |
+| Temperature | Cold/Warm/Hot - how ready they are |
 
 ### During/After Meeting (Update These)
 | Column | What to Fill In |
@@ -380,13 +383,20 @@ When someone misses their meeting:
 | Day 3/7/14/21/30 Follow-up Done | After each touchpoint |
 | Status | As they progress |
 
-### Velocity Tracking (Auto + Manual)
-| Column | What It Means |
-|--------|---------------|
-| Days In Stage | How long in current status |
-| Total Days in Pipeline | Full cycle length |
-| Lead Score | Overall engagement level |
-| Temperature | Hot/Warm/Cold |
+### Pipeline & Velocity Tracking (Mostly Automatic)
+| Column | What It Means | Updated By |
+|--------|---------------|------------|
+| Days In Stage | How long in current status | AUTO - daily |
+| Stage Entry Date | When they entered current status | AUTO |
+| Total Days in Pipeline | Full cycle length (first contact to close) | AUTO on Won/Lost |
+| First Contact Date | When Jennica first reached out | AUTO |
+| Response Time Mins | How fast Ana responded to reply | AUTO |
+| Lead Score | Overall engagement level (0-100) | AUTO |
+| Temperature | Hot/Warm/Cold | AUTO |
+| Ghost Risk | Low/Medium/High/Ghosted | AUTO - daily |
+| Win-Back Date | When to re-contact lost-to-competitor leads | AUTO (90 days) |
+
+**TIP:** Use these for your weekly reporting and to identify stuck leads!
 
 ---
 

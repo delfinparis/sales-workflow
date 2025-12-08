@@ -118,14 +118,29 @@ Great! Change status to "Replied - Awaiting Ana" and let Ana know. Don't continu
 
 ## Your Columns Explained
 
-| Column | What It Means | Do You Update It? |
-|--------|---------------|-------------------|
-| Name | Their name | No |
-| Phone | Their number | No |
-| Status | Where they are | YES - change to "SMS Sent" |
-| Superlative Type | What they achieved | YES - select from dropdown |
-| Do Not Contact | STOP sign | NO - just check it before texting |
-| Last Superlative Date | When you last found one | Auto-updates |
+### Columns You Update
+| Column | What It Means | What You Do |
+|--------|---------------|-------------|
+| Status | Where they are | Change to "SMS Sent" after texting |
+| Superlative Type | What they achieved | Select from dropdown |
+
+### Columns To Check (Don't Update)
+| Column | What It Means | Why It Matters |
+|--------|---------------|----------------|
+| Name / Phone | Their contact info | Use to find in Courted & JustCall |
+| Do Not Contact | STOP sign | If checked, NEVER text them |
+| Last Superlative Date | When you last found one | Skip if recent |
+| Lead Source | Where they came from | FYI - shows if Courted, Event, etc. |
+
+### Auto-Updated Columns (Ignore These)
+| Column | What It Means |
+|--------|---------------|
+| First Contact Date | Set automatically when you send SMS |
+| Lead Score | Increases as they engage |
+| Temperature | Cold→Warm→Hot as they progress |
+| Stage Entry Date | Tracks when status changes |
+
+**TIP:** You don't need to worry about most columns - just Status and Superlative Type!
 
 ---
 
