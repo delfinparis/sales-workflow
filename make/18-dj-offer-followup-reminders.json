@@ -7,7 +7,7 @@
       "id": 1,
       "module": "monday:searchItems",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "queryParams": {
           "rules": [
             {
@@ -62,8 +62,8 @@
               "id": 5,
               "module": "slack:postMessage",
               "mapper": {
-                "channel": "DJ_SLACK_DM_OR_CHANNEL",
-                "text": "📞 *Day 3 Follow-up Due*\n\n*{{2.name}}* - Offer extended {{3.days_since_offer}} days ago\n\n*Suggested approach:*\nQuick check-in call to surface any questions or objections.\n\n*Questions to ask:*\n• \"Have you had a chance to look over the details?\"\n• \"Any questions I can answer?\"\n• \"What's your timeline looking like?\"\n\n*Their context:*\n• Timeline: {{2.column_values.timeline.text}}\n• Objections noted: {{if(2.column_values.objections.text; 2.column_values.objections.text; 'None recorded')}}\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{2.id}}|Open in Monday>\n\n✅ Check *Day 3 Follow-up Done* after contact"
+                "channel": "dj-alerts",
+                "text": "📞 *Day 3 Follow-up Due*\n\n*{{2.name}}* - Offer extended {{3.days_since_offer}} days ago\n\n*Suggested approach:*\nQuick check-in call to surface any questions or objections.\n\n*Questions to ask:*\n• \"Have you had a chance to look over the details?\"\n• \"Any questions I can answer?\"\n• \"What's your timeline looking like?\"\n\n*Their context:*\n• Timeline: {{2.column_values.timeline.text}}\n• Objections noted: {{if(2.column_values.objections.text; 2.column_values.objections.text; 'None recorded')}}\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{2.id}}|Open in Monday>\n\n✅ Check *Day 3 Follow-up Done* after contact"
               }
             }
           ]
@@ -96,8 +96,8 @@
               "id": 6,
               "module": "slack:postMessage",
               "mapper": {
-                "channel": "DJ_SLACK_DM_OR_CHANNEL",
-                "text": "📧 *Day 7 Follow-up Due*\n\n*{{2.name}}* - Offer extended {{3.days_since_offer}} days ago\n\n*Suggested approach:*\nAdd value, don't just \"check in.\"\n\n*Ideas:*\n• Share a relevant market insight or article\n• Invite to upcoming training/event\n• Offer to connect them with a current Kale agent for reference\n• Send something personalized based on their goals: {{if(2.column_values.business_goals.text; 2.column_values.business_goals.text; 'Not recorded')}}\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{2.id}}|Open in Monday>\n\n✅ Check *Day 7 Follow-up Done* after contact"
+                "channel": "dj-alerts",
+                "text": "📧 *Day 7 Follow-up Due*\n\n*{{2.name}}* - Offer extended {{3.days_since_offer}} days ago\n\n*Suggested approach:*\nAdd value, don't just \"check in.\"\n\n*Ideas:*\n• Share a relevant market insight or article\n• Invite to upcoming training/event\n• Offer to connect them with a current Kale agent for reference\n• Send something personalized based on their goals: {{if(2.column_values.business_goals.text; 2.column_values.business_goals.text; 'Not recorded')}}\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{2.id}}|Open in Monday>\n\n✅ Check *Day 7 Follow-up Done* after contact"
               }
             }
           ]
@@ -130,8 +130,8 @@
               "id": 7,
               "module": "slack:postMessage",
               "mapper": {
-                "channel": "DJ_SLACK_DM_OR_CHANNEL",
-                "text": "🎯 *Day 14 Follow-up Due - Decision Time*\n\n*{{2.name}}* - Offer extended {{3.days_since_offer}} days ago\n\n*Suggested approach:*\nDirect but warm. Time to understand where they're at.\n\n*Questions to ask:*\n• \"I want to respect your time - where are you at in your thinking?\"\n• \"Is there something holding you back I can help address?\"\n• \"Would it help to chat with [agent who recently joined]?\"\n\n*Watch for:*\n⚠️ If they're not responding, they may be:\n- Going with a competitor\n- Not actually ready to move\n- Ghosting to avoid saying no\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{2.id}}|Open in Monday>\n\n✅ Check *Day 14 Follow-up Done* after contact"
+                "channel": "dj-alerts",
+                "text": "🎯 *Day 14 Follow-up Due - Decision Time*\n\n*{{2.name}}* - Offer extended {{3.days_since_offer}} days ago\n\n*Suggested approach:*\nDirect but warm. Time to understand where they're at.\n\n*Questions to ask:*\n• \"I want to respect your time - where are you at in your thinking?\"\n• \"Is there something holding you back I can help address?\"\n• \"Would it help to chat with [agent who recently joined]?\"\n\n*Watch for:*\n⚠️ If they're not responding, they may be:\n- Going with a competitor\n- Not actually ready to move\n- Ghosting to avoid saying no\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{2.id}}|Open in Monday>\n\n✅ Check *Day 14 Follow-up Done* after contact"
               }
             }
           ]
@@ -164,8 +164,8 @@
               "id": 8,
               "module": "slack:postMessage",
               "mapper": {
-                "channel": "DJ_SLACK_DM_OR_CHANNEL",
-                "text": "⏰ *Day 21 Follow-up Due - Create Urgency*\n\n*{{2.name}}* - Offer extended {{3.days_since_offer}} days ago\n\n*Suggested approach:*\nCreate urgency without pressure.\n\n*Ideas:*\n• Reference upcoming event they'd benefit from\n• Mention onboarding timing (\"If you're thinking Q1, we'd want to start paperwork by X\")\n• Address specific objection from notes: {{if(2.column_values.objections.text; 2.column_values.objections.text; 'None recorded')}}\n\n*Or consider:*\n• Move to *Nurture (Post-Meeting)* if they need more relationship building\n• Move to *Hibernation* if timing isn't right\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{2.id}}|Open in Monday>\n\n✅ Check *Day 21 Follow-up Done* after contact"
+                "channel": "dj-alerts",
+                "text": "⏰ *Day 21 Follow-up Due - Create Urgency*\n\n*{{2.name}}* - Offer extended {{3.days_since_offer}} days ago\n\n*Suggested approach:*\nCreate urgency without pressure.\n\n*Ideas:*\n• Reference upcoming event they'd benefit from\n• Mention onboarding timing (\"If you're thinking Q1, we'd want to start paperwork by X\")\n• Address specific objection from notes: {{if(2.column_values.objections.text; 2.column_values.objections.text; 'None recorded')}}\n\n*Or consider:*\n• Move to *Nurture (Post-Meeting)* if they need more relationship building\n• Move to *Hibernation* if timing isn't right\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{2.id}}|Open in Monday>\n\n✅ Check *Day 21 Follow-up Done* after contact"
               }
             }
           ]
@@ -188,8 +188,8 @@
               "id": 9,
               "module": "slack:postMessage",
               "mapper": {
-                "channel": "DJ_SLACK_DM_OR_CHANNEL",
-                "text": "🚨 *OFFER OPEN 30+ DAYS - Decision Required*\n\n*{{2.name}}* - Offer extended {{3.days_since_offer}} days ago\n\n*This offer is going stale. Time to decide:*\n\n*Option 1: One more direct ask*\n\"I sense the timing might not be right. Want me to check back in 90 days?\"\n\n*Option 2: Move to Nurture*\nHand back to Ana for long-term relationship building\n\n*Option 3: Move to Hibernation*\nPause for 90 days, revisit later\n\n*Option 4: Mark Lost*\nIf they've clearly gone elsewhere or aren't a fit\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{2.id}}|Open in Monday>\n\n⚠️ Don't let this linger - make a call today!"
+                "channel": "dj-alerts",
+                "text": "🚨 *OFFER OPEN 30+ DAYS - Decision Required*\n\n*{{2.name}}* - Offer extended {{3.days_since_offer}} days ago\n\n*This offer is going stale. Time to decide:*\n\n*Option 1: One more direct ask*\n\"I sense the timing might not be right. Want me to check back in 90 days?\"\n\n*Option 2: Move to Nurture*\nHand back to Ana for long-term relationship building\n\n*Option 3: Move to Hibernation*\nPause for 90 days, revisit later\n\n*Option 4: Mark Lost*\nIf they've clearly gone elsewhere or aren't a fit\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{2.id}}|Open in Monday>\n\n⚠️ Don't let this linger - make a call today!"
               }
             }
           ]
@@ -205,8 +205,8 @@
   },
   "setup_instructions": {
     "step_1": "Import into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID and YOUR_MONDAY_URL",
-    "step_3": "Set DJ_SLACK_DM_OR_CHANNEL",
+    "step_2": "Replace 18390370563 and kalerealty",
+    "step_3": "Set dj-alerts",
     "step_4": "Verify column IDs for offer_date, day_X_followup_done checkboxes",
     "step_5": "Test with a lead in Offer Extended with Offer Date = 4 days ago",
     "step_6": "Activate scenario"

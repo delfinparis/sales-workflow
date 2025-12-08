@@ -13,7 +13,7 @@
       "version": 1,
       "parameters": {
         "connection": null,
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "status"
       },
       "mapper": {},
@@ -89,7 +89,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "status",
                 "value": "{\"label\":\"Hibernation 90-Day\"}"
@@ -110,7 +110,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "no_show_count",
                 "value": "2"
@@ -149,7 +149,7 @@
                 "connection": null
               },
               "mapper": {
-                "channel": "YOUR_SLACK_CHANNEL",
+                "channel": "leads-alerts",
                 "text": "❄️ *Auto-Hibernated: {{1.itemName}}*\n\n2nd no-show. Moving to 90-day hibernation."
               },
               "metadata": {
@@ -184,7 +184,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "no_show_count",
                 "value": "1"
@@ -205,10 +205,10 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "assigned_to",
-                "value": "{\"personsAndTeams\":[{\"id\":ANA_USER_ID,\"kind\":\"person\"}]}"
+                "value": "{\"personsAndTeams\":[{\"id\":97053956,\"kind\":\"person\"}]}"
               },
               "metadata": {
                 "designer": {
@@ -226,7 +226,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "current_tasks",
                 "value": "{\"text\":\"📋 NO SHOW FOLLOW-UP:\\n\\n🎯 REACH OUT TO RESCHEDULE:\\n\\n\\\"Hey [Name]! We missed you earlier - hope everything's okay. Want to find another time that works better?\\\"\\n\\n\\\"Hey! No worries about today. Let me know when you're free and we can reschedule.\\\"\\n\\n⚠️ IMPORTANT:\\n• Be friendly, not guilt-trippy\\n• Stuff happens - assume good intent\\n• If they reschedule → back to Meeting Scheduled\\n• If they ghost → wait 3 days, try once more, then Hibernation\\n\\n⏰ Next Action: Follow up within 24 hours\"}"
@@ -247,7 +247,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "next_action",
                 "value": "Follow up on no-show - reach out to reschedule"
@@ -267,7 +267,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "next_action_date",
                 "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
@@ -306,8 +306,8 @@
                 "connection": null
               },
               "mapper": {
-                "channel": "YOUR_SLACK_CHANNEL_OR_ANA_DM",
-                "text": "⚠️ *No Show: {{1.itemName}}*\n\nThey missed their meeting with DJ. Please follow up to reschedule.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{1.itemId}}|Open in Monday>"
+                "channel": "ana-alerts",
+                "text": "⚠️ *No Show: {{1.itemName}}*\n\nThey missed their meeting with DJ. Please follow up to reschedule.\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{1.itemId}}|Open in Monday>"
               },
               "metadata": {
                 "designer": {
@@ -355,8 +355,8 @@
   },
   "setup_instructions": {
     "step_1": "Import this blueprint into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID with your actual Monday board ID",
-    "step_3": "Replace ANA_USER_ID with Ana's Monday user ID",
+    "step_2": "Replace 18390370563 with your actual Monday board ID",
+    "step_3": "Replace 97053956 with Ana's Monday user ID",
     "step_4": "Update column IDs if different: 'no_show_count', 'current_tasks', 'next_action', 'next_action_date', 'assigned_to'",
     "step_5": "Configure Slack connection (or remove Slack modules if not using)",
     "step_6": "Configure Monday.com connection",

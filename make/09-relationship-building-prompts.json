@@ -8,7 +8,7 @@
       "version": 1,
       "parameters": {
         "connection": null,
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "status"
       },
       "mapper": {},
@@ -52,7 +52,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "current_tasks",
         "value": "{\"text\":\"📋 RELATIONSHIP BUILDING - Pivot Ideas:\\n\\n🎯 AFTER TOOL FOLLOW-UP:\\n\\nIf they used it:\\n\\\"Awesome, glad it helped! QQ - [pivot below]\\\"\\n\\nIf they didn't use it:\\n\\\"No problem! QQ - [pivot below]\\\"\\n\\n─────────────────────────\\n\\n💡 PIVOT OPTIONS (pick one):\\n\\n📅 EVENT INVITE:\\n\\\"Hey, we have [event] coming up on [date]. Thought you might find it useful - want me to send the link?\\\"\\n\\n💬 MARKET QUESTION:\\n\\\"How's the [their area] market treating you lately?\\\"\\n\\n🎯 GOALS QUESTION:\\n\\\"What's your focus for the rest of the year?\\\"\\n\\n😤 CHALLENGES QUESTION:\\n\\\"What's the biggest headache in your business right now?\\\"\\n\\n📊 BUSINESS QUESTION:\\n\\\"Are you mostly working buyers or sellers these days?\\\"\\n\\n─────────────────────────\\n\\n⏰ REMEMBER:\\n• Keep it conversational\\n• Listen for pain points\\n• Note anything useful for later\\n• Watch for gratitude moments ⚡\"}"
@@ -73,7 +73,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "next_action",
         "value": "Continue conversation - use pivot question to deepen relationship"
@@ -101,7 +101,7 @@
   },
   "setup_instructions": {
     "step_1": "Import this blueprint into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID with your actual Monday board ID",
+    "step_2": "Replace 18390370563 with your actual Monday board ID",
     "step_3": "Update column IDs if different: 'current_tasks', 'next_action'",
     "step_4": "Configure Monday.com connection",
     "step_5": "Test: Move a lead to 'Relationship Building', verify prompts appear",

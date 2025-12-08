@@ -173,7 +173,7 @@
               },
               "mapper": {
                 "channel": "DJ_SLACK_CHANNEL_OR_DM",
-                "text": ":calendar: *New Appointment Booked!*\n\n*Lead:* {{1.invitee_name}}\n*Date:* {{formatDate(1.event_start_time; 'dddd, MMMM D')}} at {{formatDate(1.event_start_time; 'h:mm A')}} CT\n*Event:* {{1.event_type_name}}\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354/pulses/{{2.items[0].id}}|Open in Monday>"
+                "text": ":calendar: *New Appointment Booked!*\n\n*Lead:* {{1.invitee_name}}\n*Date:* {{formatDate(1.event_start_time; 'dddd, MMMM D')}} at {{formatDate(1.event_start_time; 'h:mm A')}} CT\n*Event:* {{1.event_type_name}}\n\n<https://kalerealty.monday.com/boards/18391158354/pulses/{{2.items[0].id}}|Open in Monday>"
               },
               "metadata": {
                 "designer": {

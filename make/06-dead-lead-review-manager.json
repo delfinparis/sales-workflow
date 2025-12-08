@@ -21,7 +21,7 @@
       "version": 1,
       "parameters": {
         "connection": null,
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "status"
       },
       "mapper": {},
@@ -65,7 +65,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "dead_until",
         "value": "{\"date\":\"{{formatDate(addDays(now; 365); 'YYYY-MM-DD')}}\"}"
@@ -86,7 +86,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "review_eligible",
         "value": "{\"checked\":\"false\"}"
@@ -145,7 +145,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "queryParams": {
           "rules": [
             {
@@ -214,7 +214,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{3.id}}",
         "columnId": "review_eligible",
         "value": "{\"checked\":\"true\"}"
@@ -254,7 +254,7 @@
     "step_1": "Create TWO scenarios in Make.com from this blueprint",
     "step_2": "Scenario 1: 'Dead Lead - Set Date' using flow_scenario_1",
     "step_3": "Scenario 2: 'Dead Lead - Review Check' using flow_scenario_2 (scheduled)",
-    "step_4": "Replace YOUR_BOARD_ID in both scenarios",
+    "step_4": "Replace 18390370563 in both scenarios",
     "step_5": "Get column IDs for 'dead_until' and 'review_eligible' and update if different",
     "step_6": "Configure Monday.com connections",
     "step_7": "Test Scenario 1: Change a lead to 'Dead - Negative Reply', verify Dead Until is set to 1 year out",

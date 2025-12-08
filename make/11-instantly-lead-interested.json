@@ -44,7 +44,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "queryParams": {
           "rules": [
             {
@@ -85,13 +85,13 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemName": "{{1.lead_email}}",
                 "columnValues": {
                   "email": {"email": "{{1.lead_email}}", "text": "{{1.lead_email}}"},
                   "status": {"label": "Replied - Awaiting Ana"},
                   "lead_source": {"label": "Instantly"},
-                  "assigned_to": {"personsAndTeams": [{"id": "ANA_USER_ID", "kind": "person"}]},
+                  "assigned_to": {"personsAndTeams": [{"id": "97053956", "kind": "person"}]},
                   "emailed_by": "{{replace(1.email_account; '@.*'; '')}}",
                   "current_tasks": {"text": "📧 NEW INSTANTLY LEAD - INTRO TASKS:\n\n☐ Send intro SMS:\n\"Hi! {{replace(1.email_account; '@.*'; '')}} from our team just sent over the [tool name] via email! I'm Ana @ Kale (I work with D.J.) and I'll be reaching out in the next few days to get your feedback! Thanks! :)\"\n\n☐ Send voice memo introducing yourself\n\n☐ Set Next Action Date for follow-up (2-4 days)\n\n📧 EMAIL THREAD SUMMARY:\nEmailed by: {{1.email_account}}\nTheir reply: {{1.reply_text_snippet}}\n\n🔗 Full thread: {{1.unibox_url}}"},
                   "next_action": "Send intro SMS + voice memo, then set follow-up date for tool feedback",
@@ -133,8 +133,8 @@
                 "connection": null
               },
               "mapper": {
-                "channel": "YOUR_SLACK_CHANNEL_OR_ANA_DM",
-                "text": "🆕 *New Instantly Lead Created: {{1.lead_email}}*\n\nThis is a NEW lead (not previously in Monday) who replied to an Instantly email!\n\nEmailed by: {{1.email_account}}\nTheir reply: \"{{1.reply_text_snippet}}\"\n\n*Tasks:*\n1. Send intro SMS\n2. Send voice memo\n3. Set follow-up date\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{4.id}}|Open in Monday>"
+                "channel": "ana-alerts",
+                "text": "🆕 *New Instantly Lead Created: {{1.lead_email}}*\n\nThis is a NEW lead (not previously in Monday) who replied to an Instantly email!\n\nEmailed by: {{1.email_account}}\nTheir reply: \"{{1.reply_text_snippet}}\"\n\n*Tasks:*\n1. Send intro SMS\n2. Send voice memo\n3. Set follow-up date\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{4.id}}|Open in Monday>"
               },
               "metadata": {
                 "designer": {
@@ -221,7 +221,7 @@
                         "connection": null
                       },
                       "mapper": {
-                        "channel": "YOUR_SLACK_CHANNEL_OR_ANA_DM",
+                        "channel": "ana-alerts",
                         "text": "ℹ️ *FYI: {{2.items[0].name}}* also got a tool via Instantly email!\n\nYou're already working this lead, so no status change. Just letting you know they now have the tool from {{1.email_account}}.\n\nTheir reply: \"{{1.reply_text_snippet}}\""
                       },
                       "metadata": {
@@ -291,7 +291,7 @@
                         "connection": null
                       },
                       "mapper": {
-                        "boardId": "YOUR_BOARD_ID",
+                        "boardId": "18390370563",
                         "itemId": "{{2.items[0].id}}",
                         "columnId": "status",
                         "value": "{\"label\":\"Tool Offered\"}"
@@ -312,7 +312,7 @@
                         "connection": null
                       },
                       "mapper": {
-                        "boardId": "YOUR_BOARD_ID",
+                        "boardId": "18390370563",
                         "itemId": "{{2.items[0].id}}",
                         "columnId": "emailed_by",
                         "value": "{{replace(1.email_account; '@.*'; '')}}"
@@ -333,7 +333,7 @@
                         "connection": null
                       },
                       "mapper": {
-                        "boardId": "YOUR_BOARD_ID",
+                        "boardId": "18390370563",
                         "itemId": "{{2.items[0].id}}",
                         "columnId": "lead_source",
                         "value": "{\"label\":\"Instantly Email\"}"
@@ -354,10 +354,10 @@
                         "connection": null
                       },
                       "mapper": {
-                        "boardId": "YOUR_BOARD_ID",
+                        "boardId": "18390370563",
                         "itemId": "{{2.items[0].id}}",
                         "columnId": "assigned_to",
-                        "value": "{\"personsAndTeams\":[{\"id\":ANA_USER_ID,\"kind\":\"person\"}]}"
+                        "value": "{\"personsAndTeams\":[{\"id\":97053956,\"kind\":\"person\"}]}"
                       },
                       "metadata": {
                         "designer": {
@@ -375,7 +375,7 @@
                         "connection": null
                       },
                       "mapper": {
-                        "boardId": "YOUR_BOARD_ID",
+                        "boardId": "18390370563",
                         "itemId": "{{2.items[0].id}}",
                         "columnId": "current_tasks",
                         "value": "{\"text\":\"📧 INSTANTLY LEAD - INTRO TASKS:\\n\\n☐ Send intro SMS:\\n\\\"Hi! {{replace(1.email_account; '@.*'; '')}} from our team just sent over the [tool name] via email! I'm Ana @ Kale (I work with D.J.) and I'll be reaching out in the next few days to get your feedback! Thanks! :)\\\"\\n\\n☐ Send voice memo introducing yourself\\n\\n☐ Set Next Action Date for follow-up (2-4 days)\\n\\n📧 EMAIL THREAD SUMMARY:\\nEmailed by: {{1.email_account}}\\nTheir reply: {{1.reply_text_snippet}}\\n\\n🔗 Full thread: {{1.unibox_url}}\"}"
@@ -396,7 +396,7 @@
                         "connection": null
                       },
                       "mapper": {
-                        "boardId": "YOUR_BOARD_ID",
+                        "boardId": "18390370563",
                         "itemId": "{{2.items[0].id}}",
                         "columnId": "next_action",
                         "value": "Send intro SMS + voice memo, then set follow-up date for tool feedback"
@@ -416,7 +416,7 @@
                         "connection": null
                       },
                       "mapper": {
-                        "boardId": "YOUR_BOARD_ID",
+                        "boardId": "18390370563",
                         "itemId": "{{2.items[0].id}}",
                         "columnId": "next_action_date",
                         "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
@@ -456,8 +456,8 @@
                         "connection": null
                       },
                       "mapper": {
-                        "channel": "YOUR_SLACK_CHANNEL_OR_ANA_DM",
-                        "text": "🎉 *New Instantly Lead: {{2.items[0].name}}*\n\nThey said YES to the tool offer!\n\nEmailed by: {{1.email_account}}\nTheir reply: \"{{1.reply_text_snippet}}\"\n\n*Tasks:*\n1. Send intro SMS\n2. Send voice memo\n3. Set follow-up date\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{2.items[0].id}}|Open in Monday>"
+                        "channel": "ana-alerts",
+                        "text": "🎉 *New Instantly Lead: {{2.items[0].name}}*\n\nThey said YES to the tool offer!\n\nEmailed by: {{1.email_account}}\nTheir reply: \"{{1.reply_text_snippet}}\"\n\n*Tasks:*\n1. Send intro SMS\n2. Send voice memo\n3. Set follow-up date\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{2.items[0].id}}|Open in Monday>"
                       },
                       "metadata": {
                         "designer": {
@@ -507,8 +507,8 @@
     "step_3": "Set Instantly webhook target_hook_url to your Make.com webhook URL",
     "step_4": "Set Instantly webhook event_type to 'lead_interested'",
     "step_5": "Import this blueprint into Make.com",
-    "step_6": "Replace YOUR_BOARD_ID with your Monday board ID",
-    "step_7": "Replace ANA_USER_ID with Ana's Monday user ID",
+    "step_6": "Replace 18390370563 with your Monday board ID",
+    "step_7": "Replace 97053956 with Ana's Monday user ID",
     "step_8": "Configure email and Slack connections",
     "step_9": "Update column IDs if different from defaults",
     "step_10": "Test: Mark a lead as 'interested' in Instantly, verify Monday updates",
@@ -518,7 +518,7 @@
     "method": "POST",
     "url": "https://api.instantly.ai/api/v2/webhooks",
     "headers": {
-      "Authorization": "Bearer YOUR_INSTANTLY_API_KEY",
+      "Authorization": "Bearer Mzg0NjFkOGUtYTljZC00N2Y3LThmZTAtOTJjMWMzZDNjYWU2OnlhaXBod0dCWVZDcA==",
       "Content-Type": "application/json"
     },
     "body": {

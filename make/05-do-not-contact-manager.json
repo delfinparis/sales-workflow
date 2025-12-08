@@ -9,7 +9,7 @@
       "version": 1,
       "parameters": {
         "connection": null,
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "status"
       },
       "mapper": {},
@@ -43,7 +43,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "do_not_contact",
                 "value": "{\"checked\":\"true\"}"
@@ -122,7 +122,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "do_not_contact",
                 "value": "{\"checked\":\"false\"}"
@@ -191,7 +191,7 @@
   },
   "setup_instructions": {
     "step_1": "Import this blueprint into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID with your actual Monday board ID",
+    "step_2": "Replace 18390370563 with your actual Monday board ID",
     "step_3": "Get the column ID for 'Do Not Contact' checkbox and replace 'do_not_contact' if different",
     "step_4": "Configure Monday.com connection",
     "step_5": "Test by manually changing a lead to '30-Day Timeout' - checkbox should auto-check",

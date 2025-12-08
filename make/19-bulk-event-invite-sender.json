@@ -7,7 +7,7 @@
       "id": 1,
       "module": "monday:searchItems",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "queryParams": {
           "rules": [
             {
@@ -95,7 +95,7 @@
       "id": 6,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{3.id}}",
         "columnId": "queue_for_event_invite",
         "value": "{\"checked\":\"false\"}"
@@ -106,7 +106,7 @@
       "id": 7,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{3.id}}",
         "columnId": "last_event_invite",
         "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
@@ -142,7 +142,7 @@
           "id": 10,
           "module": "monday:changeColumnValue",
           "mapper": {
-            "boardId": "YOUR_BOARD_ID",
+            "boardId": "18390370563",
             "itemId": "{{3.id}}",
             "columnId": "queue_for_event_invite",
             "value": "{\"checked\":\"false\"}"
@@ -153,7 +153,7 @@
           "id": 11,
           "module": "slack:postMessage",
           "mapper": {
-            "channel": "ANA_SLACK_DM_OR_CHANNEL",
+            "channel": "ana-alerts",
             "text": "⚠️ Skipped event invite for *{{3.name}}* - already invited {{floor(divide(subtract(now; parseDate(3.column_values.last_event_invite.date; 'YYYY-MM-DD')); 86400000))}} days ago. Wait until 14 days have passed."
           }
         }
@@ -167,10 +167,10 @@
   },
   "setup_instructions": {
     "step_1": "Import into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID",
+    "step_2": "Replace 18390370563",
     "step_3": "Get JustCall API key from JustCall dashboard → Settings → API",
     "step_4": "Replace YOUR_JUSTCALL_API_KEY and YOUR_JUSTCALL_PHONE_NUMBER",
-    "step_5": "Set ANA_SLACK_DM_OR_CHANNEL for skip notifications",
+    "step_5": "Set ana-alerts for skip notifications",
     "step_6": "Update the SMS body text with current event topic",
     "step_7": "Test with one lead queued",
     "step_8": "Activate scenario"

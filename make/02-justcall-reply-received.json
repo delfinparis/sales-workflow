@@ -69,7 +69,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "phone",
         "value": "{{1.from}}"
       },
@@ -117,7 +117,7 @@
                         "connection": null
                       },
                       "mapper": {
-                        "boardId": "YOUR_BOARD_ID",
+                        "boardId": "18390370563",
                         "itemId": "{{2.id}}",
                         "columnId": "status",
                         "value": "{\"label\":\"Dead - Negative Reply\"}"
@@ -196,7 +196,7 @@
                         "connection": null
                       },
                       "mapper": {
-                        "boardId": "YOUR_BOARD_ID",
+                        "boardId": "18390370563",
                         "itemId": "{{2.id}}",
                         "columnId": "status",
                         "value": "{\"label\":\"Replied - Awaiting Ana\"}"
@@ -217,10 +217,10 @@
                         "connection": null
                       },
                       "mapper": {
-                        "boardId": "YOUR_BOARD_ID",
+                        "boardId": "18390370563",
                         "itemId": "{{2.id}}",
                         "columnId": "assigned_to",
-                        "value": "{\"personsAndTeams\":[{\"id\":ANA_USER_ID,\"kind\":\"person\"}]}"
+                        "value": "{\"personsAndTeams\":[{\"id\":97053956,\"kind\":\"person\"}]}"
                       },
                       "metadata": {
                         "designer": {
@@ -228,7 +228,7 @@
                           "y": -100
                         }
                       },
-                      "note": "Assign to Ana - replace ANA_USER_ID with actual Monday user ID"
+                      "note": "Assign to Ana - replace 97053956 with actual Monday user ID"
                     },
                     {
                       "id": 8,
@@ -238,7 +238,7 @@
                         "connection": null
                       },
                       "mapper": {
-                        "boardId": "YOUR_BOARD_ID",
+                        "boardId": "18390370563",
                         "itemId": "{{2.id}}",
                         "columnId": "last_contact_date",
                         "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
@@ -278,8 +278,8 @@
                         "connection": null
                       },
                       "mapper": {
-                        "channel": "YOUR_SLACK_CHANNEL",
-                        "text": "🔔 *New Lead Reply!*\n\n*Lead:* {{2.name}}\n*Message:* {{1.body}}\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{2.id}}|View in Monday>"
+                        "channel": "leads-alerts",
+                        "text": "🔔 *New Lead Reply!*\n\n*Lead:* {{2.name}}\n*Message:* {{1.body}}\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{2.id}}|View in Monday>"
                       },
                       "metadata": {
                         "designer": {
@@ -339,7 +339,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemName": "Unknown Lead - {{1.from}}",
                 "columnValues": {
                   "phone": "{\"phone\":\"{{1.from}}\",\"countryShortName\":\"US\"}",
@@ -388,8 +388,8 @@
     "step_1": "Import this blueprint into Make.com",
     "step_2": "Configure webhook and copy URL",
     "step_3": "In JustCall: Settings > Webhooks > Add webhook for 'SMS Received' event",
-    "step_4": "Replace YOUR_BOARD_ID with actual Monday board ID",
-    "step_5": "Replace ANA_USER_ID with Ana's Monday user ID (query users endpoint to find)",
+    "step_4": "Replace 18390370563 with actual Monday board ID",
+    "step_5": "Replace 97053956 with Ana's Monday user ID (query users endpoint to find)",
     "step_6": "Optional: Configure Slack module or delete it if not using Slack",
     "step_7": "Test by replying to your JustCall number",
     "step_8": "Activate scenario"

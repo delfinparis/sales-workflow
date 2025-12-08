@@ -206,7 +206,7 @@
               },
               "mapper": {
                 "channel": "REA_SLACK_CHANNEL_OR_DM",
-                "text": ":hourglass: *Daily Timeout Report*\n\n*{{length(2.items)}} leads* moved to 'Lost - No Response' after 30 days.\n\nThey've been added to the Event Invite List for future outreach.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354|View Board>"
+                "text": ":hourglass: *Daily Timeout Report*\n\n*{{length(2.items)}} leads* moved to 'Lost - No Response' after 30 days.\n\nThey've been added to the Event Invite List for future outreach.\n\n<https://kalerealty.monday.com/boards/18391158354|View Board>"
               },
               "metadata": {
                 "designer": {

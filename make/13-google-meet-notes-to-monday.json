@@ -164,7 +164,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "queryParams": {
                   "rules": [
                     {
@@ -198,7 +198,7 @@
                         "connection": null
                       },
                       "mapper": {
-                        "boardId": "YOUR_BOARD_ID",
+                        "boardId": "18390370563",
                         "itemId": "{{7.items[0].id}}",
                         "columnId": "ai_meeting_notes",
                         "value": "{{substring(5.content; 0; 50000)}}"
@@ -238,8 +238,8 @@
                         "connection": null
                       },
                       "mapper": {
-                        "channel": "YOUR_SLACK_CHANNEL_OR_DJ_DM",
-                        "text": "📝 *Meeting notes imported for {{7.items[0].name}}*\n\nGemini notes from your {{1.summary}} meeting have been added to Monday.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{7.items[0].id}}|View in Monday> | <{{3.webViewLink}}|View in Google Docs>"
+                        "channel": "dj-alerts",
+                        "text": "📝 *Meeting notes imported for {{7.items[0].name}}*\n\nGemini notes from your {{1.summary}} meeting have been added to Monday.\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{7.items[0].id}}|View in Monday> | <{{3.webViewLink}}|View in Google Docs>"
                       },
                       "metadata": {
                         "designer": {
@@ -274,7 +274,7 @@
                         "connection": null
                       },
                       "mapper": {
-                        "channel": "YOUR_SLACK_CHANNEL_OR_DJ_DM",
+                        "channel": "dj-alerts",
                         "text": "⚠️ *Meeting notes not matched*\n\nCouldn't find a Monday lead for attendee: {{6.attendeeEmail}}\n\nMeeting: {{1.summary}}\n\n<{{3.webViewLink}}|View notes in Google Docs>\n\nYou may need to manually copy notes to the lead record."
                       },
                       "metadata": {
@@ -365,7 +365,7 @@
     "step_1": "Enable 'Take notes with Gemini' in Google Meet settings (Admin Console or per-meeting)",
     "step_2": "Create Make.com scenario from this blueprint",
     "step_3": "Connect Google Calendar, Google Drive, Google Docs, Monday.com",
-    "step_4": "Replace YOUR_BOARD_ID with your Monday board ID",
+    "step_4": "Replace 18390370563 with your Monday board ID",
     "step_5": "Configure which calendar to watch (DJ's primary calendar)",
     "step_6": "Set schedule: Every 30 minutes",
     "step_7": "Test: Have a short Google Meet with notes enabled, wait 30 min, check Monday",

@@ -8,7 +8,7 @@
       "version": 1,
       "parameters": {
         "connection": null,
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "status"
       },
       "mapper": {},
@@ -42,7 +42,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "timeout_until",
                 "value": "{\"date\":\"{{formatDate(addDays(now; 30); 'YYYY-MM-DD')}}\"}"
@@ -63,7 +63,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "assigned_to",
                 "value": "{}"
@@ -118,7 +118,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "hibernation_until",
                 "value": "{\"date\":\"{{formatDate(addDays(now; 90); 'YYYY-MM-DD')}}\"}"
@@ -139,7 +139,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "assigned_to",
                 "value": "{}"
@@ -194,10 +194,10 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "assigned_to",
-                "value": "{\"personsAndTeams\":[{\"id\":JENNICA_USER_ID,\"kind\":\"person\"}]}"
+                "value": "{\"personsAndTeams\":[{\"id\":96623424,\"kind\":\"person\"}]}"
               },
               "metadata": {
                 "designer": {
@@ -215,7 +215,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "last_contact_date",
                 "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
@@ -252,10 +252,10 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "assigned_to",
-                "value": "{\"personsAndTeams\":[{\"id\":ANA_USER_ID,\"kind\":\"person\"}]}"
+                "value": "{\"personsAndTeams\":[{\"id\":97053956,\"kind\":\"person\"}]}"
               },
               "metadata": {
                 "designer": {
@@ -273,7 +273,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "last_contact_date",
                 "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
@@ -293,8 +293,8 @@
                 "connection": null
               },
               "mapper": {
-                "channel": "YOUR_SLACK_CHANNEL",
-                "text": "🔔 *New Lead Reply!*\n\nLead *{{1.itemName}}* just replied and is ready for follow-up.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{1.itemId}}|Open in Monday>"
+                "channel": "leads-alerts",
+                "text": "🔔 *New Lead Reply!*\n\nLead *{{1.itemName}}* just replied and is ready for follow-up.\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{1.itemId}}|Open in Monday>"
               },
               "metadata": {
                 "designer": {
@@ -328,7 +328,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "next_action",
                 "value": "Call for tool feedback → if no answer, SMS: \"Hey! Did you get a chance to try that tool?\""
@@ -369,8 +369,8 @@
   },
   "setup_instructions": {
     "step_1": "Import this blueprint into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID with actual Monday board ID",
-    "step_3": "Replace JENNICA_USER_ID and ANA_USER_ID with actual Monday user IDs",
+    "step_2": "Replace 18390370563 with actual Monday board ID",
+    "step_3": "Replace 96623424 and 97053956 with actual Monday user IDs",
     "step_4": "Configure Monday.com connection (uses webhook trigger)",
     "step_5": "Optional: Configure Slack module or remove if not needed",
     "step_6": "Test by manually changing a lead's status to each target status",

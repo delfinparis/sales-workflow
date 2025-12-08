@@ -27,7 +27,7 @@
       "version": 1,
       "parameters": {
         "connection": null,
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "status"
       },
       "mapper": {},
@@ -71,7 +71,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "current_tasks",
         "value": "{\"text\":\"📋 TOOL OFFERING CHECKLIST:\\n\\n☐ Send ChatGPT tool link via SMS\\n☐ Send voice memo introducing yourself\\n☐ Set 'Next Action Date' for follow-up call (YOU DECIDE WHEN)\\n☐ Confirm 'Next Action' field has your plan\\n\\n⚠️ DON'T MOVE ON until you've set your follow-up date!\\n\\n💡 Tip: 2-4 days is usually good for tool follow-up.\"}"
@@ -92,7 +92,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "next_action",
         "value": "Call for tool feedback → if no answer, SMS: \"Hey! Did you get a chance to try that tool?\""
@@ -132,7 +132,7 @@
       "version": 1,
       "parameters": {
         "connection": null,
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "status"
       },
       "mapper": {},
@@ -266,8 +266,8 @@
         "connection": null
       },
       "mapper": {
-        "channel": "YOUR_SLACK_CHANNEL_OR_ANA_DM",
-        "text": "⚠️ *Follow-up Date Missing!*\n\nYou offered a tool to *{{itemName}}* but didn't set a follow-up date.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{itemId}}|Set it now →>\n\nRemember: You need to call them in a few days to get feedback!"
+        "channel": "ana-alerts",
+        "text": "⚠️ *Follow-up Date Missing!*\n\nYou offered a tool to *{{itemName}}* but didn't set a follow-up date.\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{itemId}}|Set it now →>\n\nRemember: You need to call them in a few days to get feedback!"
       },
       "metadata": {
         "designer": {
@@ -282,9 +282,9 @@
     "module": "email:sendEmail",
     "note": "Use this instead of Slack if preferred",
     "mapper": {
-      "to": "ana@kalerealty.com",
+      "to": "anaya@kalerealty.com",
       "subject": "⚠️ Set follow-up date for {{itemName}}",
-      "body": "You offered a tool to {{itemName}} but didn't set a follow-up date.\n\nSet it now: https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{itemId}}\n\nRemember: You need to call them in a few days to get feedback!"
+      "body": "You offered a tool to {{itemName}} but didn't set a follow-up date.\n\nSet it now: https://kalerealty.monday.com/boards/18390370563/pulses/{{itemId}}\n\nRemember: You need to call them in a few days to get feedback!"
     }
   },
   "metadata": {
@@ -295,7 +295,7 @@
     "step_1": "Create TWO scenarios in Make.com from this blueprint",
     "step_2": "Scenario 1: 'Tool Offered - Checklist' using flow_scenario_1",
     "step_3": "Scenario 2: 'Tool Offered - Date Check' using flow_scenario_2",
-    "step_4": "Replace YOUR_BOARD_ID in both scenarios",
+    "step_4": "Replace 18390370563 in both scenarios",
     "step_5": "Update column IDs if different: 'current_tasks', 'next_action', 'next_action_date'",
     "step_6": "Configure Slack connection and set channel/DM for Ana (or use email alternative)",
     "step_7": "Configure Monday.com connections",

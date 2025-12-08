@@ -79,7 +79,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "phone",
         "value": "{{1.to}}"
       },
@@ -120,7 +120,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{2.id}}",
                 "columnId": "status",
                 "value": "{\"label\":\"SMS Sent\"}"
@@ -141,7 +141,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{2.id}}",
                 "columnId": "last_contact_date",
                 "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
@@ -226,7 +226,7 @@
     "step_2": "Configure the webhook module - click it and copy the generated webhook URL",
     "step_3": "In JustCall, go to Settings > Integrations > Webhooks",
     "step_4": "Add webhook: Event = 'SMS Sent', URL = (paste from step 2), Method = POST",
-    "step_5": "Replace YOUR_BOARD_ID with your actual Monday board ID in all modules",
+    "step_5": "Replace 18390370563 with your actual Monday board ID in all modules",
     "step_6": "Configure Monday.com connection in each Monday module",
     "step_7": "Test by sending a test SMS, verify Monday updates",
     "step_8": "Activate the scenario"

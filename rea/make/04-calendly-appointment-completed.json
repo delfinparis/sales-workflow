@@ -85,7 +85,7 @@
       },
       "mapper": {
         "channel": "DJ_SLACK_CHANNEL_OR_DM",
-        "text": ":question: *Appointment Status Check*\n\n*Lead:* {{3.name}}\n*Scheduled:* Yesterday/Today\n\nDid this appointment happen?\n\n:white_check_mark: Mark as *Completed* in Monday\n:x: Mark as *No Show* in Monday\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354/pulses/{{3.id}}|Open in Monday>"
+        "text": ":question: *Appointment Status Check*\n\n*Lead:* {{3.name}}\n*Scheduled:* Yesterday/Today\n\nDid this appointment happen?\n\n:white_check_mark: Mark as *Completed* in Monday\n:x: Mark as *No Show* in Monday\n\n<https://kalerealty.monday.com/boards/18391158354/pulses/{{3.id}}|Open in Monday>"
       },
       "metadata": {
         "designer": {

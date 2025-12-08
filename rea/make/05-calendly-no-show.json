@@ -135,7 +135,7 @@
       },
       "mapper": {
         "channel": "REA_SLACK_CHANNEL_OR_DM",
-        "text": ":x: *No Show Alert*\n\n*Lead:* {{3.name}}\n*No Show Count:* {{add(3.column_values.numeric_mkybzb1j.value; 1)}}\n\n*Action:* Please call to reschedule\n*Calendly:* https://joinkale.com/schedule\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354/pulses/{{1.itemId}}|Open in Monday>"
+        "text": ":x: *No Show Alert*\n\n*Lead:* {{3.name}}\n*No Show Count:* {{add(3.column_values.numeric_mkybzb1j.value; 1)}}\n\n*Action:* Please call to reschedule\n*Calendly:* https://joinkale.com/schedule\n\n<https://kalerealty.monday.com/boards/18391158354/pulses/{{1.itemId}}|Open in Monday>"
       },
       "metadata": {
         "designer": {

@@ -122,7 +122,7 @@
               },
               "mapper": {
                 "channel": "REA_SLACK_CHANNEL_OR_DM",
-                "text": ":telephone_receiver: *Week 3 Calling Reminder!*\n\nIt's the 3rd week of the month - time to call your \"Never Responded\" leads!\n\n*{{length(3.items)}} leads* waiting for a call:\n\n{{5.text}}\n\n---\n\n*Strategy:*\n1. Call each lead\n2. If they answer - send Calendly link: https://joinkale.com/schedule\n3. If no answer - leave voicemail, try again tomorrow\n4. If they respond - move to \"Responded\" group\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354|Open Board - Never Responded View>"
+                "text": ":telephone_receiver: *Week 3 Calling Reminder!*\n\nIt's the 3rd week of the month - time to call your \"Never Responded\" leads!\n\n*{{length(3.items)}} leads* waiting for a call:\n\n{{5.text}}\n\n---\n\n*Strategy:*\n1. Call each lead\n2. If they answer - send Calendly link: https://joinkale.com/schedule\n3. If no answer - leave voicemail, try again tomorrow\n4. If they respond - move to \"Responded\" group\n\n<https://kalerealty.monday.com/boards/18391158354|Open Board - Never Responded View>"
               },
               "metadata": {
                 "designer": {

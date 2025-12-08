@@ -228,7 +228,7 @@
               },
               "mapper": {
                 "channel": "REA_SLACK_CHANNEL_OR_DM",
-                "text": ":arrows_counterclockwise: *Hibernation Expiration Alert*\n\n*{{length(2.items)}} lead(s)* are ready for re-engagement!\n\nThese agents chose another firm 90 days ago. Time to check in and see how it's going.\n\n*Strategy:* Don't pitch - just reconnect. If they're unhappy, they'll tell you.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354|View Board>"
+                "text": ":arrows_counterclockwise: *Hibernation Expiration Alert*\n\n*{{length(2.items)}} lead(s)* are ready for re-engagement!\n\nThese agents chose another firm 90 days ago. Time to check in and see how it's going.\n\n*Strategy:* Don't pitch - just reconnect. If they're unhappy, they'll tell you.\n\n<https://kalerealty.monday.com/boards/18391158354|View Board>"
               },
               "metadata": {
                 "designer": {

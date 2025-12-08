@@ -9,7 +9,7 @@
       "version": 1,
       "parameters": {
         "connection": null,
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "status"
       },
       "mapper": {},
@@ -85,7 +85,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "current_tasks",
                 "value": "{\"text\":\"📋 NEW LISTING - Response Options:\\n\\n1️⃣ Listings are everything right now! Getting any action on it yet?\\n\\n2️⃣ YW - market's picking up! How was summer biz?\\n\\n3️⃣ Exciting! Working mostly with sellers these days?\"}"
@@ -121,7 +121,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "current_tasks",
                 "value": "{\"text\":\"📋 PENDING/UNDER CONTRACT - Response Options:\\n\\n1️⃣ Exciting! Any roadblocks on this one or smooth sailing?\\n\\n2️⃣ Awesome job! Working more buyers/sellers these days? (check Courted for list/buy side)\\n\\n3️⃣ YW - market's picking up! How was summer biz?\"}"
@@ -157,7 +157,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "current_tasks",
                 "value": "{\"text\":\"📋 CLOSED SALE - Response Options:\\n\\n1️⃣ YW - market's picking up! How was summer biz?\\n\\n2️⃣ Congrats again - working more buyers/sellers these days? (check Courted for list/buy side)\\n\\n3️⃣ Awesome - any roadblocks or was this one easy?\"}"
@@ -193,7 +193,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "current_tasks",
                 "value": "{\"text\":\"📋 CLOSED RENTAL - Response Options:\\n\\n1️⃣ YW - market's picking up! How was summer biz?\\n\\n2️⃣ Do you think they could buy when lease up?\\n\\n3️⃣ Nice! How's rental market right now - competitive?\"}"
@@ -229,7 +229,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "current_tasks",
                 "value": "{\"text\":\"📋 GENERAL - Response Options:\\n\\n1️⃣ YW - market's picking up! How was summer biz?\\n\\n2️⃣ Thanks for the reply! How long have you been in the business?\\n\\n3️⃣ Appreciate you! Anything exciting going on in your market right now?\"}"
@@ -310,7 +310,7 @@
   },
   "setup_instructions": {
     "step_1": "Import this blueprint into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID with your actual Monday board ID",
+    "step_2": "Replace 18390370563 with your actual Monday board ID",
     "step_3": "Get column ID for 'Current Tasks' (long text) and 'Superlative Type' (dropdown)",
     "step_4": "Update column IDs in the scenario if different from 'current_tasks' and 'superlative_type'",
     "step_5": "Configure Monday.com connection",

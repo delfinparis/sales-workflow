@@ -7,7 +7,7 @@
       "id": 1,
       "module": "monday:searchItems",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "queryParams": {
           "rules": [
             {
@@ -58,7 +58,7 @@
               "id": 4,
               "module": "slack:postMessage",
               "mapper": {
-                "channel": "DJ_SLACK_DM_OR_CHANNEL",
+                "channel": "dj-alerts",
                 "text": "📅 *Meeting Prep Reminder - 24 Hours*\n\n*{{2.name}}* - Meeting tomorrow\n\n*Time:* {{formatDate(parseDate(2.column_values.meeting_date.date; 'YYYY-MM-DD'); 'MMM D')}} at {{2.column_values.meeting_date.time}}\n\n*Prep Tasks:*\n• Review their Current Brokerage & Deal Count\n• Check Notes for context from Ana\n• Review Current Tasks for meeting questions\n• Have Kale value props ready\n\n<{{2.column_values.meeting_url.url}}|Join Meeting Link>\n\n✅ Mark *Meeting Prep Done* when ready"
               }
             }
@@ -87,7 +87,7 @@
               "id": 5,
               "module": "slack:postMessage",
               "mapper": {
-                "channel": "DJ_SLACK_DM_OR_CHANNEL",
+                "channel": "dj-alerts",
                 "text": "⚠️ *Meeting in 1 Hour - Prep Not Done!*\n\n*{{2.name}}*\n\n*Quick Prep:*\n• They do {{2.column_values.deal_count.text}} deals/year\n• Currently at: {{2.column_values.current_brokerage.text}}\n• Priority: {{2.column_values.priority.text}}\n\n<{{2.column_values.meeting_url.url}}|Join Meeting>\n\n✅ Mark *Meeting Prep Done* now!"
               }
             }
@@ -116,7 +116,7 @@
               "id": 6,
               "module": "slack:postMessage",
               "mapper": {
-                "channel": "DJ_SLACK_DM_OR_CHANNEL",
+                "channel": "dj-alerts",
                 "text": "🚨 *MEETING IN 10 MINUTES!*\n\n*{{2.name}}*\n\n<{{2.column_values.meeting_url.url}}|JOIN NOW>\n\nKey questions:\n• \"What made you interested in chatting?\"\n• \"What's the biggest challenge you're facing?\"\n• \"Have you thought about making a change?\""
               }
             }
@@ -132,8 +132,8 @@
   },
   "setup_instructions": {
     "step_1": "Import into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID",
-    "step_3": "Set DJ_SLACK_DM_OR_CHANNEL to DJ's Slack DM or a dedicated channel",
+    "step_2": "Replace 18390370563",
+    "step_3": "Set dj-alerts to DJ's Slack DM or a dedicated channel",
     "step_4": "Verify column IDs match your board",
     "step_5": "Test with a meeting scheduled for 25 hours from now",
     "step_6": "Activate scenario"

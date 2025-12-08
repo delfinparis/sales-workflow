@@ -18,7 +18,7 @@
       "id": 1,
       "module": "monday:searchItems",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "queryParams": {
           "rules": [
             {
@@ -63,8 +63,8 @@
       "id": 4,
       "module": "slack:postMessage",
       "mapper": {
-        "channel": "DJ_SLACK_DM_OR_CHANNEL",
-        "text": "⏰ *Meeting Processing Overdue - 24+ Hours*\n\n*{{2.name}}* had a meeting and needs processing:\n\n*Missing fields:*\n{{if(equals(2.column_values.meeting_outcome.text; ''); '• Meeting Outcome\n'; '')}}{{if(equals(2.column_values.current_brokerage.text; ''); '• Current Brokerage\n'; '')}}{{if(equals(2.column_values.why_considering_change.text; ''); '• Why Considering Change\n'; '')}}{{if(equals(2.column_values.timeline.text; ''); '• Timeline\n'; '')}}\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{2.id}}|Open in Monday>\n\n⚠️ Don't let this lead fall through the cracks!"
+        "channel": "dj-alerts",
+        "text": "⏰ *Meeting Processing Overdue - 24+ Hours*\n\n*{{2.name}}* had a meeting and needs processing:\n\n*Missing fields:*\n{{if(equals(2.column_values.meeting_outcome.text; ''); '• Meeting Outcome\n'; '')}}{{if(equals(2.column_values.current_brokerage.text; ''); '• Current Brokerage\n'; '')}}{{if(equals(2.column_values.why_considering_change.text; ''); '• Why Considering Change\n'; '')}}{{if(equals(2.column_values.timeline.text; ''); '• Timeline\n'; '')}}\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{2.id}}|Open in Monday>\n\n⚠️ Don't let this lead fall through the cracks!"
       }
     }
   ],
@@ -73,7 +73,7 @@
       "id": 1,
       "module": "monday:searchItems",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "queryParams": {
           "rules": [
             {
@@ -107,16 +107,16 @@
       "id": 3,
       "module": "slack:postMessage",
       "mapper": {
-        "channel": "DJ_SLACK_DM_OR_CHANNEL",
-        "text": "📊 *Daily 5pm Meeting Check*\n\n*Needs Processing:* {{length(filter(1.items; 'item'; equals(item.column_values.meeting_outcome.text; '')))}} leads\n\n*In Offer Extended:* {{length(filter(1.items; 'item'; equals(item.column_values.status.text; 'Offer Extended')))}} leads\n\n{{if(length(filter(1.items; 'item'; equals(item.column_values.meeting_outcome.text; ''))) > 0; '⚠️ Complete meeting processing before EOD!'; '✅ All meetings processed!')}}\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID|Open Board>"
+        "channel": "dj-alerts",
+        "text": "📊 *Daily 5pm Meeting Check*\n\n*Needs Processing:* {{length(filter(1.items; 'item'; equals(item.column_values.meeting_outcome.text; '')))}} leads\n\n*In Offer Extended:* {{length(filter(1.items; 'item'; equals(item.column_values.status.text; 'Offer Extended')))}} leads\n\n{{if(length(filter(1.items; 'item'; equals(item.column_values.meeting_outcome.text; ''))) > 0; '⚠️ Complete meeting processing before EOD!'; '✅ All meetings processed!')}}\n\n<https://kalerealty.monday.com/boards/18390370563|Open Board>"
       }
     }
   ],
   "setup_instructions": {
     "step_1": "Import Scenario A (hourly check)",
     "step_2": "Import Scenario B (daily 5pm)",
-    "step_3": "Replace YOUR_BOARD_ID and YOUR_MONDAY_URL",
-    "step_4": "Set DJ_SLACK_DM_OR_CHANNEL",
+    "step_3": "Replace 18390370563 and kalerealty",
+    "step_4": "Set dj-alerts",
     "step_5": "Test Scenario A by creating a DJ Meeting Complete lead with empty fields",
     "step_6": "Activate both scenarios"
   },

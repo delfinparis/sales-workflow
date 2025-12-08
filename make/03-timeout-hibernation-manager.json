@@ -28,7 +28,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "queryParams": {
           "rules": [
             {
@@ -83,7 +83,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{3.id}}",
                 "columnId": "status",
                 "value": "{\"label\":\"New Lead\"}"
@@ -104,7 +104,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{3.id}}",
                 "columnId": "timeout_until",
                 "value": "{}"
@@ -164,7 +164,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{3.id}}",
                 "columnId": "status",
                 "value": "{\"label\":\"New Lead\"}"
@@ -185,7 +185,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{3.id}}",
                 "columnId": "hibernation_until",
                 "value": "{}"
@@ -275,7 +275,7 @@
   },
   "setup_instructions": {
     "step_1": "Import this blueprint into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID with actual Monday board ID",
+    "step_2": "Replace 18390370563 with actual Monday board ID",
     "step_3": "Configure Monday.com connection",
     "step_4": "Verify column IDs match your board (timeout_until, hibernation_until, status)",
     "step_5": "Set scheduling to run daily at 8:00 AM (or preferred time)",

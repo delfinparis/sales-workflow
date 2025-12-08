@@ -152,7 +152,7 @@
               },
               "mapper": {
                 "channel": "REA_SLACK_CHANNEL_OR_DM",
-                "text": ":speech_balloon: *New SMS Reply from {{2.display_name}}!*\n\n\"{{1.body}}\"\n\n*Next steps:*\n1. Reply within 24 hrs with Calendly link\n2. https://joinkale.com/schedule\n\n<https://YOUR_MONDAY_URL.monday.com/boards/18391158354/pulses/{{2.custom.monday_item_id}}|Open in Monday>"
+                "text": ":speech_balloon: *New SMS Reply from {{2.display_name}}!*\n\n\"{{1.body}}\"\n\n*Next steps:*\n1. Reply within 24 hrs with Calendly link\n2. https://joinkale.com/schedule\n\n<https://kalerealty.monday.com/boards/18391158354/pulses/{{2.custom.monday_item_id}}|Open in Monday>"
               },
               "metadata": {
                 "designer": {

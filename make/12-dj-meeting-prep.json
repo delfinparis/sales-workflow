@@ -9,7 +9,7 @@
       "version": 1,
       "parameters": {
         "connection": null,
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "status"
       },
       "mapper": {},
@@ -62,7 +62,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "current_tasks",
                 "value": "{\"text\":\"🎯 DJ MEETING PREP CHECKLIST\\n\\n📋 BEFORE THE MEETING:\\n☐ Review their Courted profile\\n☐ Check Notes for conversation history\\n☐ Review what tool they received\\n☐ Note their superlative/achievement\\n\\n❓ QUESTIONS TO ASK:\\n\\n**Opening:**\\n• \\\"Thanks for taking the time! What made you interested in chatting?\\\"\\n• \\\"How's business been going lately?\\\"\\n\\n**Current Situation:**\\n• \\\"Where are you hanging your license right now?\\\"\\n• \\\"How long have you been there?\\\"\\n• \\\"What do you like about your current setup?\\\"\\n\\n**Pain Points (The Gold):**\\n• \\\"What's the biggest challenge you're facing right now?\\\"\\n• \\\"If you could change one thing about your brokerage, what would it be?\\\"\\n• \\\"What support do you wish you had?\\\"\\n\\n**Goals:**\\n• \\\"Where do you want to be in 2-3 years?\\\"\\n• \\\"What would help you get to the next level?\\\"\\n• \\\"What's your target for deals this year?\\\"\\n\\n**The Ask (If Warm):**\\n• \\\"Have you ever thought about making a change?\\\"\\n• \\\"What would your ideal brokerage look like?\\\"\\n• \\\"Would you be open to learning more about Kale?\\\"\\n\\n**Timeline:**\\n• \\\"If you were to make a move, when would that be?\\\"\\n• \\\"What would need to happen for you to consider a change?\\\"\\n\\n**Close:**\\n• \\\"What questions do you have for me?\\\"\\n• \\\"What would be most helpful as a next step?\\\"\\n\\n📝 AFTER THE MEETING:\\n☐ Review MeetGeek AI notes\\n☐ Fill in Meeting Outcome\\n☐ Fill in Current Brokerage\\n☐ Fill in Why Considering Change\\n☐ Fill in Business Goals\\n☐ Fill in Timeline\\n☐ Fill in Objections\\n☐ Update Status based on outcome\\n☐ Set Next Action if follow-up needed\"}"
@@ -83,7 +83,7 @@
                 "connection": null
               },
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "next_action",
                 "value": "Prep for meeting: review Courted profile + conversation history. After: fill in meeting fields."
@@ -104,8 +104,8 @@
                 "connection": null
               },
               "mapper": {
-                "channel": "YOUR_SLACK_CHANNEL_OR_DJ_DM",
-                "text": "📅 *Meeting Scheduled: {{3.name}}*\n\n*Meeting Date:* Check Calendly/Calendar\n*Their Achievement:* {{3.column_values.superlative_type.text}}\n*Deal Count:* {{3.column_values.deal_count.text}}/year\n\n*Prep checklist and questions are in the Current Tasks column.*\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID/pulses/{{1.itemId}}|Open in Monday>"
+                "channel": "dj-alerts",
+                "text": "📅 *Meeting Scheduled: {{3.name}}*\n\n*Meeting Date:* Check Calendly/Calendar\n*Their Achievement:* {{3.column_values.superlative_type.text}}\n*Deal Count:* {{3.column_values.deal_count.text}}/year\n\n*Prep checklist and questions are in the Current Tasks column.*\n\n<https://kalerealty.monday.com/boards/18390370563/pulses/{{1.itemId}}|Open in Monday>"
               },
               "metadata": {
                 "designer": {
@@ -138,7 +138,7 @@
   },
   "setup_instructions": {
     "step_1": "Import this blueprint into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID with your Monday board ID",
+    "step_2": "Replace 18390370563 with your Monday board ID",
     "step_3": "Configure Monday.com connection",
     "step_4": "Configure Slack connection and channel",
     "step_5": "Update column IDs if different from defaults",

@@ -7,7 +7,7 @@
       "id": 1,
       "module": "monday:watchColumnsChange",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "status"
       },
       "note": "Watch for status changes"
@@ -32,7 +32,7 @@
       "id": 3,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "offer_date",
         "value": "{\"date\":\"{{formatDate(now; 'YYYY-MM-DD')}}\"}"
@@ -43,7 +43,7 @@
       "id": 4,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "day_3_followup_done",
         "value": "{\"checked\":\"false\"}"
@@ -54,7 +54,7 @@
       "id": 5,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "day_7_followup_done",
         "value": "{\"checked\":\"false\"}"
@@ -65,7 +65,7 @@
       "id": 6,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "day_14_followup_done",
         "value": "{\"checked\":\"false\"}"
@@ -76,7 +76,7 @@
       "id": 7,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "day_21_followup_done",
         "value": "{\"checked\":\"false\"}"
@@ -87,7 +87,7 @@
       "id": 8,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "current_tasks",
         "value": "\"📋 **OFFER EXTENDED - FOLLOW-UP CADENCE**\\n\\n**Day 3:** Quick check-in, surface objections\\n• \\\"Have you had a chance to look over the details?\\\"\\n• \\\"Any questions I can answer?\\\"\\n\\n**Day 7:** Add value (don't just check in)\\n• Share relevant insight/content\\n• Invite to event\\n• Offer agent reference call\\n\\n**Day 14:** Direct conversation\\n• \\\"Where are you at in your thinking?\\\"\\n• \\\"Is there something holding you back?\\\"\\n\\n**Day 21:** Create urgency\\n• Reference timing/onboarding\\n• Address specific objections\\n\\n**Day 30:** Decision time\\n• Close, nurture, or hibernate\\n\\n**Remember:** System will remind you. Check boxes as you complete each follow-up.\""
@@ -98,7 +98,7 @@
       "id": 9,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "next_action",
         "value": "\"Day 3 follow-up call\""
@@ -109,7 +109,7 @@
       "id": 10,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "next_action_date",
         "value": "{\"date\":\"{{formatDate(addDays(now; 3); 'YYYY-MM-DD')}}\"}"
@@ -128,7 +128,7 @@
       "id": 12,
       "module": "slack:postMessage",
       "mapper": {
-        "channel": "DJ_SLACK_DM_OR_CHANNEL",
+        "channel": "dj-alerts",
         "text": "🎯 *Offer Extended to {{1.itemName}}*\n\nFollow-up cadence started. First check-in: *{{formatDate(addDays(now; 3); 'MMM D')}}* (Day 3)\n\nI'll remind you at each milestone. Good luck! 🍀"
       }
     },
@@ -160,7 +160,7 @@
           "id": 15,
           "module": "slack:postMessage",
           "mapper": {
-            "channel": "DJ_SLACK_DM_OR_CHANNEL",
+            "channel": "dj-alerts",
             "text": "💡 *Tip:* Consider connecting with *{{1.itemName}}* on Facebook. Social intel can help with personalized follow-ups!\n\nCheck the *Facebook Connected* box in Monday once done."
           }
         }
@@ -169,8 +169,8 @@
   ],
   "setup_instructions": {
     "step_1": "Import into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID",
-    "step_3": "Set DJ_SLACK_DM_OR_CHANNEL",
+    "step_2": "Replace 18390370563",
+    "step_3": "Set dj-alerts",
     "step_4": "Verify all column IDs match your board",
     "step_5": "Test by changing a lead's status to 'Offer Extended'",
     "step_6": "Activate scenario"

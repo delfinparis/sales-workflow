@@ -11,7 +11,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "queryParams": {
           "rules": [
             {
@@ -83,8 +83,8 @@
         "connection": null
       },
       "mapper": {
-        "channel": "YOUR_SLACK_CHANNEL_OR_ANA_DM",
-        "text": "🚨 *Stale Leads Alert*\n\nThese leads haven't been touched in 7+ days:\n\n{{join(map(1.items; 'item'; '• ' + item.name + ' (' + item.column_values.status.text + ') - Last contact: ' + item.column_values.last_contact_date.text); '\n')}}\n\n*Action needed:* Follow up or move to Hibernation if cold.\n\n<https://YOUR_MONDAY_URL.monday.com/boards/YOUR_BOARD_ID|Open Board>"
+        "channel": "ana-alerts",
+        "text": "🚨 *Stale Leads Alert*\n\nThese leads haven't been touched in 7+ days:\n\n{{join(map(1.items; 'item'; '• ' + item.name + ' (' + item.column_values.status.text + ') - Last contact: ' + item.column_values.last_contact_date.text); '\n')}}\n\n*Action needed:* Follow up or move to Hibernation if cold.\n\n<https://kalerealty.monday.com/boards/18390370563|Open Board>"
       },
       "metadata": {
         "designer": {
@@ -103,7 +103,7 @@
   },
   "setup_instructions": {
     "step_1": "Import this blueprint into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID with your Monday board ID",
+    "step_2": "Replace 18390370563 with your Monday board ID",
     "step_3": "Configure Slack connection and channel (Ana's DM or team channel)",
     "step_4": "Set schedule: Daily at 9:00 AM",
     "step_5": "Test by temporarily changing the date filter to 1 day",

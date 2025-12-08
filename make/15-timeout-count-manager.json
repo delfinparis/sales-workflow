@@ -11,7 +11,7 @@
         "connection": null
       },
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "columnId": "status"
       },
       "note": "Watch for status changes"
@@ -46,7 +46,7 @@
       "id": 4,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "timeout_until",
         "value": "{\"date\":\"{{formatDate(addDays(now; 30); 'YYYY-MM-DD')}}\"}"
@@ -57,7 +57,7 @@
       "id": 5,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "timeout_count",
         "value": "{{if(3.column_values.timeout_count.text; add(3.column_values.timeout_count.text; 1); 1)}}"
@@ -68,7 +68,7 @@
       "id": 6,
       "module": "monday:changeColumnValue",
       "mapper": {
-        "boardId": "YOUR_BOARD_ID",
+        "boardId": "18390370563",
         "itemId": "{{1.itemId}}",
         "columnId": "do_not_contact",
         "value": "{\"checked\":\"true\"}"
@@ -86,7 +86,7 @@
               "id": 8,
               "module": "monday:changeColumnValue",
               "mapper": {
-                "boardId": "YOUR_BOARD_ID",
+                "boardId": "18390370563",
                 "itemId": "{{1.itemId}}",
                 "columnId": "status",
                 "value": "{\"label\":\"Hibernation 90-Day\"}"
@@ -105,7 +105,7 @@
               "id": 10,
               "module": "slack:postMessage",
               "mapper": {
-                "channel": "YOUR_SLACK_CHANNEL",
+                "channel": "leads-alerts",
                 "text": "⚠️ *{{3.name}}* auto-hibernated after 3 timeouts with no response."
               }
             }
@@ -145,7 +145,7 @@
   ],
   "setup_instructions": {
     "step_1": "Import this blueprint into Make.com",
-    "step_2": "Replace YOUR_BOARD_ID with your Monday board ID",
+    "step_2": "Replace 18390370563 with your Monday board ID",
     "step_3": "Configure Monday.com and Slack connections",
     "step_4": "Ensure 'Timeout Count' column exists on your board",
     "step_5": "Test: Manually change a lead to 30-Day Timeout",
