@@ -8,6 +8,43 @@ You're the **hunter**. You find real estate agents who just achieved something g
 
 ---
 
+## Why This Works (The Psychology)
+
+Agents love recognition. Most never get congratulated for their wins - not by their broker, not by colleagues, nobody. When you text them celebrating their achievement, you're:
+
+1. **Making them feel seen** → Builds instant goodwill
+2. **Standing out from recruiters** → No pitch, just congrats
+3. **Opening a door** → They're more likely to respond warmly
+
+**Your success rate:** Expect 15-25% reply rate. That's excellent for cold outreach!
+
+---
+
+## Success Metrics (What Good Looks Like)
+
+| Metric | Target | Why It Matters |
+|--------|--------|----------------|
+| SMS sent per day | 20 | Volume creates opportunities |
+| Reply rate | 15-25% | Higher = better personalization |
+| Quality superlatives | 100% | Never send generic messages |
+
+**Benchmark:** A good week = 100 SMS sent, 15-25 replies for Ana.
+
+---
+
+## Best Times to Send
+
+| Time | Quality | Notes |
+|------|---------|-------|
+| **9-11 AM** | ⭐⭐⭐ | Best! They're starting their day |
+| **1-3 PM** | ⭐⭐ | Good, post-lunch |
+| **4-6 PM** | ⭐ | Okay, but winding down |
+| Evenings/weekends | ❌ | Avoid - feels intrusive |
+
+**Pro tip:** Tuesday-Thursday tend to have best response rates.
+
+---
+
 ## Getting Started (One-Time Setup)
 
 ### Tools You Need Open
@@ -56,15 +93,36 @@ For **each lead** in your view, do this:
 ```
 1. Open JustCall
 2. Find their phone number (from Monday)
-3. Send this message (personalize it!):
+3. Pick a template and personalize it:
 
-   "Hey [First Name] - saw you just [their achievement].
-    Amazing work! Congrats! - Ana @ Kale"
+TEMPLATE VARIATIONS (rotate these!):
+---
+#1 Standard:
+"Hey [Name] - saw you just closed on [address]. Amazing work! Congrats! - Ana @ Kale"
 
-EXAMPLES:
-- "Hey Sarah - saw you just closed on 123 Main St. Amazing work! Congrats! - Ana @ Kale"
-- "Hey Mike - saw you got a new listing on Oak Ave. Looking great! Congrats! - Ana @ Kale"
-- "Hey Lisa - saw your YoY growth numbers - crushing it! Congrats! - Ana @ Kale"
+#2 Enthusiastic:
+"Hey [Name]! Just saw [achievement] - that's awesome! Congrats! 🎉 - Ana @ Kale"
+
+#3 Curious:
+"Hey [Name] - noticed you just [achievement]. Nice work! How long was that one in the works? - Ana @ Kale"
+
+#4 Market-aware:
+"Hey [Name] - [achievement] in this market? Impressive! Well done! - Ana @ Kale"
+
+#5 Specific praise:
+"Hey [Name] - saw you closed on [address]. Love that neighborhood! Great work! - Ana @ Kale"
+
+#6 Short & sweet:
+"Hey [Name]! Congrats on [achievement]! Well deserved! - Ana @ Kale"
+---
+
+Mix them up so you're not sending the same thing every time!
+
+PERSONALIZATION TIPS:
+✓ Use their first name (not full name)
+✓ Be specific about the achievement (address, neighborhood, etc.)
+✓ If luxury property, acknowledge it: "Wow, [address] - beautiful property!"
+✓ If they closed multiple, mention it: "Another one! You're on fire!"
 ```
 
 #### D. Update Monday (15 sec)

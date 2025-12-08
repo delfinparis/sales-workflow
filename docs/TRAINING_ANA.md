@@ -8,6 +8,39 @@ You're the **relationship builder**. Jennica finds agents and sends the first te
 
 ---
 
+## Why This Works (The Psychology)
+
+Real estate agents get pitched constantly. They're skeptical of anyone who seems "salesy." Our approach works because:
+
+1. **We lead with congratulations, not a pitch** → They feel seen, not targeted
+2. **We offer value before asking for anything** → Builds trust and reciprocity
+3. **We're patient** → Most recruiters give up after 1-2 touches; we nurture for weeks
+4. **We listen for pain** → We don't create problems; we help solve ones they already have
+
+**The typical journey takes 2-4 weeks** from first reply to scheduling with DJ. Don't rush it. The agents who feel genuinely cared for become the best recruits.
+
+### Your Mindset
+- You're not "selling" - you're **helping agents find a better situation**
+- Rejection isn't personal - it's about timing and fit
+- Every "no" is a "not yet" - they may come back in 90 days
+- You're building **relationships**, not closing deals
+
+---
+
+## Success Metrics (What Good Looks Like)
+
+| Metric | Target | Why It Matters |
+|--------|--------|----------------|
+| Response time | < 4 hours | Speed builds trust |
+| Reply → Ana Engaged | 80%+ | Shows good first response |
+| Tool acceptance rate | 60%+ | Shows value is compelling |
+| Ask Made → Meeting | 30-40% | Shows good qualification |
+| Ghost rate | < 20% | Shows good engagement |
+
+**Benchmark:** A good month = 5-10 meetings scheduled from your conversations.
+
+---
+
 ## Getting Started (One-Time Setup)
 
 ### Tools You Need Open
@@ -63,6 +96,7 @@ Your response should:
 ✓ Acknowledge what they said
 ✓ Be warm and personal (not salesy)
 ✓ Offer something of value OR ask a question
+✓ Match their energy level (short reply = short response)
 
 GOOD EXAMPLES:
 ---
@@ -77,6 +111,22 @@ You: "Hey! I'm Ana with Kale Realty. Saw your closed sale and just wanted
 Them: "Thanks, how did you find me?"
 You: "We use a tool that highlights agent achievements - yours popped up!
       Just like to connect with successful agents in the area. What's your focus right now - buyers or sellers?"
+
+❌ BAD EXAMPLES (Don't Do This):
+---
+Them: "Thanks!"
+You: "You're welcome! So have you ever thought about switching brokerages?
+      We have great splits and culture!"
+→ WAY too fast. You just met them!
+---
+Them: "Who is this?"
+You: "I'm with Kale Realty and we're looking for top producers to join our team.
+      Can I tell you about our commission structure?"
+→ Sounds like a cold pitch. They'll ghost.
+---
+Them: "How's business?"
+You: "Great! Hey so do you have time for a call this week?"
+→ Didn't answer their question. Pushy.
 ```
 
 ### Step 4: Update Monday
@@ -113,10 +163,20 @@ Want me to send it over?"
 
 If yes:
 □ Send the tool link
-□ Send a voice memo introducing yourself
+□ Send a voice memo introducing yourself (see script below)
 □ Check "Voice Memo Sent" box
 □ Status → "Tool Offered"
 □ Set follow-up for 2-4 days
+
+VOICE MEMO SCRIPT (30-45 seconds):
+---
+"Hey [Name]! It's Ana from Kale Realty. Just wanted to put a voice
+to the texts! [laugh] I just sent over those AI prompts - I think
+you'll really like the listing description one, it's been a game changer
+for our agents. Anyway, let me know what you think after you play
+with it! Talk soon!"
+---
+Keep it warm, natural, like you're texting a friend. Don't sound scripted.
 
 TRAINING INVITATION:
 "We do a free Thursday training on [topic] - no pitch, just good info.
@@ -144,6 +204,24 @@ Listen for:
 ⚠️ Feeling unsupported
 ⚠️ Wanting more training/tools
 ⚠️ Mentioning they've thought about switching
+
+READING BETWEEN THE LINES:
+---
+They say: "It's been a tough year"
+They mean: Possible financial stress, may be open to better splits
+
+They say: "My broker doesn't really do much"
+They mean: Feeling unsupported, wants more leadership
+
+They say: "I'm basically running my own business"
+They mean: Not getting value for their fees
+
+They say: "I've been thinking about what's next"
+They mean: Open to change, perfect time for the ask
+
+They say: "I just do my own thing"
+They mean: Independent, may resist structure OR may be lonely
+---
 
 CAPTURE PAIN POINTS:
 When they mention frustrations, update these columns:

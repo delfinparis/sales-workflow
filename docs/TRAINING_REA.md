@@ -8,6 +8,51 @@ You handle **newly licensed brokers** - people who just passed their real estate
 
 ---
 
+## 🚨 SPEED IS EVERYTHING
+
+**Respond to new replies within 5 MINUTES if possible.**
+
+Why? Newly licensed agents are:
+- Actively exploring options RIGHT NOW
+- Likely texting multiple brokerages
+- Making quick decisions about their first home
+- Going with whoever responds first
+
+**The first brokerage to call often wins.**
+
+Studies show:
+- Responding in 5 min = 9x more likely to convert than 30 min
+- After 1 hour, their interest drops 80%
+- By next day, they've often already chosen someone else
+
+---
+
+## Why This Works (The Psychology)
+
+New agents are **nervous and overwhelmed**. They just passed their exam and have no idea what to do next. They need:
+
+1. **Reassurance** → "You made a great decision getting licensed!"
+2. **Guidance** → "Here's what happens next..."
+3. **Speed** → Slow response = "they don't care about me"
+4. **Low pressure** → They're already stressed, don't add to it
+
+**Your superpower:** Being the helpful, fast-responding person who makes them feel taken care of.
+
+---
+
+## Success Metrics (What Good Looks Like)
+
+| Metric | Target | Why It Matters |
+|--------|--------|----------------|
+| Response time | < 5 min | Speed wins |
+| Reply → Scheduled | 40-50% | Shows good urgency |
+| Call attempts completed | 7 per lead | Persistence pays |
+| No-show rate | < 20% | Good pre-qualification |
+
+**Benchmark:** A good month = 10-15 appointments scheduled.
+
+---
+
 ## Getting Started (One-Time Setup)
 
 ### Tools You Need Open
@@ -183,6 +228,54 @@ to reschedule? Here's DJ's calendar again: [Calendly Link]"
 
 □ If they reschedule → back to "Scheduled Appointments"
 □ If they ghost again → Status → "Lost - No Response"
+```
+
+---
+
+## New Agent Objection Handling
+
+New agents have different concerns than experienced agents. Here's how to handle:
+
+### "I don't know if I'm ready yet"
+```
+"That's totally normal! Most new agents feel that way. DJ's call
+isn't about pressure - it's about helping you understand what
+getting started looks like. What questions do you have?"
+```
+
+### "I'm still studying / haven't activated my license"
+```
+"Perfect timing then! This call is exactly for people in your
+situation. DJ can explain what happens after you activate.
+Want me to schedule it for after you're ready?"
+```
+
+### "I want to join a team, not a brokerage"
+```
+"We actually have teams here! DJ can talk you through what
+working on a team looks like vs. going solo. Which sounds
+more interesting to you?"
+```
+
+### "I'm just doing this part-time"
+```
+"Totally fine! Many of our agents started part-time. DJ can
+share what that looks like and how to make it work with your
+schedule. Sound good?"
+```
+
+### "My friend/family member is an agent, I'll join them"
+```
+"That's great you have someone to learn from! Just so you know,
+you can join any brokerage regardless of where they are.
+Want to at least hear what we offer so you can compare?"
+```
+
+### "I already talked to [competitor]"
+```
+"Nice! It's smart to explore options. We're pretty different
+from most brokerages - worth a 15-min chat to compare.
+What do you have to lose?"
 ```
 
 ---

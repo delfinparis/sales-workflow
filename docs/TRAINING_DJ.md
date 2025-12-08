@@ -8,6 +8,20 @@ You're the **closer**. Ana builds relationships and identifies agents open to sw
 
 ---
 
+## Success Metrics (What Good Looks Like)
+
+| Metric | Target | Why It Matters |
+|--------|--------|----------------|
+| Meeting → Offer Extended | 60-70% | Shows good qualification by Ana |
+| Offer → Signed | 30-40% | Industry standard for recruiting |
+| Average days to close | 14-21 days | Speed matters, but don't rush |
+| No-show rate | < 15% | Low = good pre-qualification |
+| Follow-up completion | 100% | Consistency wins |
+
+**Benchmark:** A good month = 3-5 signed agents from your pipeline.
+
+---
+
 ## Getting Started (One-Time Setup)
 
 ### Tools You Need Open
@@ -427,13 +441,67 @@ When someone misses their meeting:
 
 ---
 
+## Competitor Battle Cards
+
+When they mention a competitor, here's how to position:
+
+### vs. Compass
+```
+Their pitch: Tech platform, brand recognition, stock options
+Our counter:
+→ "Compass is great for marketing, but how's the actual support?
+   Many agents tell us they feel like a number there."
+→ "Their tech is slick, but do you actually use it all?"
+→ "Stock options sound great until you read the fine print..."
+
+Key advantage: Personal attention, actually knowing your broker
+```
+
+### vs. @properties
+```
+Their pitch: Local brand, Christie's connection, strong culture
+Our counter:
+→ "Great company! What specifically draws you to them?"
+→ Focus on splits - they're often lower than Kale
+→ "How accessible is leadership there?"
+
+Key advantage: More competitive splits, equally strong training
+```
+
+### vs. eXp Realty
+```
+Their pitch: Revenue share, virtual model, stock
+Our counter:
+→ "The revenue share sounds great - how many people do you
+   actually know who make real money from it?"
+→ "Virtual is fine, but do you have someone to call when
+   a deal is falling apart at 9pm?"
+→ "What happens to your revenue share if they leave?"
+
+Key advantage: Physical presence, real mentorship, no recruiting pressure
+```
+
+### vs. Staying Put
+```
+Their pitch: "I know my broker, it's comfortable, why change?"
+Our counter:
+→ "That makes total sense. What would have to change for you
+   to even consider looking around?"
+→ "If you could design your perfect situation, what would it look like?"
+→ "Are you growing the way you want to be?"
+
+Key advantage: Plant seeds, stay in touch, they may come back
+```
+
+---
+
 ## Quick Troubleshooting
 
 | Problem | Solution |
 |---------|----------|
 | Lead went cold after hot meeting | Check in - life happens. Offer flexibility. |
 | They keep rescheduling | "I want to respect both our time. Is this still something you're interested in?" |
-| They're comparing to competitor | "What would help you make the best decision for yourself?" |
+| They're comparing to competitor | Use battle card above. Stay curious, not defensive. |
 | They want things we can't offer | Be honest. Better to lose now than have unhappy agent later. |
 | They signed with competitor | "Congrats! If things don't work out, door is always open." Set win-back date. |
 
