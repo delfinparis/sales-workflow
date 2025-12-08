@@ -228,7 +228,7 @@
                           "y": -100
                         }
                       },
-                      "note": "Assign to Ana - replace 97053956 with actual Monday user ID"
+                      "note": "Assign to Ana (97053956 = anaya@kalerealty.com)"
                     },
                     {
                       "id": 8,
@@ -388,8 +388,8 @@
     "step_1": "Import this blueprint into Make.com",
     "step_2": "Configure webhook and copy URL",
     "step_3": "In JustCall: Settings > Webhooks > Add webhook for 'SMS Received' event",
-    "step_4": "Replace 18390370563 with actual Monday board ID",
-    "step_5": "Replace 97053956 with Ana's Monday user ID (query users endpoint to find)",
+    "step_4": "Board ID already set: 18390370563 (Superlative Leads)",
+    "step_5": "Ana's User ID already set: 97053956 (anaya@kalerealty.com)",
     "step_6": "Optional: Configure Slack module or delete it if not using Slack",
     "step_7": "Test by replying to your JustCall number",
     "step_8": "Activate scenario"

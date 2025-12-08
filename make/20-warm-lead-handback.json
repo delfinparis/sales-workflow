@@ -80,8 +80,8 @@
   ],
   "setup_instructions": {
     "step_1": "Import into Make.com",
-    "step_2": "Replace 18390370563 and kalerealty",
-    "step_3": "Replace 97053956 with Ana's Monday user ID",
+    "step_2": "Board ID already set: 18390370563, Monday URL: kalerealty",
+    "step_3": "Ana's User ID already set: 97053956 (anaya@kalerealty.com)",
     "step_4": "Set ana-alerts",
     "step_5": "Test by changing a lead's Meeting Outcome to 'Warm - Needs Follow-up'",
     "step_6": "Activate scenario"

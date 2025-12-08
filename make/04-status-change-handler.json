@@ -369,8 +369,8 @@
   },
   "setup_instructions": {
     "step_1": "Import this blueprint into Make.com",
-    "step_2": "Replace 18390370563 with actual Monday board ID",
-    "step_3": "Replace 96623424 and 97053956 with actual Monday user IDs",
+    "step_2": "Board ID already set: 18390370563 (Superlative Leads)",
+    "step_3": "User IDs already set: Jennica=96623424, Ana=97053956",
     "step_4": "Configure Monday.com connection (uses webhook trigger)",
     "step_5": "Optional: Configure Slack module or remove if not needed",
     "step_6": "Test by manually changing a lead's status to each target status",

@@ -4,6 +4,30 @@
 
 ---
 
+## API Credentials & User IDs
+
+### Monday.com API
+```
+API Token: eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjMzMDE5NDQxNywiYWFpIjoxMSwidWlkIjoxMDk5MzEwNywiaWFkIjoiMjAyNC0wMy0wN1QyMTo1MDoxMi4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6NDk2MDA1OSwicmduIjoidXNlMSJ9.m3bCdQF0HwlTYrLQy4-fbTtv04A8RPxzTsWeTsGHFfI
+API URL: https://api.monday.com/v2
+```
+
+### User IDs (for person column assignments)
+| Name | Email | User ID |
+|------|-------|---------|
+| **Ana (Anaya Dada)** | anaya@kalerealty.com | `97053956` |
+| D.J. Paris | dj@kalerealty.com | `10993107` |
+| Jennica Mercedes Abiera | jennica.abiera@gmail.com | `96623424` |
+| Rea Endaya | rea@kalerealty.com | `10995945` |
+
+### Board IDs
+| Board | ID |
+|-------|-----|
+| Superlative Leads (main) | `18390370563` |
+| REA Newly Licensed Leads | `18391158354` |
+
+---
+
 ## Already Completed ✅
 
 | # | Scenario |
