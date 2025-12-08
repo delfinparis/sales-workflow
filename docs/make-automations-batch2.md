@@ -26,6 +26,25 @@ API URL: https://api.monday.com/v2
 | Superlative Leads (main) | `18390370563` |
 | REA Newly Licensed Leads | `18391158354` |
 
+### Instantly API (Cold Email)
+```
+API URL: https://api.instantly.ai/api/v2
+Authorization: Bearer Mzg0NjFkOGUtYTljZC00N2Y3LThmZTAtOTJjMWMzZDNjYWU2OnlhaXBod0dCWVZDcA==
+```
+
+**Webhook Setup (for lead_interested events):**
+```json
+POST https://api.instantly.ai/api/v2/webhooks
+Headers:
+  Authorization: Bearer Mzg0NjFkOGUtYTljZC00N2Y3LThmZTAtOTJjMWMzZDNjYWU2OnlhaXBod0dCWVZDcA==
+  Content-Type: application/json
+Body:
+  {
+    "target_hook_url": "YOUR_MAKE_WEBHOOK_URL",
+    "event_type": "lead_interested"
+  }
+```
+
 ---
 
 ## Already Completed ✅
