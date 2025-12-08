@@ -45,6 +45,23 @@ Body:
   }
 ```
 
+### JustCall API (SMS)
+```
+API URL: https://api.justcall.io/v1
+API Key: a0de455c4755393df988913e1303804c91bc67e3
+API Secret: 962e2b2b3b45d0b47ae3b1f7a22dded09cf575c6
+```
+
+**For Make.com HTTP modules:**
+```
+Authorization: Bearer a0de455c4755393df988913e1303804c91bc67e3:962e2b2b3b45d0b47ae3b1f7a22dded09cf575c6
+```
+
+**Send SMS endpoint:**
+```
+POST https://api.justcall.io/v1/texts/new
+```
+
 ---
 
 ## Already Completed ✅

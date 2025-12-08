@@ -76,7 +76,7 @@
         "headers": [
           {
             "name": "Authorization",
-            "value": "Bearer YOUR_JUSTCALL_API_KEY"
+            "value": "Bearer a0de455c4755393df988913e1303804c91bc67e3:962e2b2b3b45d0b47ae3b1f7a22dded09cf575c6"
           },
           {
             "name": "Content-Type",
@@ -167,9 +167,9 @@
   },
   "setup_instructions": {
     "step_1": "Import into Make.com",
-    "step_2": "Replace 18390370563",
-    "step_3": "Get JustCall API key from JustCall dashboard → Settings → API",
-    "step_4": "Replace YOUR_JUSTCALL_API_KEY and YOUR_JUSTCALL_PHONE_NUMBER",
+    "step_2": "Board ID already set: 18390370563 (Superlative Leads)",
+    "step_3": "JustCall API key already set in Authorization header",
+    "step_4": "Set YOUR_JUSTCALL_PHONE_NUMBER to the JustCall number for sending",
     "step_5": "Set ana-alerts for skip notifications",
     "step_6": "Update the SMS body text with current event topic",
     "step_7": "Test with one lead queued",
