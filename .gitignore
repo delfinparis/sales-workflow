@@ -1,6 +1,9 @@
 # API Keys and Credentials
 docs/API_CREDENTIALS.md
 
+# Notion config (contains user-specific page IDs)
+notion_config.json
+
 # Progress files (regenerated on run)
 scripts/import_progress.json
 

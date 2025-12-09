@@ -21,28 +21,69 @@
 
 ## Current Session
 
-**Date:** 2025-12-06
+**Date:** 2025-12-08
 **Status:** Active
 
 ### What We're Working On Now
-- **RUNNING:** Close CRM to Monday import (background process)
-  - 10,918 leads to import, ~1,500 processed so far
-  - ~610 created, ~793 skipped (duplicates)
-  - ETA: ~2.5 hours remaining
-  - Progress saved to `scripts/import_progress.json` every 10 leads
-  - If interrupted, just run: `python3 import-to-monday.py` to resume
 
-- **COMPLETED:** Added 21 CRM enhancement columns to Superlative Leads board
-  - Script: `scripts/add-crm-columns.py`
-  - See "New Columns Added" section below
+- **RUNNING:** Activity Backfill (background process - started 7:13 AM)
+  - Script: `scripts/backfill-activities.py`
+  - Adding 10 additional activities per lead (positions 6-15)
+  - 160,912 total activities loaded
+  - 7,027 leads eligible (have >5 activities)
+  - ETA: 6-8 hours
+  - Progress saved to `scripts/backfill_progress.json`
+
+### Completed Today (Dec 8)
+
+- **Smart Routing Import COMPLETED** (6:53 AM)
+  - Script: `scripts/cleanup-and-import.py`
+  - Deleted: 5,539 incorrect items from Newly Licensed board
+  - Imported to Newly Licensed (Rea): 3,450 AMP leads
+  - Imported to Superlative (Jennica/Ana): 7,258 non-AMP leads
+  - Skipped: 38 duplicates, 136 no email
+  - Failed: 31
+  - **Routing logic:** AMP leads → Rea's board, Non-AMP → Jennica/Ana board
+
+- **JustCall Integration Setup**
+  - JustCall Calls board: `18387583881`
+  - JustCall SMS board: `18387583880`
+  - Configured two-way Connect Boards columns for Contact linking
+
+- **Updated make-automations-batch2.md** with JustCall board IDs
 
 ### Key Decisions Made Today
+- Import 15 total activities per lead (was 5, adding 10 more)
+- Activities added oldest-first so they appear in correct chronological order in Monday
+
+---
+
+## Session: 2025-12-07
+
+### Completed
+- **Smart Routing Import Started** (8:07 PM)
+  - Cleaned up incorrectly imported items
+  - Implemented AMP/non-AMP routing logic
+
+---
+
+## Session: 2025-12-06
+
+### Completed
+- Initial Close CRM import (4,982 leads, 23,304 activities)
+- Added 21 CRM enhancement columns
+
+### Key Decisions Made
 - Added progress tracking to import script so it can resume after interruptions
 - **Decision: Stay with custom CRM structure** (don't migrate to native Monday Sales CRM)
   - Reasoning: Workflow is linear (one "deal" per agent), not multi-deal like native CRM expects
   - Already built 51 columns, 18 statuses, 21 Make scenarios - migration would mean rebuilding
   - Status-driven Jennica→Ana→DJ handoff works well on single board
 - **Added CRM gap analysis enhancements** (7 gaps identified and columns added)
+
+---
+
+## Column Reference
 
 ### New Columns Added (21 total)
 

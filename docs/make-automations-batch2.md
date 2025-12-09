@@ -25,6 +25,9 @@ API URL: https://api.monday.com/v2
 |-------|-----|
 | Superlative Leads (main) | `18390370563` |
 | REA Newly Licensed Leads | `18391158354` |
+| JustCall Contacts | *(created by JustCall integration)* |
+| JustCall Calls | `18387583881` |
+| JustCall SMS | `18387583880` |
 
 ### Instantly API (Cold Email)
 ```
@@ -694,6 +697,181 @@ POST https://api.justcall.io/v1/texts/new
 | 13 | Win-Back Reminder | Daily | Batch 3 |
 | 14 | Re-engagement Counter | Event | Batch 3 |
 | 15 | Auto-Set Referral Source | Event | Batch 3 |
+| 16 | Gmail Meeting Notes (Gemini) | Event | Batch 4 |
+| 17 | Instantly Cold Email Response | Event | Batch 5 |
+
+---
+
+## BATCH 4: Integrations (1 Scenario)
+
+### Scenario 16: Gmail → Monday Meeting Notes (Gemini)
+
+**Purpose:** Automatically capture Google Gemini meeting notes from Gmail and post them as updates on the corresponding Monday.com lead.
+
+**Gmail Account:** `dj@kalerealty.com`
+
+**Trigger:** Gmail - Watch Emails
+- **Connect DJ's Gmail:** `dj@kalerealty.com`
+- Filter: From `noreply@google.com` AND subject contains "Meeting notes"
+- Folder: Inbox (or create a label filter for organization)
+
+**Flow:**
+```
+Gmail Email Arrives → Parse Attendee Email → Search Monday Board → Create Update
+```
+
+**Make.com Scenario:**
+
+```json
+{
+  "name": "Gmail Meeting Notes to Monday",
+  "trigger": {
+    "module": "gmail.watchEmails",
+    "connection": "dj@kalerealty.com",
+    "folder": "INBOX",
+    "criteria": {
+      "from": "noreply@google.com",
+      "subject": "Meeting notes"
+    },
+    "markAsRead": true
+  },
+  "actions": [
+    {
+      "module": "tools.textParser",
+      "name": "Extract Attendee Email",
+      "note": "Parse the meeting notes body to find attendee email addresses",
+      "input": "{{email_body}}",
+      "pattern": "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}",
+      "match_all": true
+    },
+    {
+      "module": "filter",
+      "note": "Only continue if we found at least one non-kale email (external attendee)",
+      "condition": "{{attendee_emails | filter: 'not contains \"@kalerealty.com\"' | length}} > 0"
+    },
+    {
+      "module": "tools.setVariable",
+      "name": "lead_email",
+      "value": "{{attendee_emails | filter: 'not contains \"@kalerealty.com\"' | first}}"
+    },
+    {
+      "module": "monday.searchItems",
+      "board_id": 18390370563,
+      "note": "Search Superlative Leads board for matching email",
+      "query": {
+        "rules": [
+          {
+            "column_id": "email",
+            "compare_value": "{{lead_email}}"
+          }
+        ]
+      }
+    },
+    {
+      "module": "filter",
+      "note": "Only continue if lead found",
+      "condition": "{{items | length}} > 0"
+    },
+    {
+      "module": "monday.createUpdate",
+      "board_id": 18390370563,
+      "item_id": "{{items[0].id}}",
+      "body": "📝 **Meeting Notes (Auto-captured from Gemini)**\n\n**Subject:** {{email_subject}}\n**Date:** {{email_date | date: 'MMM D, YYYY h:mm A'}}\n\n---\n\n{{email_body | stripHtml}}"
+    },
+    {
+      "module": "monday.updateItem",
+      "note": "Update Last Meaningful Reply date since this was a meeting",
+      "board_id": 18390370563,
+      "item_id": "{{items[0].id}}",
+      "column_values": {
+        "date_mkyctpv2": {
+          "date": "{{now | date: 'YYYY-MM-DD'}}"
+        }
+      }
+    }
+  ]
+}
+```
+
+**Step-by-Step Setup in Make.com:**
+
+1. **Create New Scenario** → Name: "Gmail Meeting Notes to Monday"
+
+2. **Module 1: Gmail - Watch Emails**
+   - **Gmail Account:** `dj@kalerealty.com` (connect DJ's Gmail)
+   - Folder: `INBOX`
+   - Criteria:
+     - From contains: `noreply@google.com`
+     - Subject contains: `Meeting notes`
+   - Mark emails as read: Yes
+   - Max results: 10
+
+3. **Module 2: Text Parser - Match Pattern**
+   - Pattern: `[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`
+   - Text: `{{1.text}}` (email body)
+   - Global match: Yes
+
+4. **Module 3: Array Aggregator** (if multiple emails found)
+   - Aggregate results from text parser
+
+5. **Module 4: Iterator**
+   - Iterate through found email addresses
+   - Filter out @kalerealty.com addresses
+
+6. **Module 5: Monday.com - Search Items by Column Value**
+   - Board: Superlative Leads (18390370563)
+   - Column: Email
+   - Value: `{{iterator.email}}`
+
+7. **Module 6: Filter**
+   - Condition: `{{length(items)}} > 0`
+
+8. **Module 7: Monday.com - Create an Update**
+   - Board: Superlative Leads
+   - Item ID: `{{5.items[1].id}}`
+   - Body:
+   ```
+   📝 **Meeting Notes (Auto-captured from Gemini)**
+
+   **Subject:** {{1.subject}}
+   **Date:** {{formatDate(1.date; "MMM D, YYYY h:mm A")}}
+
+   ---
+
+   {{1.text}}
+   ```
+
+9. **Module 8: Monday.com - Change Column Value** (optional)
+   - Update `Last Meaningful Reply` to today
+   - This prevents ghost detection from flagging leads you've just met with
+
+**Also Search Newly Licensed Board (Optional):**
+
+If you want to also check the Newly Licensed board for matches:
+
+```json
+{
+  "module": "monday.searchItems",
+  "board_id": 18391158354,
+  "note": "Also check Newly Licensed board",
+  "query": {
+    "rules": [
+      {
+        "column_id": "email",
+        "compare_value": "{{lead_email}}"
+      }
+    ]
+  }
+}
+```
+
+**Cost:** Free (Make.com Gmail module included in all plans)
+
+**Testing:**
+1. Have a test meeting with Gemini recording enabled
+2. Wait for the Gemini notes email to arrive
+3. Verify the scenario triggers
+4. Check Monday.com lead for the new update
 
 ---
 
@@ -714,3 +892,336 @@ POST https://api.justcall.io/v1/texts/new
 - [ ] On a lead's win-back date → verify Slack notification and Monday update
 - [ ] Add note with "follow up" → verify Re-engagement Attempts increments
 - [ ] Create new item → verify Referral Source auto-sets from Lead Source
+
+### Batch 4 Tests
+- [ ] Have a test meeting with Gemini recording enabled
+- [ ] Wait for Gemini notes email to arrive in Gmail
+- [ ] Verify Make.com scenario triggers on email arrival
+- [ ] Verify lead is found by email address match
+- [ ] Check Monday.com lead for new update with meeting notes
+- [ ] Verify Last Meaningful Reply date is updated
+
+---
+
+## BATCH 5: Instantly Cold Email Integration (1 Scenario)
+
+### Scenario 17: Instantly "Interested" Reply → Monday.com
+
+**Purpose:** When a lead replies "interested" to an Instantly cold email campaign, this scenario:
+1. Checks if the lead exists in Monday.com (both boards)
+2. If exists: Updates the lead with email conversation, notifies assigned person
+3. If DJ is assigned: Alerts both DJ and Ana
+4. If nobody assigned: Assigns to Ana
+5. If NOT exists: Creates new lead on Superlative board, assigns to Jennica for Courted lookup
+
+**Context:** Instantly sends cold emails from a "fake" Kale persona. When leads respond positively, we need to capture this and route to the right team member.
+
+**Trigger:** Instantly Webhook (`lead_interested` event)
+
+**Flow Diagram:**
+```
+Instantly "Interested" Webhook
+         │
+         ▼
+┌─────────────────────────────┐
+│ Search Superlative Board    │
+│ by email                    │
+└──────────────┬──────────────┘
+               │
+      ┌────────┴────────┐
+      │  Found?         │
+      ▼                 ▼
+     YES               NO
+      │                 │
+      ▼                 ▼
+┌──────────────┐  ┌──────────────────┐
+│ Check Owner  │  │ Search Newly     │
+│              │  │ Licensed Board   │
+└──────┬───────┘  └────────┬─────────┘
+       │                   │
+       ▼              Found? ──NO──▶ CREATE NEW LEAD
+┌──────────────────┐       │         (assign Jennica)
+│ DJ assigned?     │      YES
+│                  │       │
+└──────┬───────────┘       ▼
+       │              ┌──────────────┐
+  ┌────┴────┐         │ Update lead  │
+  │         │         │ Notify Rea   │
+ YES       NO         └──────────────┘
+  │         │
+  ▼         ▼
+Alert     Is anyone
+DJ+Ana    assigned?
+          │
+     ┌────┴────┐
+    YES       NO
+     │         │
+     ▼         ▼
+  Notify    Assign Ana
+  owner     + Notify
+```
+
+### Column IDs Reference
+
+**Superlative Board (18390370563):**
+| Column | ID | Type |
+|--------|-----|------|
+| Email | `email_mky6p7cy` | email |
+| First Name | `text_mky6wn9s` | text |
+| Last Name | `text_mky6whek` | text |
+| Person (legacy) | `person` | people |
+| Assigned To | `multiple_person_mky6jgt4` | people |
+| Status | `status` | status |
+
+**Newly Licensed Board (18391158354):**
+| Column | ID | Type |
+|--------|-----|------|
+| Email | `email_mkybfqax` | email |
+| First Name | `text_mkybe1vc` | text |
+| Last Name | `text_mkyb85z9` | text |
+| Lead Owner | `multiple_person_mkyb4wzn` | people |
+| Status | `color_mkybxbyk` | status |
+
+**User IDs:**
+| Name | User ID |
+|------|---------|
+| Ana (Anaya Dada) | `97053956` |
+| D.J. Paris | `10993107` |
+| Jennica Mercedes Abiera | `96623424` |
+| Rea Endaya | `10995945` |
+
+### Step-by-Step Make.com Setup
+
+#### Step 1: Create the Webhook
+
+1. In Make.com, create a new scenario
+2. Add module: **Webhooks > Custom Webhook**
+3. Click "Add" to create a new webhook
+4. Name it: `Instantly Lead Interested`
+5. Copy the webhook URL (you'll need this for Instantly)
+
+#### Step 2: Register Webhook with Instantly
+
+Run this API call to register your Make.com webhook with Instantly:
+
+```bash
+curl -X POST "https://api.instantly.ai/api/v2/webhooks" \
+  -H "Authorization: Bearer Mzg0NjFkOGUtYTljZC00N2Y3LThmZTAtOTJjMWMzZDNjYWU2OnlhaXBod0dCWVZDcA==" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "event_type": "lead_interested",
+    "webhook_url": "YOUR_MAKE_WEBHOOK_URL_HERE"
+  }'
+```
+
+#### Step 3: Build the Make.com Scenario
+
+**Module 1: Webhooks - Custom Webhook**
+- The trigger you created in Step 1
+
+**Module 2: Monday.com - Search Items by Column Value**
+- Board: Superlative Leads (`18390370563`)
+- Column: Email (`email_mky6p7cy`)
+- Value: `{{1.email}}` (from Instantly webhook)
+
+**Module 3: Router** (3 paths)
+
+---
+
+**PATH A: Found in Superlative Board**
+
+Condition: `{{length(2.items)}} > 0`
+
+**Module A1: Monday.com - Get Item**
+- Get full item details including person column
+- Item ID: `{{2.items[1].id}}`
+
+**Module A2: Router** (check who's assigned)
+
+**Path A2a: DJ is assigned**
+- Condition: Check if `10993107` is in the people column
+- Action: Create update + notify both DJ and Ana
+
+**Module A2a-1: Monday.com - Create Update**
+```
+📧 **Instantly Cold Email Reply - INTERESTED**
+
+Lead replied positively to Instantly campaign.
+
+**Email:** {{1.email}}
+**Campaign:** {{1.campaign_name}}
+**Reply:** {{1.reply_text}}
+
+⚠️ Note: This lead was contacted via Instantly (cold email). DJ and Ana should discuss next steps since DJ is already assigned.
+```
+
+**Module A2a-2: Slack - Send Message** (to #ana-alerts)
+```
+🔥 *Instantly Lead Interested - DJ's Lead*
+Lead *{{A1.name}}* replied to cold email!
+<Monday Link>
+DJ is assigned - please discuss next steps together.
+```
+
+**Path A2b: Someone else assigned (not DJ)**
+- Condition: People column is not empty AND doesn't contain DJ
+- Action: Update lead + notify the assigned person
+
+**Module A2b-1: Monday.com - Create Update**
+```
+📧 **Instantly Cold Email Reply - INTERESTED**
+
+Lead replied positively to Instantly campaign.
+
+**Email:** {{1.email}}
+**Campaign:** {{1.campaign_name}}
+**Reply:** {{1.reply_text}}
+
+Please follow up with this lead!
+```
+
+**Path A2c: Nobody assigned**
+- Condition: People column is empty
+- Action: Assign Ana + notify Ana
+
+**Module A2c-1: Monday.com - Change Column Value**
+- Column: `multiple_person_mky6jgt4` (Assigned To)
+- Value: `{"personsAndTeams":[{"id":97053956,"kind":"person"}]}`
+
+**Module A2c-2: Monday.com - Create Update**
+```
+📧 **Instantly Cold Email Reply - INTERESTED**
+
+Lead replied positively to Instantly campaign.
+
+**Email:** {{1.email}}
+**Campaign:** {{1.campaign_name}}
+**Reply:** {{1.reply_text}}
+
+Ana has been auto-assigned to follow up.
+```
+
+---
+
+**PATH B: Not in Superlative, Check Newly Licensed**
+
+Condition: `{{length(2.items)}} = 0`
+
+**Module B1: Monday.com - Search Items by Column Value**
+- Board: Newly Licensed (`18391158354`)
+- Column: Email (`email_mkybfqax`)
+- Value: `{{1.email}}`
+
+**Module B2: Filter**
+- Condition: `{{length(B1.items)}} > 0`
+
+**Module B3: Monday.com - Create Update**
+- Item: `{{B1.items[1].id}}`
+```
+📧 **Instantly Cold Email Reply - INTERESTED**
+
+Lead replied positively to Instantly campaign.
+
+**Email:** {{1.email}}
+**Campaign:** {{1.campaign_name}}
+**Reply:** {{1.reply_text}}
+
+Rea, please follow up with this lead!
+```
+
+**Module B4: Slack - Send Message** (to Rea's channel or DM)
+```
+🔥 *Instantly Lead Interested - Your Board*
+Lead replied to cold email!
+Email: {{1.email}}
+<Monday Link>
+```
+
+---
+
+**PATH C: Not Found Anywhere - Create New Lead**
+
+Condition: `{{length(2.items)}} = 0` AND (Module B1 returns 0 items)
+
+**Module C1: Monday.com - Create Item**
+- Board: Superlative Leads (`18390370563`)
+- Name: `{{1.email}}` (email as name since we don't have full name)
+- Column Values:
+```json
+{
+  "email_mky6p7cy": {"email": "{{1.email}}", "text": "{{1.email}}"},
+  "multiple_person_mky6jgt4": {"personsAndTeams": [{"id": 96623424, "kind": "person"}]},
+  "status": {"label": "New Lead"}
+}
+```
+
+**Module C2: Monday.com - Create Update**
+```
+📧 **NEW LEAD from Instantly Cold Email**
+
+This lead replied "interested" to an Instantly campaign but was NOT in our CRM.
+
+**Email:** {{1.email}}
+**Campaign:** {{1.campaign_name}}
+**Reply:** {{1.reply_text}}
+
+🔍 **Jennica Action Required:**
+1. Look up this email in Courted
+2. Fill in First Name, Last Name, Phone Number
+3. Once complete, Ana will take over
+
+⚠️ This is a cold email response - the lead doesn't know who contacted them (fake Kale persona was used).
+```
+
+**Module C3: Slack - Send Message** (to Jennica or #jennica-alerts)
+```
+🆕 *NEW Instantly Lead - Courted Lookup Needed*
+A new lead replied to cold email but wasn't in our CRM.
+Email: {{1.email}}
+<Monday Link>
+Please look them up in Courted and fill in their info!
+```
+
+---
+
+### Instantly Webhook Payload Example
+
+When Instantly fires the `lead_interested` webhook, it sends data like:
+
+```json
+{
+  "event_type": "lead_interested",
+  "email": "agent@example.com",
+  "first_name": "John",
+  "last_name": "Smith",
+  "campaign_id": "abc123",
+  "campaign_name": "Chicago Agents - December 2024",
+  "reply_text": "Yes, I'd love to learn more about Kale Realty!",
+  "reply_timestamp": "2024-12-09T15:30:00Z",
+  "lead_id": "xyz789"
+}
+```
+
+### Testing Checklist
+
+- [ ] Register webhook with Instantly using the curl command
+- [ ] Test with existing lead in Superlative (no owner) → should assign Ana
+- [ ] Test with existing lead in Superlative (DJ assigned) → should alert DJ + Ana
+- [ ] Test with existing lead in Superlative (someone else assigned) → should notify that person
+- [ ] Test with existing lead in Newly Licensed → should notify Rea
+- [ ] Test with NEW email (not in CRM) → should create lead, assign Jennica
+- [ ] Verify Slack notifications are sent correctly
+- [ ] Verify Monday updates contain correct info
+
+### Follow-up Automation (Optional)
+
+After Jennica fills in the lead details, you may want a native Monday automation:
+
+**Trigger:** When First Name AND Last Name AND Phone are filled in
+**Condition:** Lead Source = "Instantly" or status = "New Lead from Instantly"
+**Action:**
+1. Change status to "Replied - Awaiting Ana"
+2. Assign Ana
+3. Notify Ana
+
+This ensures smooth handoff once Jennica completes the Courted lookup.

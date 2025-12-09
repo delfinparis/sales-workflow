@@ -1,0 +1,18 @@
+{
+  "_comment": "Copy this file to notion_config.json and fill in your Notion page IDs",
+  "_instructions": [
+    "1. Create a Notion integration at https://www.notion.so/my-integrations",
+    "2. Copy the integration token and add it as a GitHub secret named NOTION_TOKEN",
+    "3. In Notion, share each page with your integration (click Share > Invite > select your integration)",
+    "4. Get page IDs from the URL: notion.so/Page-Name-{PAGE_ID_HERE}",
+    "5. Copy this file to notion_config.json and replace the placeholder IDs"
+  ],
+  "pages": {
+    "training_jennica": "YOUR_JENNICA_PAGE_ID",
+    "training_ana": "YOUR_ANA_PAGE_ID",
+    "training_rea": "YOUR_REA_PAGE_ID",
+    "training_dj": "YOUR_DJ_PAGE_ID",
+    "daily_reference": "YOUR_DAILY_REFERENCE_PAGE_ID",
+    "cheat_sheets": "YOUR_CHEAT_SHEETS_PAGE_ID"
+  }
+}

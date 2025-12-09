@@ -246,3 +246,85 @@ A: Say congrats, change status to "Chose Another Firm", set Hibernation for 90 d
    - **DJ**: Full access (can edit)
 
 Or create a **Guest link** for view-only access.
+
+---
+
+## Automatic GitHub → Notion Sync
+
+Training documentation can be automatically synced from GitHub to Notion whenever changes are pushed.
+
+### Setup (One-Time)
+
+#### Step 1: Create Notion Integration
+1. Go to [notion.so/my-integrations](https://www.notion.so/my-integrations)
+2. Click **"+ New integration"**
+3. Name it "GitHub Sync" (or similar)
+4. Select your workspace
+5. Click **Submit**
+6. Copy the **Internal Integration Token** (starts with `secret_`)
+
+#### Step 2: Share Pages with Integration
+For each training page you want to sync:
+1. Open the page in Notion
+2. Click **Share** in the top right
+3. Click **Invite**
+4. Search for your integration name ("GitHub Sync")
+5. Click to add it
+
+#### Step 3: Get Page IDs
+For each page, copy the page ID from the URL:
+```
+https://www.notion.so/Your-Page-Name-abc123def456...
+                                      ↑↑↑↑↑↑↑↑↑↑↑↑↑
+                                      This is the page ID
+```
+
+#### Step 4: Configure the Sync
+1. Edit `notion_config.json` in the repo root
+2. Replace placeholder IDs with your actual page IDs:
+
+```json
+{
+  "pages": {
+    "training_jennica": "abc123def456...",
+    "training_ana": "xyz789ghi012...",
+    "training_rea": "...",
+    "training_dj": "...",
+    "daily_reference": "...",
+    "cheat_sheets": "..."
+  }
+}
+```
+
+#### Step 5: Add GitHub Secret
+1. Go to your GitHub repo → **Settings** → **Secrets and variables** → **Actions**
+2. Click **New repository secret**
+3. Name: `NOTION_TOKEN`
+4. Value: Paste your integration token
+5. Click **Add secret**
+
+### How It Works
+
+- **Automatic**: When you push changes to `docs/TRAINING_*.md` files on main branch, GitHub Actions syncs them to Notion
+- **Manual**: Go to Actions → "Sync Training Docs to Notion" → "Run workflow"
+- **Sync indicator**: Each Notion page shows a callout with last sync time
+
+### Files That Sync
+
+| GitHub File | Notion Page Key |
+|-------------|-----------------|
+| `docs/TRAINING_JENNICA.md` | `training_jennica` |
+| `docs/TRAINING_ANA.md` | `training_ana` |
+| `docs/TRAINING_REA.md` | `training_rea` |
+| `docs/TRAINING_DJ.md` | `training_dj` |
+| `docs/DAILY_QUICK_REFERENCE.md` | `daily_reference` |
+| `docs/CHEAT_SHEETS.md` | `cheat_sheets` |
+
+### Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| Sync fails with "unauthorized" | Check NOTION_TOKEN secret is set correctly |
+| Page not updating | Make sure the page is shared with your integration |
+| Wrong content synced | Verify the page ID in notion_config.json |
+| Sync runs but no changes | Check GitHub Actions log for errors |

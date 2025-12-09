@@ -1,0 +1,34 @@
+name: Sync Training Docs to Notion
+
+on:
+  push:
+    paths:
+      - 'docs/TRAINING_*.md'
+      - 'docs/DAILY_QUICK_REFERENCE.md'
+      - 'docs/CHEAT_SHEETS.md'
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  sync-to-notion:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install notion-client markdown2
+
+      - name: Sync docs to Notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: |
+          python scripts/sync-to-notion.py
