@@ -1,0 +1,37 @@
+name: Weekly Former Agents Sync
+
+on:
+  schedule:
+    # Runs every Monday at 8 AM UTC (2 AM Chicago time)
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+    # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  sync-former-agents:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Former Agents Sync
+        env:
+          MONDAY_API_KEY: ${{ secrets.MONDAY_API_KEY }}
+        run: python scripts/sync-former-agents-to-crm.py
+
+      - name: Upload sync log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-log-${{ github.run_number }}
+          path: /tmp/former_agents_sync.log
+          retention-days: 30

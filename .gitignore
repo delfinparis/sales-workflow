@@ -10,9 +10,18 @@ scripts/import_progress.json
 # Close CRM export data (contains PII and is large)
 scripts/close_export_*.json
 
-# Python scripts - TEMPORARILY EXCLUDED until API keys are removed
-# TODO: After sanitizing, remove this line and commit scripts
-scripts/*.py
+# Python scripts with hardcoded API keys (excluded for security)
+# These scripts can be committed once API keys are moved to env vars
+scripts/import-to-monday.py
+scripts/backfill-activities.py
+scripts/sync-close-*.py
+scripts/export-close-*.py
+
+# Scripts safe to commit (use environment variables)
+!scripts/sync-former-agents-to-crm.py
+!scripts/cleanup-terminated-agents.py
+!scripts/sync-to-notion.py
+!scripts/sync-won-from-roster.py
 
 # Export data (large files)
 scripts/exports/
