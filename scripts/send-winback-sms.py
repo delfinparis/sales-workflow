@@ -28,11 +28,11 @@ JUSTCALL_SMS_URL = "https://api.justcall.io/v1/texts/new"
 
 FORMER_AGENTS_BOARD_ID = "18391489234"
 WINBACK_DATE_COL = "date_mkygkfv"  # Next SMS date
-EMAIL_WINBACK_DATE_COL = "date_mkyh456"  # Next email date (15 days after SMS)
-WINBACK_COUNT_COL = "numbers_mkygz1v"  # Track which message in sequence
+EMAIL_WINBACK_DATE_COL = "date_mkyg2ebg"  # Next email date (15 days after SMS)
+WINBACK_COUNT_COL = "numeric_mkyg19jw"  # Track which message in sequence
 FIRST_NAME_COL = "text_mkyfws0a"
 PHONE_COL = "phone_mkyfkn1f"
-DO_NOT_CONTACT_COL = "boolean_mkyg123"  # Skip if checked
+DO_NOT_CONTACT_COL = "boolean_mkygt8d2"  # Skip if checked
 
 # Spintax SMS Messages (rotates based on winback_count % 3)
 SMS_MESSAGES = [
@@ -160,17 +160,18 @@ def update_winback_status(item_id, new_count):
     next_email_date = (date.today() + timedelta(days=15)).isoformat()  # Email 15 days after SMS
 
     # Update winback count, next SMS date, and next email date
+    # Uses column IDs: WINBACK_COUNT_COL, WINBACK_DATE_COL, EMAIL_WINBACK_DATE_COL
     query = """
     mutation {
         change_multiple_column_values(
             board_id: %s,
             item_id: %s,
-            column_values: "{\\"numbers_mkygz1v\\": %d, \\"date_mkygkfv\\": {\\"date\\": \\"%s\\"}, \\"date_mkyh456\\": {\\"date\\": \\"%s\\"}}"
+            column_values: "{\\"numeric_mkyg19jw\\": \\"%d\\", \\"date_mkygkfv\\": {\\"date\\": \\"%s\\"}, \\"%s\\": {\\"date\\": \\"%s\\"}}"
         ) {
             id
         }
     }
-    """ % (FORMER_AGENTS_BOARD_ID, item_id, new_count, next_sms_date, next_email_date)
+    """ % (FORMER_AGENTS_BOARD_ID, item_id, new_count, next_sms_date, EMAIL_WINBACK_DATE_COL, next_email_date)
 
     return monday_query(query)
 
