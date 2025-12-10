@@ -673,7 +673,7 @@ POST https://api.justcall.io/v1/texts/new
 
 ---
 
-## Summary: All 15 Make.com Scenarios
+## Summary: All 20 Make.com Scenarios
 
 ### Completed ✅
 | # | Name | Type |
@@ -700,7 +700,8 @@ POST https://api.justcall.io/v1/texts/new
 | 16 | Gmail Meeting Notes (Gemini) | Event | Batch 4 |
 | 17 | Instantly Cold Email Response | Event | Batch 5 |
 | 18 | Kale Roster → Won Sync | Daily | Batch 6 |
-| 19 | Former Agent Win-Back SMS | Daily | Batch 7 |
+| 19 | Former Agent Win-Back SMS | Daily (GitHub) | Batch 7 |
+| 20 | Former Agent Win-Back Email | Daily (Make) | Batch 7 |
 
 ---
 
@@ -1422,42 +1423,64 @@ python3 sync-won-from-roster.py --dry-run
 
 ---
 
-## BATCH 7: Win-Back Campaigns (1 Scenario)
+## BATCH 7: Win-Back Campaigns (2 Scenarios)
 
-### Scenario 19: Former Agent Win-Back SMS (DAILY)
+### Scenario 19: Former Agent Win-Back SMS (DAILY - GitHub Actions)
 
-**Purpose:** Automatically sends a personalized SMS to former agents 90 days after they leave, offering them free access to the Kale Listing AI tool and requesting feedback. This "ask for feedback" approach is disarming and opens dialogue without being pushy about returning.
+**Purpose:** Sends personalized spintax SMS to former agents on a quarterly cadence. SMS messages rotate through 3 templates, with emails sent 15 days after each SMS via Make.com (Scenario 20).
 
-**Context:** Former agents who left Kale are a warm audience - they already know the culture and systems. After 90 days, the "honeymoon period" at their new brokerage may have worn off. By offering genuine value (free AI tool access) and asking for their expertise, we rebuild relationships naturally.
+**Staggered Schedule:**
+| Day | Channel | Message Theme |
+|-----|---------|---------------|
+| 90 | SMS | AI Tool Feedback Request |
+| 105 | Email | AI Tool Feedback (expanded) |
+| 180 | SMS | We'd Love You Back |
+| 195 | Email | What's New at Kale |
+| 270 | SMS | New Feature Announcement |
+| 285 | Email | Personal Check-In |
 
-**Trigger:** Schedule - Daily at 10:00 AM CT
+**Trigger:** Schedule - Daily at 10:00 AM CT (GitHub Actions)
 
 **Board:** Former Kale Agents We Want Back (`18391489234`)
 
 **Column IDs:**
-| Column | ID | Type |
-|--------|-----|------|
+| Column | Column ID | Type |
+|--------|-----------|------|
 | Name | `name` | name |
 | First Name | `text_mkyfws0a` | text |
 | Phone | `phone_mkyfkn1f` | phone |
 | Email | `email_mkyfnfx4` | email |
 | Status | `color_mkyfnpqe` | status |
 | Termination Date | `date_mkygj51c` | date |
-| Win-Back Date | `date_mkygkfv` | date |
-| Win-Back Sent | `boolean_mkygr6v` | checkbox |
+| Win-Back Date (SMS) | `date_mkygkfv` | date |
+| Email Win-Back Date | `date_mkyg2ebg` | date |
+| Win-Back Count | `numeric_mkyg19jw` | number |
+| Do Not Contact | `boolean_mkygt8d2` | checkbox |
 | Owner | `multiple_person_mkyftdm7` | people |
 
-**SMS Message:**
+**SMS Messages (Spintax - rotates based on Win-Back Count % 3):**
+
+**SMS #1 - Day 90: AI Tool Feedback**
 ```
-Hey [First Name] - hope all is well! I just launched
-this listing description AI tool and would love your
-feedback. It researches your neighborhood and rewrites
-listings to get more showings.
+{Hey|Hi} {first_name} - {hope all is well|hope you're doing great|how's it going}! I just launched this listing description AI tool and would love your feedback. It researches your neighborhood and rewrites listings to get more showings.
 
 Try it free: listing.joinkale.com
 
-Let me know what you think? No strings - just want
-honest feedback from someone who knows their stuff.
+{Let me know what you think|Would love your thoughts|Curious what you think}? {No strings - just want honest feedback|Just looking for honest feedback} from someone who knows their stuff.
+
+- DJ
+```
+
+**SMS #2 - Day 180: We'd Love You Back**
+```
+{Hey|Hi} {first_name} - just wanted to {check in|reach out|say hi}. {Miss having you around|Been thinking about the old crew|Hope the new gig is treating you well}. {If things ever change|If you ever want to chat|If you're ever curious about what's new}, {my door's always open|you know where to find me|just reach out}.
+
+- DJ
+```
+
+**SMS #3 - Day 270: New Feature**
+```
+{Hey|Hi} {first_name} - {it's been a while|long time no talk|hope you're killing it out there}. {We've been making some changes here at Kale|Lot of new stuff happening at Kale|Things are evolving here} and {I thought of you|wanted to let you know|figured you might be curious}. {Let me know if you ever want to catch up|Would love to chat sometime|Reach out if you want to hear about it}.
 
 - DJ
 ```
@@ -1730,4 +1753,208 @@ When a former agent replies to the SMS, JustCall can send a webhook to Make.com.
 4. Assign to Ana
 5. Notify Ana via Slack/Monday
 
-This reply handling can be added as Scenario 20 once the outbound SMS is working.
+This reply handling can be added as Scenario 21 once the outbound SMS is working.
+
+---
+
+### Scenario 20: Former Agent Win-Back Email (DAILY - Make.com)
+
+**Purpose:** Sends personalized emails to former agents 15 days after each SMS touchpoint. Emails are sent via Make.com from `dj@kalerealty.com` (max 5/day to protect sender reputation).
+
+**Trigger:** Schedule - Daily at 10:00 AM CT
+
+**Board:** Former Kale Agents We Want Back (`18391489234`)
+
+**Logic:** When SMS is sent (Scenario 19), the Python script sets `Email Win-Back Date` = today + 15 days. This Make.com scenario watches for leads where that date equals today.
+
+---
+
+#### Make.com Module Flow
+
+```
+[Schedule: Daily 10AM CT]
+        ↓
+[Monday: Search Items where Email Win-Back Date = today AND Do Not Contact != true, limit 5]
+        ↓
+[Iterator: Loop through results]
+        ↓
+[Router: Based on Win-Back Count % 3]
+        ↓
+[Route 0: AI Tool Feedback Email]
+[Route 1: What's New at Kale Email]
+[Route 2: Personal Check-In Email]
+        ↓
+[Email: Send from dj@kalerealty.com]
+        ↓
+[Monday: Update Email Win-Back Date + 90 days]
+        ↓
+[Monday: Create Update note]
+```
+
+---
+
+#### Module 1: Schedule Trigger
+- **Type:** Schedule
+- **Interval:** Every day at 10:00 AM (CT)
+
+#### Module 2: Monday.com - Search Items by Column Value
+- **Board:** Former Agents (`18391489234`)
+- **Column:** Email Win-Back Date (`date_mkyg2ebg`)
+- **Value:** `{{formatDate(now; "YYYY-MM-DD")}}`
+- **Additional Filter:** Do Not Contact (`boolean_mkygt8d2`) != true
+- **Limit:** `5`
+
+#### Module 3: Iterator
+- **Array:** Results from Module 2
+
+#### Module 4: Router (3 paths based on Win-Back Count % 3)
+
+**Route Conditions:**
+- **Route 0:** `{{mod(3.Win-Back Count; 3)}} = 0` → AI Tool Feedback
+- **Route 1:** `{{mod(3.Win-Back Count; 3)}} = 1` → What's New
+- **Route 2:** `{{mod(3.Win-Back Count; 3)}} = 2` → Personal Check-In
+
+---
+
+#### Email #1 - Day 105: AI Tool Feedback (Route 0)
+
+**Subject Lines (use `pick()` for variation):**
+```
+{{pick("Quick question"; "Curious what you think"; "Need your expert opinion")}}, {{3.First Name}}
+```
+
+**Body:**
+```html
+<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;">
+
+{{pick("Hey"; "Hi")}} {{3.First Name}},<br><br>
+
+{{pick("Hope you're doing well"; "Hope things are going great"; "How's everything going")}}!<br><br>
+
+I {{pick("just built"; "recently launched"; "put together")}} this AI tool that {{pick("rewrites listing descriptions"; "helps agents write better listings"; "generates listing copy")}} - it actually {{pick("researches the neighborhood"; "pulls local data"; "analyzes the area")}} and {{pick("creates descriptions that get more showings"; "writes copy that converts"; "generates high-performing content")}}.<br><br>
+
+{{pick("I know you always had an eye for good marketing"; "You always knew what worked"; "You've got great instincts for this stuff")}}, so I'd {{pick("really value your feedback"; "love to hear what you think"; "appreciate your honest take")}}.<br><br>
+
+{{pick("Here's the link"; "Check it out"; "Try it here")}}: <a href="https://listing.joinkale.com">listing.joinkale.com</a><br><br>
+
+{{pick("No strings attached"; "Totally free"; "No commitment")}} - just {{pick("looking for honest feedback"; "want to know if it's actually useful"; "curious if it helps")}}.<br><br>
+
+{{pick("Thanks"; "Appreciate it")}},<br>
+DJ<br><br>
+
+--<br>
+DJ Paris<br>
+Kale Realty<br>
+dj@kalerealty.com
+
+</div>
+```
+
+---
+
+#### Email #2 - Day 195: What's New at Kale (Route 1)
+
+**Subject Lines:**
+```
+{{pick("Things have changed"; "Lot happening")}} at Kale, {{3.First Name}}
+```
+
+**Body:**
+```html
+<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;">
+
+{{pick("Hey"; "Hi")}} {{3.First Name}},<br><br>
+
+{{pick("Wanted to reach out"; "Just thinking about you"; "Hope you're killing it out there")}}.<br><br>
+
+{{pick("We've made some changes at Kale"; "Things have evolved here"; "A lot has happened since you left")}} - {{pick("new tools"; "better systems"; "some cool stuff")}} that {{pick("I think you'd appreciate"; "might interest you"; "you'd probably like")}}.<br><br>
+
+{{pick("If you're ever curious"; "If things change on your end"; "If you ever want to chat")}}, {{pick("I'd love to catch up"; "my door's open"; "just reach out")}}. {{pick("We'd love to have you back"; "Always a spot for you here"; "You're always welcome")}}.<br><br>
+
+{{pick("No pressure"; "Just wanted you to know"; "Totally understand if you're happy where you are")}} - {{pick("just keeping the door open"; "just saying hi"; "wanted to stay in touch")}}.<br><br>
+
+{{pick("Talk soon"; "Best")}},<br>
+DJ<br><br>
+
+--<br>
+DJ Paris<br>
+Kale Realty<br>
+dj@kalerealty.com
+
+</div>
+```
+
+---
+
+#### Email #3 - Day 285: Personal Check-In (Route 2)
+
+**Subject Lines:**
+```
+{{pick("Checking in"; "Just saying hi")}}, {{3.First Name}}
+```
+
+**Body:**
+```html
+<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;">
+
+{{pick("Hey"; "Hi")}} {{3.First Name}},<br><br>
+
+{{pick("It's been a while"; "Long time no talk"; "Hope all is well")}}.<br><br>
+
+{{pick("Just wanted to check in"; "Thinking about you"; "Wanted to say hi")}} and see {{pick("how things are going"; "how you're doing"; "what you're up to")}}.<br><br>
+
+{{pick("I've been building some new stuff"; "We've added some great tools"; "The team has grown")}} and {{pick("honestly"; "I'll be real"; "truthfully")}}, {{pick("I think you'd really like what we're doing now"; "things are different in a good way"; "we've gotten better")}}.<br><br>
+
+{{pick("If you ever want to reconnect"; "If you're ever open to a conversation"; "If things change")}}, {{pick("I'd love to chat"; "reach out anytime"; "you know where to find me")}}. {{pick("We'd love to have you back"; "There's always a place for you"; "The door's always open")}}.<br><br>
+
+{{pick("Hope you're well"; "Take care"; "Talk soon")}},<br>
+DJ<br><br>
+
+--<br>
+DJ Paris<br>
+Kale Realty<br>
+dj@kalerealty.com
+
+</div>
+```
+
+---
+
+#### Module 5 (all routes): Email - Send
+- **From:** `dj@kalerealty.com`
+- **From Name:** `DJ Paris`
+- **To:** `{{3.Email}}` (from Monday `email_mkyfnfx4`)
+- **Subject:** (from route-specific subject)
+- **Body (HTML):** (from route-specific body)
+
+#### Module 6: Monday.com - Change Multiple Column Values
+- **Board:** `18391489234`
+- **Item ID:** `{{3.id}}`
+- **Column Values:**
+  - `date_mkyg2ebg` (Email Win-Back Date): `{{addDays(now; 90)}}`
+
+#### Module 7: Monday.com - Create Update
+- **Item ID:** `{{3.id}}`
+- **Body:** `📧 Win-back email sent via Make\n\nSubject: {{email_subject}}\nMessage type: {{route_name}}`
+
+---
+
+#### Testing Checklist
+
+- [ ] Set one test agent's Email Win-Back Date = today
+- [ ] Run scenario manually
+- [ ] Verify email arrives from dj@kalerealty.com
+- [ ] Verify Email Win-Back Date updated to +90 days
+- [ ] Verify update note created
+- [ ] Test all 3 routes (change Win-Back Count to 0, 1, 2)
+- [ ] Verify max 5 emails sent per run
+
+---
+
+#### Notes
+
+- **Max 5 emails/day** protects dj@kalerealty.com sender reputation
+- **15-day gap** ensures agents don't get SMS and email on same day
+- **Spintax via pick()** creates natural variation - no two emails identical
+- **Do Not Contact** flag is respected
+- **Email Win-Back Date** auto-advances 90 days after each send
