@@ -251,64 +251,70 @@ This workflow manages outreach to newly licensed real estate brokers (AMP passer
 
 ## Google Apps Script: Import Button
 
-```javascript
-// Add this to Google Sheets → Extensions → Apps Script
+**Full script location:** `rea/google-apps-script-import.js`
 
-function onOpen() {
-  const ui = SpreadsheetApp.getUi();
-  ui.createMenu('Monday Import')
-    .addItem('Import to Monday', 'importToMonday')
-    .addToUi();
-}
+### Quick Setup
 
-function importToMonday() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const data = sheet.getDataRange().getValues();
-  const headers = data[0];
+1. Open your Google Sheet with AMP passer data
+2. Go to **Extensions → Apps Script**
+3. Delete any existing code
+4. Copy/paste the entire contents of `rea/google-apps-script-import.js`
+5. Update `MAKE_WEBHOOK_URL` with your actual webhook URL from Make.com
+6. Save and refresh the sheet
+7. You'll see a new **"Rea Import"** menu
 
-  // De-dupe by email
-  const seen = new Set();
-  const uniqueRows = [];
+### Menu Options
 
-  for (let i = 1; i < data.length; i++) {
-    const email = data[i][headers.indexOf('Email')];
-    if (email && !seen.has(email.toLowerCase())) {
-      seen.add(email.toLowerCase());
-      uniqueRows.push(data[i]);
-    }
-  }
+| Menu Item | Description |
+|-----------|-------------|
+| **Preview Import (Dry Run)** | Shows what will be imported without sending |
+| **Import to Monday** | Filters, dedupes, and sends to Monday.com |
+| **Show Statistics** | Displays license types and cities in the sheet |
 
-  // Send to Make.com webhook
-  const webhookUrl = 'YOUR_MAKE_WEBHOOK_URL';
+### Filtering Logic
 
-  const payload = {
-    leads: uniqueRows.map(row => ({
-      firstName: row[headers.indexOf('First Name')],
-      lastName: row[headers.indexOf('Last Name')],
-      email: row[headers.indexOf('Email')],
-      phone: row[headers.indexOf('Phone')],
-      leadSource: 'AMP Passer List',
-      importDate: new Date().toISOString()
-    }))
-  };
+The script applies these filters in order:
 
-  const options = {
-    method: 'post',
-    contentType: 'application/json',
-    payload: JSON.stringify(payload)
-  };
+1. **License Type Filter** - Only includes:
+   - `IL Broker National Portion`
+   - `IL Broker State Portion`
+   - `IL Broker Reciprocity Examination`
 
-  try {
-    UrlFetchApp.fetch(webhookUrl, options);
-    SpreadsheetApp.getUi().alert(
-      'Success!',
-      `Imported ${uniqueRows.length} leads to Monday.com (${data.length - 1 - uniqueRows.length} duplicates removed)`,
-      SpreadsheetApp.getUi().ButtonSet.OK
-    );
-  } catch (error) {
-    SpreadsheetApp.getUi().alert('Error', 'Failed to import: ' + error.message, SpreadsheetApp.getUi().ButtonSet.OK);
-  }
-}
+2. **Chicago Area Filter** - Only includes leads from ~150 Chicago-area cities
+
+3. **Required Data Filter** - Must have First Name, Last Name, and Email
+
+4. **Email Deduplication** - Removes duplicate emails (keeps first occurrence)
+
+### CSV Column Requirements
+
+The script expects these column headers (case-sensitive):
+
+| Column | Required |
+|--------|----------|
+| `First Name` | Yes |
+| `Last Name` | Yes |
+| `Email` | Yes |
+| `Phone` | No |
+| `City` | Yes (for filtering) |
+| `Test Date` | No |
+| `Portion` | Yes (license type) |
+
+### Sample Preview Output
+
+```
+Total rows in sheet: 500
+After license type filter: 320
+After city filter: 180
+After email deduplication: 175
+
+READY TO IMPORT: 175 leads
+
+Excluded:
+  - Wrong license type: 180
+  - Outside Chicago area: 140
+  - Duplicate emails: 5
+  - Missing required data: 0
 ```
 
 ---

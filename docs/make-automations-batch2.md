@@ -673,7 +673,7 @@ POST https://api.justcall.io/v1/texts/new
 
 ---
 
-## Summary: All 20 Make.com Scenarios
+## Summary: All 21 Make.com Scenarios
 
 ### Completed ✅
 | # | Name | Type |
@@ -702,6 +702,7 @@ POST https://api.justcall.io/v1/texts/new
 | 18 | Kale Roster → Won Sync | Daily | Batch 6 |
 | 19 | Former Agent Win-Back SMS | Daily (GitHub) | Batch 7 |
 | 20 | Former Agent Win-Back Email | Daily (Make) | Batch 7 |
+| 21 | REA Google Sheets Import | Event (Webhook) | Batch 8 |
 
 ---
 
@@ -1958,3 +1959,200 @@ dj@kalerealty.com
 - **Spintax via pick()** creates natural variation - no two emails identical
 - **Do Not Contact** flag is respected
 - **Email Win-Back Date** auto-advances 90 days after each send
+
+---
+
+## BATCH 8: Rea's Newly Licensed Import (1 Scenario + Google Apps Script)
+
+### Scenario 21: Google Sheets → Monday Newly Licensed Import
+
+**Purpose:** Rea receives monthly AMP passer lists (newly licensed brokers). This automation:
+1. Filters by Chicago-area cities only
+2. Filters by broker license types only (excludes leasing agents)
+3. Deduplicates by email
+4. Creates leads in Monday.com "Newly Licensed Leads" board
+5. Enrolls in Close CRM SMS workflow
+
+**Components:**
+- **Google Apps Script** (in Google Sheets) - handles filtering/deduping
+- **Make.com Webhook** - receives clean data, creates Monday items
+
+---
+
+### Google Apps Script Setup
+
+**Script location:** `rea/google-apps-script-import.js`
+
+**Installation:**
+1. Open Google Sheet with AMP passer CSV data
+2. Go to **Extensions → Apps Script**
+3. Delete existing code, paste contents of `rea/google-apps-script-import.js`
+4. Update `MAKE_WEBHOOK_URL` with your webhook URL
+5. Save and refresh sheet
+6. New **"Rea Import"** menu appears
+
+**Menu Options:**
+| Menu Item | Description |
+|-----------|-------------|
+| Preview Import (Dry Run) | Shows what will be imported without sending |
+| Import to Monday | Filters, dedupes, sends to Monday.com |
+| Show Statistics | Displays license types and cities breakdown |
+
+**Filters Applied:**
+1. **License Type** - Only includes:
+   - `IL Broker National Portion`
+   - `IL Broker State Portion`
+   - `IL Broker Reciprocity Examination`
+
+2. **Chicago Area Cities** - ~150 approved cities (see script for full list)
+
+3. **Required Data** - Must have First Name, Last Name, Email
+
+4. **Email Deduplication** - Keeps first occurrence only
+
+**CSV Column Requirements:**
+| Column | Required | Notes |
+|--------|----------|-------|
+| `First Name` | Yes | |
+| `Last Name` | Yes | |
+| `Email` | Yes | Used for deduplication |
+| `Phone` | No | |
+| `City` | Yes | Used for geographic filtering |
+| `Test Date` | No | |
+| `Portion` | Yes | License type - used for filtering |
+
+---
+
+### Make.com Scenario
+
+**Trigger:** Custom Webhook (from Google Apps Script)
+
+**Board:** Newly Licensed Leads (`18391158354`)
+
+**Column IDs:**
+| Column | Column ID | Type |
+|--------|-----------|------|
+| Name | `name` | name |
+| First Name | `text_mkybe1vc` | text |
+| Last Name | `text_mkyb85z9` | text |
+| Email | `email_mkybfqax` | email |
+| Phone | `phone_mkyb4cr0` | phone |
+| Lead Status | `color_mkybxbyk` | status |
+| Import Date | `date_mkybk1hp` | date |
+| Lead Owner | `multiple_person_mkyb4wzn` | people |
+| Close CRM Lead ID | `text_mkyb1a5v` | text |
+
+**Group IDs:**
+| Group | ID |
+|-------|-----|
+| Never Responded | `group_mkyb6hgy` |
+| Responded | `group_mkyb51b6` |
+| Scheduled Appointments | `group_mkybxtds` |
+| Initially Responded, Then Disappeared | `group_mkyb64mg` |
+
+**User IDs:**
+| Name | User ID |
+|------|---------|
+| Rea Endaya | `10995945` |
+
+---
+
+#### Make.com Module Flow
+
+```
+[Custom Webhook: Receive from Google Sheets]
+        ↓
+[Iterator: Loop through leads array]
+        ↓
+[Monday: Search by email (dedupe check)]
+        ↓
+[Router]
+    ├── [Lead exists] → Log & skip
+    └── [New lead] →
+        ↓
+[Monday: Create Item in "Never Responded" group]
+        ↓
+[Close CRM: Create Lead]
+        ↓
+[Close CRM: Enroll in SMS Sequence]
+        ↓
+[Monday: Store Close Lead ID]
+        ↓
+[Monday: Update status to "In Workflow"]
+```
+
+---
+
+#### Module Details
+
+**Module 1: Custom Webhook**
+- Create webhook, copy URL to Google Apps Script
+
+**Module 2: Iterator**
+- Array: `{{1.leads}}`
+
+**Module 3: Monday.com - Search Items**
+- Board: `18391158354`
+- Column: `email_mkybfqax`
+- Value: `{{2.email}}`
+
+**Module 4: Router**
+- Route A: `{{length(3.items)}} > 0` → Skip (duplicate)
+- Route B: Default → Create new lead
+
+**Module 5: Monday.com - Create Item** (Route B)
+```json
+{
+  "boardId": "18391158354",
+  "groupId": "group_mkyb6hgy",
+  "itemName": "{{2.firstName}} {{2.lastName}}",
+  "columnValues": {
+    "text_mkybe1vc": "{{2.firstName}}",
+    "text_mkyb85z9": "{{2.lastName}}",
+    "email_mkybfqax": {"email": "{{2.email}}", "text": "{{2.email}}"},
+    "phone_mkyb4cr0": {"phone": "{{2.phone}}", "countryShortName": "US"},
+    "color_mkybxbyk": {"label": "New Lead"},
+    "date_mkybk1hp": {"date": "{{formatDate(now; 'YYYY-MM-DD')}}"},
+    "multiple_person_mkyb4wzn": {"personsAndTeams": [{"id": 10995945, "kind": "person"}]}
+  }
+}
+```
+
+**Module 6: Close CRM - Create Lead**
+```json
+{
+  "name": "{{2.firstName}} {{2.lastName}}",
+  "contacts": [{
+    "name": "{{2.firstName}} {{2.lastName}}",
+    "emails": [{"email": "{{2.email}}", "type": "office"}],
+    "phones": [{"phone": "{{2.phone}}", "type": "mobile"}]
+  }],
+  "custom_fields": {
+    "monday_item_id": "{{5.id}}"
+  }
+}
+```
+
+**Module 7: Close CRM - Create Sequence Subscription**
+- Sequence ID: `seq_7TUbe0qzdkzDqHMTy63BMb`
+- Contact ID: `{{6.contacts[0].id}}`
+
+**Module 8: Monday.com - Change Column Value**
+- Store Close Lead ID: `{{6.id}}` in column `text_mkyb1a5v`
+
+**Module 9: Monday.com - Change Column Value**
+- Update status to "In Workflow"
+
+---
+
+#### Testing Checklist
+
+- [ ] Create webhook in Make.com, copy URL
+- [ ] Update Google Apps Script with webhook URL
+- [ ] Test "Preview Import" with sample CSV
+- [ ] Test "Import to Monday" with 2-3 test leads
+- [ ] Verify Monday items created in "Never Responded" group
+- [ ] Verify Close CRM leads created
+- [ ] Verify SMS sequence enrollment
+- [ ] Verify status shows "In Workflow"
+- [ ] Test with full month's data
