@@ -152,32 +152,128 @@ dj@kalerealty.com
 
 ---
 
-## Make.com Scenario Setup
+## Setup Instructions
 
-**Trigger:** Schedule - runs daily at 10 AM CT
+### Step 1: Create Email Win-Back Date Column
 
-**Steps:**
-1. **Monday.com - Search Items**
-   - Board: Former Agents
-   - Filter: `Email Win-Back Date = today` AND `Do Not Contact != checked`
-   - Limit: 5 (max emails per day)
+Run the setup script to create the column on Monday.com:
+```bash
+MONDAY_API_KEY=your_key python3 scripts/setup-email-winback-column.py
+```
 
-2. **Iterator** - Loop through results
+Then update `scripts/send-winback-sms.py` line 31 with the returned column ID.
 
-3. **Text Parser - Process Spintax**
-   - Select random options from `{option1|option2|option3}` patterns
-   - Replace `{first_name}` with actual name
+### Step 2: Update SMS Script Column ID
 
-4. **Email - Send via SMTP/Gmail**
-   - From: dj@kalerealty.com
-   - To: Agent's email
-   - Subject: Processed spintax subject
-   - Body: Processed spintax body
+Edit `scripts/send-winback-sms.py`:
+```python
+EMAIL_WINBACK_DATE_COL = "date_XXXXXX"  # Replace with actual column ID from Step 1
+```
 
-5. **Monday.com - Update Item**
-   - Increment `Win-Back Count`
-   - Set next `Email Win-Back Date` = today + 90 days
-   - Add update note: "Win-back email #X sent"
+### Step 3: Create Make.com Scenario
+
+Create a new scenario in Make with these modules:
+
+#### Module 1: Schedule Trigger
+- **Type:** Schedule
+- **Interval:** Every day at 10:00 AM (CT)
+
+#### Module 2: Monday.com - Search Items
+- **Connection:** Your Monday.com connection
+- **Board ID:** `18391489234` (Former Agents)
+- **Filter:**
+  ```
+  Email Win-Back Date = {{formatDate(now; "YYYY-MM-DD")}}
+  AND Do Not Contact != true
+  ```
+- **Limit:** `5` (max emails per day to protect sender reputation)
+
+#### Module 3: Iterator
+- **Array:** Results from Module 2
+
+#### Module 4: Set Variable - Process Spintax
+Create these variables with the **Set Variable** module:
+
+**Variable: `processed_subject`**
+Use this formula (choose Email #1, #2, or #3 based on Win-Back Count % 3):
+```
+{{switch(mod(3.Win-Back Count; 3);
+  0; replace(replace("{{pick('Quick question'; 'Curious what you think'; 'Need your expert opinion')}}, {{3.First Name}}"; "{{3.First Name}}"; 3.First Name); ""; "");
+  1; replace("{{pick('Things have changed'; 'Lot happening')}} at Kale, {{3.First Name}}"; "{{3.First Name}}"; 3.First Name);
+  2; replace("{{pick('Checking in'; 'Just saying hi')}}, {{3.First Name}}"; "{{3.First Name}}"; 3.First Name)
+)}}
+```
+
+**Variable: `processed_body`**
+*(Copy the appropriate email body spintax from above and use Make's `pick()` function to randomize)*
+
+**Simplified approach:** Create 3 separate email body text variables and use `switch()` to select based on count.
+
+#### Module 5: Email - Send (Gmail/SMTP)
+- **From:** `dj@kalerealty.com`
+- **From Name:** `DJ Paris`
+- **To:** `{{3.Email}}` (agent's email from Monday)
+- **Subject:** `{{4.processed_subject}}`
+- **Body (HTML):**
+```html
+<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;">
+{{4.processed_body}}
+</div>
+```
+
+#### Module 6: Monday.com - Update Item
+- **Board ID:** `18391489234`
+- **Item ID:** `{{3.id}}`
+- **Column Values:**
+  - **Win-Back Count:** `{{3.Win-Back Count + 1}}`
+  - **Email Win-Back Date:** `{{addDays(now; 90)}}` (next email in 90 days)
+
+#### Module 7: Monday.com - Create Update
+- **Item ID:** `{{3.id}}`
+- **Update Text:** `Win-back email #{{3.Win-Back Count + 1}} sent via Make`
+
+### Step 4: Test and Activate
+
+1. **Test manually** with a single record where Email Win-Back Date = today
+2. **Check email** arrives from dj@kalerealty.com
+3. **Verify Monday.com** updates (count incremented, next date set)
+4. **Turn on scheduling** once confirmed working
+
+---
+
+## Alternative: Simpler Make Setup (No Spintax Processing)
+
+If Make's spintax processing is too complex, use this simpler approach:
+
+1. Create 3 separate email templates in Make
+2. Use a Router module after the Iterator
+3. Route based on `Win-Back Count % 3`:
+   - Route 1 (count % 3 = 0): AI Tool Feedback email
+   - Route 2 (count % 3 = 1): What's New email
+   - Route 3 (count % 3 = 2): Personal Check-In email
+4. Each route has its own hardcoded email module
+
+This removes spintax variation but simplifies the Make scenario significantly.
+
+---
+
+## Quick Reference: Make Module Flow
+
+```
+[Schedule: Daily 10AM CT]
+        ↓
+[Monday: Search Items where Email Win-Back Date = today, limit 5]
+        ↓
+[Iterator: Loop through results]
+        ↓
+[Set Variable: Process subject/body based on Win-Back Count]
+        ↓
+[Email: Send from dj@kalerealty.com]
+        ↓
+[Monday: Update Win-Back Count + 1, Email Win-Back Date + 90 days]
+        ↓
+[Monday: Create Update note]
+```
 
 ---
 
