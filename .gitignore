@@ -22,6 +22,7 @@ scripts/export-close-*.py
 !scripts/cleanup-terminated-agents.py
 !scripts/sync-to-notion.py
 !scripts/sync-won-from-roster.py
+!scripts/send-winback-sms.py
 
 # Export data (large files)
 scripts/exports/

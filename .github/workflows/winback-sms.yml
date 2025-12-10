@@ -1,0 +1,39 @@
+name: Daily Win-Back SMS
+
+on:
+  schedule:
+    # Runs every day at 3:00 PM UTC (10 AM Chicago time)
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+    # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  send-winback-sms:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Win-Back SMS Script
+        env:
+          MONDAY_API_KEY: ${{ secrets.MONDAY_API_KEY }}
+          JUSTCALL_API_KEY: ${{ secrets.JUSTCALL_API_KEY }}
+          JUSTCALL_API_SECRET: ${{ secrets.JUSTCALL_API_SECRET }}
+        run: python scripts/send-winback-sms.py
+
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: winback-log-${{ github.run_number }}
+          path: /tmp/winback_sms.log
+          retention-days: 30

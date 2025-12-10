@@ -699,6 +699,8 @@ POST https://api.justcall.io/v1/texts/new
 | 15 | Auto-Set Referral Source | Event | Batch 3 |
 | 16 | Gmail Meeting Notes (Gemini) | Event | Batch 4 |
 | 17 | Instantly Cold Email Response | Event | Batch 5 |
+| 18 | Kale Roster → Won Sync | Daily | Batch 6 |
+| 19 | Former Agent Win-Back SMS | Daily | Batch 7 |
 
 ---
 
@@ -1225,3 +1227,507 @@ After Jennica fills in the lead details, you may want a native Monday automation
 3. Notify Ana
 
 This ensures smooth handoff once Jennica completes the Courted lookup.
+
+---
+
+## BATCH 6: Cross-Board Sync (1 Scenario)
+
+### Scenario 18: Kale Roster → Won Status Sync (DAILY)
+
+**Purpose:** Automatically marks leads as "Won" when they appear in the active Kale Realty Agents roster board. This catches converted agents who may not have been manually updated.
+
+**Context:** The Kale Realty Agents board (`359616654`) contains all active Kale agents. When a lead becomes an agent, their email and/or phone appears in this board. This scenario scans for matches and marks those leads as Won.
+
+**Trigger:** Schedule - Daily at 7:00 AM (before ghost risk/days-in-stage updates)
+
+**Boards Involved:**
+| Board | ID | Purpose |
+|-------|-----|---------|
+| Kale Realty Agents (roster) | `359616654` | Source - active agents |
+| Superlative Leads | `18390370563` | Target - mark as Won |
+| Newly Licensed Leads | `18391158354` | Target - mark as Won |
+
+**Column IDs:**
+
+**Kale Realty Agents (Roster):**
+| Column | ID | Type |
+|--------|-----|------|
+| Work Email | `work_email` | text |
+| Phone Number | `phone_number8` | phone |
+| Group | `group_title` | group |
+
+**Superlative Leads:**
+| Column | ID | Type |
+|--------|-----|------|
+| Email | `email_mky6p7cy` | email |
+| Phone | `phone_mky6fr9j` | phone |
+| Status | `status` | status |
+
+**Newly Licensed Leads:**
+| Column | ID | Type |
+|--------|-----|------|
+| Email | `email_mkybfqax` | email |
+| Phone | `phone_mkyb4cr0` | phone |
+| Lead Status | `color_mkybxbyk` | status |
+
+**Make.com Scenario:**
+
+```json
+{
+  "name": "Roster to Won Sync (Daily)",
+  "trigger": {
+    "module": "schedule",
+    "interval": "daily",
+    "time": "07:00"
+  },
+  "actions": [
+    {
+      "module": "monday.searchItems",
+      "board_id": 359616654,
+      "note": "Get all agents from Kale Agents group",
+      "query": {
+        "group_id": "group_title"
+      },
+      "columns": ["work_email", "phone_number8"]
+    },
+    {
+      "module": "tools.aggregator",
+      "note": "Build sets of agent emails and phones for comparison",
+      "aggregate": {
+        "emails": "{{items | map: 'work_email' | compact | map: 'lowercase'}}",
+        "phones": "{{items | map: 'phone_number8' | compact | map: 'last10digits'}}"
+      }
+    },
+    {
+      "module": "monday.searchItems",
+      "board_id": 18390370563,
+      "note": "Get all Superlative leads not already Won",
+      "query": {
+        "rules": [
+          {
+            "column_id": "status",
+            "compare_value_not": ["Won"]
+          }
+        ]
+      },
+      "columns": ["email_mky6p7cy", "phone_mky6fr9j"]
+    },
+    {
+      "module": "iterator",
+      "array": "{{superlative_leads}}"
+    },
+    {
+      "module": "filter",
+      "note": "Check if lead's email OR phone matches any agent",
+      "condition": "{{agent_emails contains lead.email.lowercase}} OR {{agent_phones contains lead.phone.last10digits}}"
+    },
+    {
+      "module": "monday.updateItem",
+      "board_id": 18390370563,
+      "item_id": "{{lead.id}}",
+      "column_values": {
+        "status": {"label": "Won"}
+      }
+    },
+    {
+      "module": "monday.createUpdate",
+      "board_id": 18390370563,
+      "item_id": "{{lead.id}}",
+      "body": "🎉 **Converted to Kale Agent!**\n\nThis lead has joined Kale Realty and is now in the active agent roster.\n\n*Automatically synced from Kale Realty Agents board.*"
+    }
+  ]
+}
+```
+
+**Step-by-Step Setup in Make.com:**
+
+1. **Create New Scenario** → Name: "Roster to Won Sync (Daily)"
+
+2. **Module 1: Schedule**
+   - Interval: Daily
+   - Time: 07:00 (before other daily syncs)
+
+3. **Module 2: Monday.com - Search Items (Roster)**
+   - Board: Kale Realty Agents (`359616654`)
+   - Filter by group: `group_title` (Kale Agents)
+   - Columns: `work_email`, `phone_number8`
+   - Limit: 500+ (to get all agents)
+
+4. **Module 3: Tools - Set Multiple Variables**
+   ```
+   agent_emails = {{map(2.items; "column_values.work_email.text") | filter | map: lowercase}}
+   agent_phones = {{map(2.items; "column_values.phone_number8.phone") | filter | map: last10digits}}
+   ```
+
+5. **Module 4: Monday.com - Search Items (Superlative)**
+   - Board: Superlative Leads (`18390370563`)
+   - Query: Status != Won
+   - Columns: `email_mky6p7cy`, `phone_mky6fr9j`
+
+6. **Module 5: Iterator**
+   - Array: `{{4.items}}`
+
+7. **Module 6: Filter**
+   - Condition: Lead email in agent_emails OR lead phone (last 10 digits) in agent_phones
+
+8. **Module 7: Monday.com - Change Column Value**
+   - Board: `18390370563`
+   - Item: `{{5.id}}`
+   - Column: Status → "Won"
+
+9. **Module 8: Monday.com - Create Update**
+   - Item: `{{5.id}}`
+   - Body: Conversion celebration message
+
+10. **Duplicate Modules 4-8 for Newly Licensed Board** (18391158354)
+    - Same logic, different board/column IDs
+
+**Phone Normalization:**
+
+Make.com doesn't have a built-in "last 10 digits" function. Use this formula:
+```
+{{if(length(phone) >= 10; substring(phone; length(phone) - 10; 10); phone)}}
+```
+
+**Email Normalization:**
+
+Use lowercase comparison:
+```
+{{lowercase(trim(email))}}
+```
+
+**Alternative: Python Script (One-Time)**
+
+For bulk backfill or if Make.com complexity is too high, use the Python script:
+
+```bash
+cd scripts && python3 sync-won-from-roster.py
+```
+
+Script location: `scripts/sync-won-from-roster.py`
+
+**Dry-run first:**
+```bash
+python3 sync-won-from-roster.py --dry-run
+```
+
+**Testing Checklist:**
+
+- [ ] Add a test lead with email/phone matching a known Kale agent
+- [ ] Run scenario manually or wait for 7am
+- [ ] Verify lead status changed to "Won"
+- [ ] Verify update note was created
+- [ ] Check Newly Licensed board works the same way
+- [ ] Verify no false positives (non-matching leads unchanged)
+
+---
+
+## BATCH 7: Win-Back Campaigns (1 Scenario)
+
+### Scenario 19: Former Agent Win-Back SMS (DAILY)
+
+**Purpose:** Automatically sends a personalized SMS to former agents 90 days after they leave, offering them free access to the Kale Listing AI tool and requesting feedback. This "ask for feedback" approach is disarming and opens dialogue without being pushy about returning.
+
+**Context:** Former agents who left Kale are a warm audience - they already know the culture and systems. After 90 days, the "honeymoon period" at their new brokerage may have worn off. By offering genuine value (free AI tool access) and asking for their expertise, we rebuild relationships naturally.
+
+**Trigger:** Schedule - Daily at 10:00 AM CT
+
+**Board:** Former Kale Agents We Want Back (`18391489234`)
+
+**Column IDs:**
+| Column | ID | Type |
+|--------|-----|------|
+| Name | `name` | name |
+| First Name | `text_mkyfws0a` | text |
+| Phone | `phone_mkyfkn1f` | phone |
+| Email | `email_mkyfnfx4` | email |
+| Status | `color_mkyfnpqe` | status |
+| Termination Date | `date_mkygj51c` | date |
+| Win-Back Date | `date_mkygkfv` | date |
+| Win-Back Sent | `boolean_mkygr6v` | checkbox |
+| Owner | `multiple_person_mkyftdm7` | people |
+
+**SMS Message:**
+```
+Hey [First Name] - hope all is well! I just launched
+this listing description AI tool and would love your
+feedback. It researches your neighborhood and rewrites
+listings to get more showings.
+
+Try it free: listing.joinkale.com
+
+Let me know what you think? No strings - just want
+honest feedback from someone who knows their stuff.
+
+- DJ
+```
+
+**Implementation: GitHub Actions (Free)**
+
+This automation runs via GitHub Actions to avoid Make.com credit costs. The Python script:
+1. Queries Former Agents board for items where Win-Back Date = today AND Win-Back Sent = false
+2. Sends SMS via JustCall API
+3. Marks Win-Back Sent = true
+4. Creates update note on the item
+
+**GitHub Actions Workflow:** `.github/workflows/winback-sms.yml`
+
+```yaml
+name: Daily Win-Back SMS
+
+on:
+  schedule:
+    # Runs every day at 3:00 PM UTC (10 AM Chicago time)
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+    # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  send-winback-sms:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Win-Back SMS Script
+        env:
+          MONDAY_API_KEY: ${{ secrets.MONDAY_API_KEY }}
+          JUSTCALL_API_KEY: ${{ secrets.JUSTCALL_API_KEY }}
+          JUSTCALL_API_SECRET: ${{ secrets.JUSTCALL_API_SECRET }}
+        run: python scripts/send-winback-sms.py
+
+      - name: Upload log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: winback-log-${{ github.run_number }}
+          path: /tmp/winback_sms.log
+          retention-days: 30
+```
+
+**Python Script:** `scripts/send-winback-sms.py`
+
+```python
+#!/usr/bin/env python3
+"""
+Win-Back SMS Script
+
+Sends personalized SMS to former agents 90 days after termination,
+offering free access to the Kale Listing AI tool.
+
+Runs daily via GitHub Actions.
+"""
+
+import requests
+import json
+import time
+import os
+from datetime import datetime, date
+
+# Configuration
+MONDAY_API_KEY = os.environ.get("MONDAY_API_KEY")
+JUSTCALL_API_KEY = os.environ.get("JUSTCALL_API_KEY")
+JUSTCALL_API_SECRET = os.environ.get("JUSTCALL_API_SECRET")
+
+MONDAY_API_URL = "https://api.monday.com/v2"
+JUSTCALL_SMS_URL = "https://api.justcall.io/v1/texts/new"
+
+FORMER_AGENTS_BOARD_ID = "18391489234"
+WINBACK_DATE_COL = "date_mkygkfv"
+WINBACK_SENT_COL = "boolean_mkygr6v"
+FIRST_NAME_COL = "text_mkyfws0a"
+PHONE_COL = "phone_mkyfkn1f"
+
+SMS_MESSAGE = """Hey {first_name} - hope all is well! I just launched this listing description AI tool and would love your feedback. It researches your neighborhood and rewrites listings to get more showings.
+
+Try it free: listing.joinkale.com
+
+Let me know what you think? No strings - just want honest feedback from someone who knows their stuff.
+
+- DJ"""
+
+def monday_query(query):
+    headers = {
+        "Authorization": MONDAY_API_KEY,
+        "Content-Type": "application/json",
+        "API-Version": "2024-10"
+    }
+    response = requests.post(MONDAY_API_URL, headers=headers, json={"query": query})
+    return response.json().get("data")
+
+def get_todays_winbacks():
+    """Get former agents where Win-Back Date = today and Win-Back Sent = false."""
+    today = date.today().isoformat()
+
+    query = """
+    query {
+        boards(ids: [%s]) {
+            items_page(limit: 100) {
+                items {
+                    id
+                    name
+                    column_values {
+                        id
+                        text
+                        value
+                    }
+                }
+            }
+        }
+    }
+    """ % FORMER_AGENTS_BOARD_ID
+
+    result = monday_query(query)
+    items = result.get("boards", [{}])[0].get("items_page", {}).get("items", [])
+
+    ready_items = []
+    for item in items:
+        cols = {c["id"]: c for c in item.get("column_values", [])}
+
+        winback_date = cols.get(WINBACK_DATE_COL, {}).get("text", "")
+        winback_sent = cols.get(WINBACK_SENT_COL, {}).get("text", "")
+
+        if winback_date == today and winback_sent != "true":
+            first_name = cols.get(FIRST_NAME_COL, {}).get("text", "")
+            phone_data = cols.get(PHONE_COL, {}).get("value", "{}")
+            phone = json.loads(phone_data).get("phone", "") if phone_data else ""
+
+            if phone and first_name:
+                ready_items.append({
+                    "id": item["id"],
+                    "name": item["name"],
+                    "first_name": first_name,
+                    "phone": phone
+                })
+
+    return ready_items
+
+def send_sms(phone, message):
+    """Send SMS via JustCall API."""
+    headers = {
+        "Authorization": f"{JUSTCALL_API_KEY}:{JUSTCALL_API_SECRET}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "to": phone,
+        "body": message
+    }
+    response = requests.post(JUSTCALL_SMS_URL, headers=headers, json=payload)
+    return response.status_code == 200
+
+def mark_sent(item_id):
+    """Mark Win-Back Sent = true on Monday item."""
+    query = """
+    mutation {
+        change_column_value(
+            board_id: %s,
+            item_id: %s,
+            column_id: "%s",
+            value: "{\\"checked\\": true}"
+        ) {
+            id
+        }
+    }
+    """ % (FORMER_AGENTS_BOARD_ID, item_id, WINBACK_SENT_COL)
+
+    return monday_query(query)
+
+def create_update(item_id, message):
+    """Create update note on Monday item."""
+    query = """
+    mutation {
+        create_update(
+            item_id: %s,
+            body: "%s"
+        ) {
+            id
+        }
+    }
+    """ % (item_id, message.replace('"', '\\"').replace('\n', '\\n'))
+
+    return monday_query(query)
+
+def main():
+    print("=" * 60)
+    print("Win-Back SMS Script")
+    print(f"Date: {date.today().isoformat()}")
+    print("=" * 60)
+
+    items = get_todays_winbacks()
+    print(f"Found {len(items)} agents ready for win-back SMS")
+
+    stats = {"sent": 0, "failed": 0}
+
+    for item in items:
+        message = SMS_MESSAGE.format(first_name=item["first_name"])
+
+        print(f"  Sending to {item['name']} ({item['phone']})...", end=" ")
+
+        if send_sms(item["phone"], message):
+            mark_sent(item["id"])
+            create_update(item["id"],
+                f"Win-back SMS sent via JustCall.\\n\\n"
+                f"Message: {message[:100]}...")
+            print("SENT")
+            stats["sent"] += 1
+        else:
+            print("FAILED")
+            stats["failed"] += 1
+
+        time.sleep(1)  # Rate limiting
+
+    print()
+    print("=" * 60)
+    print("Complete!")
+    print(f"  Sent: {stats['sent']}")
+    print(f"  Failed: {stats['failed']}")
+
+if __name__ == "__main__":
+    main()
+```
+
+**Monday.com Automation (Set Win-Back Date):**
+
+Create a native Monday automation to auto-calculate Win-Back Date:
+
+**Trigger:** When Termination Date changes
+**Action:** Set Win-Back Date = Termination Date + 90 days
+
+This can be done with Monday's formula column or a simple automation.
+
+**Required GitHub Secrets:**
+- `MONDAY_API_KEY` - Already added
+- `JUSTCALL_API_KEY` - JustCall API key
+- `JUSTCALL_API_SECRET` - JustCall API secret
+
+**Testing Checklist:**
+
+- [ ] Add Win-Back columns to Former Agents board (DONE)
+- [ ] Create Monday automation: Termination Date → Win-Back Date + 90 days
+- [ ] Add JustCall API credentials to GitHub Secrets
+- [ ] Create `scripts/send-winback-sms.py`
+- [ ] Create `.github/workflows/winback-sms.yml`
+- [ ] Test with a single agent (set Win-Back Date = today)
+- [ ] Verify SMS received
+- [ ] Verify Win-Back Sent checkbox marked
+- [ ] Verify update note created on item
+
+**JustCall Reply Handling (Future):**
+
+When a former agent replies to the SMS, JustCall can send a webhook to Make.com. A simple scenario would:
+1. Receive JustCall incoming SMS webhook
+2. Match phone number to Former Agents board
+3. Update status to "Replied"
+4. Assign to Ana
+5. Notify Ana via Slack/Monday
+
+This reply handling can be added as Scenario 20 once the outbound SMS is working.
