@@ -27,8 +27,8 @@ MONDAY_API_URL = "https://api.monday.com/v2"
 JUSTCALL_SMS_URL = "https://api.justcall.io/v1/texts/new"
 
 FORMER_AGENTS_BOARD_ID = "18391489234"
-WINBACK_DATE_COL = "date_mkygkfv"
-WINBACK_SENT_COL = "boolean_mkygr6v"
+WINBACK_DATE_COL = "date_mkygkfv"  # Next SMS date
+EMAIL_WINBACK_DATE_COL = "date_mkyh456"  # Next email date (15 days after SMS)
 WINBACK_COUNT_COL = "numbers_mkygz1v"  # Track which message in sequence
 FIRST_NAME_COL = "text_mkyfws0a"
 PHONE_COL = "phone_mkyfkn1f"
@@ -153,23 +153,24 @@ def send_sms(phone, message):
     return response.status_code == 200
 
 def update_winback_status(item_id, new_count):
-    """Update winback count and set next winback date (90 days from now)."""
+    """Update winback count, set next SMS date (90 days) and email date (15 days)."""
     from datetime import timedelta
 
-    next_date = (date.today() + timedelta(days=90)).isoformat()
+    next_sms_date = (date.today() + timedelta(days=90)).isoformat()
+    next_email_date = (date.today() + timedelta(days=15)).isoformat()  # Email 15 days after SMS
 
-    # Update winback count and next winback date
+    # Update winback count, next SMS date, and next email date
     query = """
     mutation {
         change_multiple_column_values(
             board_id: %s,
             item_id: %s,
-            column_values: "{\\"numbers_mkygz1v\\": %d, \\"date_mkygkfv\\": {\\"date\\": \\"%s\\"}}"
+            column_values: "{\\"numbers_mkygz1v\\": %d, \\"date_mkygkfv\\": {\\"date\\": \\"%s\\"}, \\"date_mkyh456\\": {\\"date\\": \\"%s\\"}}"
         ) {
             id
         }
     }
-    """ % (FORMER_AGENTS_BOARD_ID, item_id, new_count, next_date)
+    """ % (FORMER_AGENTS_BOARD_ID, item_id, new_count, next_sms_date, next_email_date)
 
     return monday_query(query)
 
