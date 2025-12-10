@@ -142,17 +142,23 @@ dj@kalerealty.com
 
 ## Monday.com Column Setup
 
-### Former Agents Board Columns Needed:
-| Column | Type | Purpose |
-|--------|------|---------|
-| `Win-Back Date` | Date | Next SMS date (auto-updates +90 days after send) |
-| `Email Win-Back Date` | Date | Next email date (set to Win-Back Date + 15 days) |
-| `Win-Back Count` | Number | Tracks which message in sequence (0, 1, 2...) |
-| `Do Not Contact` | Checkbox | Skip all outreach if checked |
+### Former Agents Board (ID: 18391489234)
+
+| Column | Column ID | Type | Purpose |
+|--------|-----------|------|---------|
+| Win-Back Date | `date_mkygkfv` | Date | Next SMS date (auto-updates +90 days after send) |
+| Email Win-Back Date | `date_mkyg2ebg` | Date | Next email date (set to Win-Back Date + 15 days) |
+| Win-Back Count | `numeric_mkyg19jw` | Number | Tracks which message in sequence (0, 1, 2...) |
+| Do Not Contact | `boolean_mkygt8d2` | Checkbox | Skip all outreach if checked |
+| First Name | `text_mkyfws0a` | Text | Agent's first name for personalization |
+| Email | `email_mkyfnfx4` | Email | Agent's email for Make scenario |
+| Phone | `phone_mkyfkn1f` | Phone | Agent's phone for SMS |
 
 ---
 
 ## Setup Instructions
+
+**Columns already created** - skip to Step 3 (Make scenario).
 
 ### Step 1: Create Email Win-Back Date Column
 
