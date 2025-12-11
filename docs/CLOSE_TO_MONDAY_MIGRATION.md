@@ -139,7 +139,7 @@ For leads who already joined Kale (status = "Kale Agent")
 | `custom['Lead Owner']` | Assigned To | `multiple_person_mky6jgt4` | Map to Monday user ID |
 | `date_created` | First Contact Date | `date_mky6ky4j` | `{"date": "YYYY-MM-DD"}` |
 | `custom['Kale Lead Source']` | Lead Source (Close) | `text_mkyffxfn` | Direct |
-| `id` | Close Lead ID | **NEED TO ADD** | New text column |
+| `id` | Close Lead ID | `text_mkyhaqf0` | Direct |
 | `custom['Left Kale Date']` | Win-Back Date | `date_mkyct9n3` | Parse date if present |
 
 ### Close → Monday Newly Licensed Board Mapping
@@ -267,7 +267,7 @@ From Monday main workspace:
 | Superlative Leads | `18390370563` |
 | Newly Licensed Leads | `18391158354` |
 | Former Kale Agents We Want Back | `18391489234` |
-| Closed Leads | TBD (create first) |
+| Closed Leads (Won) | `18391860337` |
 
 ### Monday User IDs
 | Name | ID | Email |
@@ -283,25 +283,25 @@ From Monday main workspace:
 ## Progress Tracking
 
 ### Phase 0: Pre-Migration Cleanup
-- [ ] Delete Superlative Leads items
-- [ ] Delete Newly Licensed Leads items
+- [x] Delete Superlative Leads items (0 items - already cleared)
+- [x] Delete Newly Licensed Leads items (0 items - already cleared)
 
 ### Phase 1: Analysis (COMPLETE)
 - [x] Query Close lead counts by owner
 - [x] Query Close lead counts by status
 - [x] Document routing rules
 
-### Phase 2: Create New Board
-- [ ] Create Closed Leads board
-- [ ] Add required columns
-- [ ] Get board ID
+### Phase 2: Create New Board (COMPLETE)
+- [x] Create Closed Leads board → `18391860337`
+- [x] Add required columns
+- [x] Get board ID
 
-### Phase 3: Field Mapping
+### Phase 3: Field Mapping (COMPLETE)
 - [x] Get Monday Superlative column IDs (DONE)
 - [x] Get Monday Newly Licensed column IDs (DONE)
 - [x] Get Ana's Monday user ID → `97053956` (Anaya Dada)
 - [x] Verify status label mappings (DONE - see mapping table above)
-- [ ] Create Close ID column if needed
+- [x] Create Close ID column → `text_mkyhaqf0`
 
 ### Phase 4: Migration Scripts
 - [ ] Write clear boards script
