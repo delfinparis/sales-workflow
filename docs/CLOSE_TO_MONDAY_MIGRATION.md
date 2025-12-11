@@ -95,33 +95,67 @@ For leads who already joined Kale (status = "Kale Agent")
 
 ## Phase 3: Field Mapping
 
-### Close CRM Fields → Monday Superlative Board
+### Close CRM Standard Fields Available
+| Field | Description | Example |
+|-------|-------------|---------|
+| `id` | Lead ID | `lead_upcFee1wf8VxuqUVymZ0oRR3Xc6Zgv1GVfbq4TmqTvE` |
+| `display_name` | Full name | `Angela Beckham` |
+| `status_label` | Lead status | `Kale Agent` |
+| `status_id` | Status ID | `stat_gpGLuaytcoLBIH8THhZAcbLDFfyZGwdTa9JlZjDK7of` |
+| `date_created` | Created date | `2025-08-15T15:38:15.034000+00:00` |
+| `date_updated` | Updated date | `2025-12-11T21:00:03.852000+00:00` |
+| `html_url` | Close URL | `https://app.close.com/lead/...` |
+| `created_by_name` | Created by | `Rea Endaya` |
 
-| Close Field | Close Type | Monday Column | Monday ID | Notes |
-|-------------|------------|---------------|-----------|-------|
-| display_name | text | Name | `name` | |
-| contact.name (split) | text | First Name | `text_mky6wn9s` | |
-| contact.name (split) | text | Last Name | `text_mky6whek` | |
-| contact.emails[0] | email | Email | `email_mky6p7cy` | |
-| contact.phones[0] | phone | Phone | `phone_mky6fr9j` | |
-| status_label | status | Status | `status` | Needs mapping |
-| Lead Owner | user | Assigned To | `multiple_person_mky6jgt4` | Map user IDs |
-| date_created | date | First Contact Date | `date_mky6ky4j` | |
-| Kale Lead Source | text | Lead Source (Close) | `text_mkyffxfn` | Custom field |
-| id | text | (new column?) | TBD | Store Close ID |
+### Close CRM Custom Fields Available
+| Field ID | Name | Type |
+|----------|------|------|
+| `cf_8XeOgI61X7ks89bycJoNnXYdxbILwjaWx0m7Qq6IAAl` | Lead Owner | user |
+| `cf_U9j9E5v9LuS4SMLZfI854gU88tmhi0GLVlxtzbZp1yD` | Kale Lead Source | text |
+| `cf_OOmZXaW7wr2fPZBkyp3lETVgFEkwYmUbsAGn3901x4K` | Left Kale Date | text |
+| `cf_RZFq96WnPU5gJpj4eLcg62pXrFPuNhDdULrGKr85T3A` | Added To Courted | text |
+| `cf_c09clx40GuQEME4aFK13bHwS57NdQOUTMWI5KAq9EfY` | Lead Type | text |
+| `cf_XPSkF9vmCkjQJU4tkjFUV0EethSIAt8qqHiHZsjK3Sm` | Office Name | text |
 
-### Close CRM Fields → Monday Newly Licensed Board
+### Close CRM Contact Fields
+| Field | Description |
+|-------|-------------|
+| `contacts[0].name` | Contact name (split into first/last) |
+| `contacts[0].emails[0].email` | Primary email |
+| `contacts[0].phones[0].phone` | Primary phone |
 
-| Close Field | Close Type | Monday Column | Monday ID | Notes |
-|-------------|------------|---------------|-----------|-------|
-| display_name | text | Name | `name` | |
-| contact.name (split) | text | First Name | `text_mkybe1vc` | |
-| contact.name (split) | text | Last Name | `text_mkyb85z9` | |
-| contact.emails[0] | email | Email | `email_mkybfqax` | |
-| contact.phones[0] | phone | Phone | `phone_mkyb4cr0` | |
-| status_label | status | Lead Status | `color_mkybxbyk` | All = "Lead - No Response" |
-| date_created | date | Import Date | `date_mkybk1hp` | |
-| id | text | Close CRM Lead ID | `text_mkyb1a5v` | |
+---
+
+### Close → Monday Superlative Board Mapping
+
+| Close Field | Monday Column | Monday ID | Transform |
+|-------------|---------------|-----------|-----------|
+| `display_name` | Name | `name` | Direct |
+| `contact.name` (first word) | First Name | `text_mky6wn9s` | Split on space |
+| `contact.name` (rest) | Last Name | `text_mky6whek` | Split on space |
+| `contacts[0].emails[0].email` | Email | `email_mky6p7cy` | `{"email": X, "text": X}` |
+| `contacts[0].phones[0].phone` | Phone | `phone_mky6fr9j` | `{"phone": X, "countryShortName": "US"}` |
+| `status_label` | Status | `status` | See status mapping table |
+| `custom['Lead Owner']` | Assigned To | `multiple_person_mky6jgt4` | Map to Monday user ID |
+| `date_created` | First Contact Date | `date_mky6ky4j` | `{"date": "YYYY-MM-DD"}` |
+| `custom['Kale Lead Source']` | Lead Source (Close) | `text_mkyffxfn` | Direct |
+| `id` | Close Lead ID | **NEED TO ADD** | New text column |
+| `custom['Left Kale Date']` | Win-Back Date | `date_mkyct9n3` | Parse date if present |
+
+### Close → Monday Newly Licensed Board Mapping
+
+| Close Field | Monday Column | Monday ID | Transform |
+|-------------|---------------|-----------|-----------|
+| `display_name` | Name | `name` | Direct |
+| `contact.name` (first word) | First Name | `text_mkybe1vc` | Split on space |
+| `contact.name` (rest) | Last Name | `text_mkyb85z9` | Split on space |
+| `contacts[0].emails[0].email` | Email | `email_mkybfqax` | `{"email": X, "text": X}` |
+| `contacts[0].phones[0].phone` | Phone | `phone_mkyb4cr0` | `{"phone": X, "countryShortName": "US"}` |
+| (fixed) | Lead Status | `color_mkybxbyk` | `{"index": 9}` = "Lead - No Response" |
+| `date_created` | Import Date | `date_mkybk1hp` | `{"date": "YYYY-MM-DD"}` |
+| `id` | Close CRM Lead ID | `text_mkyb1a5v` | Direct |
+| (calculated) | Hibernation Until | `date_mkyb1317` | `today + 365 days` |
+| `custom['Kale Lead Source']` | Lead Source (Close) | `text_mkyfrjqv` | Direct |
 
 ### Status Mapping: Close → Monday Superlative
 
