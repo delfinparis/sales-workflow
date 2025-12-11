@@ -125,29 +125,34 @@ For leads who already joined Kale (status = "Kale Agent")
 
 ### Status Mapping: Close → Monday Superlative
 
-| Close Status | Monday Status | Notes |
-|--------------|---------------|-------|
-| Top Of Funnel | New Lead | |
-| Never Responded | New Lead | |
-| Cold Reach Out | New Lead | |
-| Qualify | Qualify | |
-| Present | Present | |
-| Propose | Propose | |
-| Paperwork Sent | Paperwork Sent | |
-| Bad Fit | Bad Fit | |
-| Lost | Lost | |
-| Not Right Now | Not Right Now | |
-| Kale Agent | → Closed Leads board | Don't put in Superlative |
+| Close Status | Close Status ID | Monday Status | Monday Index | Notes |
+|--------------|-----------------|---------------|--------------|-------|
+| Top Of Funnel | `stat_broiYwml7eEj5SFwAvolMOhK0bPsA961YhnhVgyqtDJ` | New Lead | 5 | |
+| Never Responded | `stat_GM1XZLRo6iWw7L5MErnRLmLAomMnvtHxNrMWpmwZjKN` | New Lead | 5 | |
+| Cold Reach Out | `stat_XMeasIhqKgO00Zq5WHPm8RF6pLbngcZD40U7Aj42HTM` | New Lead | 5 | |
+| Qualify | `stat_ZumjZ332FAzeIChMtwQvn72JVMQNlw9cjfbNSdYCLmb` | Ask Made | 10 | Active pipeline |
+| Present | `stat_cvENukdW4deeZDg8kgfitNgXGqrg3BSBuUpsMj2Iib7` | DJ Meeting Complete | 13 | |
+| Propose | `stat_jFNYSesA1YDSFYiZRrEBZdF082h4xd7nYGHD1NgXf4f` | Offer Extended | 14 | |
+| Paperwork Sent | `stat_i7QhRXMzVdKm0NSV8aahYCx3o7yKjMLu0uP2555IAui` | Offer Extended | 14 | |
+| Bad Fit | `stat_jyuDEdENpXxnyUnjOrLPCgYPHckgOPPBkDveh4tdHuF` | Lost - Not Qualified | 19 | |
+| Lost | `stat_MWPLuOaeQDBbalLYXORYbclyXm9Mt96xaoc2XsrEQ2V` | Lost - Not Interested | 17 | |
+| Not Right Now | `stat_gSGH90rg1lUOX2la33FAZLlytei5oH2IHsYGAusyw0g` | Hibernation 90-Day | 102 | |
+| HC Application | `stat_JvbIwU7Lc0aXDx6BJHLpxCMKrMYfsMn02JsMWGNvNP1` | Offer Extended | 14 | |
+| Kale Agent | `stat_gpGLuaytcoLBIH8THhZAcbLDFfyZGwdTa9JlZjDK7of` | → Closed Leads board | - | Don't put in Superlative |
 
 ### User ID Mapping: Close → Monday
 
-| Name | Close User ID | Monday User ID |
-|------|---------------|----------------|
-| DJ | `user_AP0Edi94oMcrN6LGAm9Gcy0ebFjy3F0bRonhocDFeO1` | `10993107` |
-| Rea | `user_dDXNoNN8voWPjdLp6jxW27aSA96ezyIRHWvYE2yBaQq` | `10995945` |
-| Ana | `user_DBMZmo4TP2tILMtbDsIVQnSU9JJ0WM0YoXS9Ly7izlh` | TBD |
-| Aileen | `user_cUe328ab6kjnxlUZPrKNrU5GrBb0BYHbpicB46rbj1z` | TBD |
-| Tim | `user_kHYbqNSf6bBO9cuhN0OkaMRgnsAZoXirNt565R0OiEJ` | → DJ |
+| Name | Close User ID | Monday User ID | Notes |
+|------|---------------|----------------|-------|
+| DJ | `user_AP0Edi94oMcrN6LGAm9Gcy0ebFjy3F0bRonhocDFeO1` | `10993107` | |
+| Rea | `user_dDXNoNN8voWPjdLp6jxW27aSA96ezyIRHWvYE2yBaQq` | `10995945` | |
+| Ana (Anaya) | `user_DBMZmo4TP2tILMtbDsIVQnSU9JJ0WM0YoXS9Ly7izlh` | `97053956` | anaya@kalerealty.com |
+| Aileen | `user_cUe328ab6kjnxlUZPrKNrU5GrBb0BYHbpicB46rbj1z` | → Ana | Leads transfer to Ana |
+| Tim | `user_kHYbqNSf6bBO9cuhN0OkaMRgnsAZoXirNt565R0OiEJ` | → DJ (`10993107`) | Leads transfer to DJ |
+
+**Note:** There are two Ana accounts in Monday:
+- `97053956`: Anaya Dada (anaya@kalerealty.com) ← **USE THIS ONE**
+- `96623356`: ana@kalerealty.com
 
 ---
 
@@ -231,12 +236,13 @@ From Monday main workspace:
 | Closed Leads | TBD (create first) |
 
 ### Monday User IDs
-| Name | ID |
-|------|-----|
-| DJ | `10993107` |
-| Rea | `10995945` |
-| Ana | TBD |
-| Aileen | TBD |
+| Name | ID | Email |
+|------|-----|-------|
+| DJ | `10993107` | dj@kalerealty.com |
+| Rea | `10995945` | rea@kalerealty.com |
+| Ana (Anaya) | `97053956` | anaya@kalerealty.com |
+| Tim | `10993186` | tim@kalerealty.com |
+| Jennica | `96623424` | jennica.abiera@gmail.com |
 
 ---
 
@@ -257,10 +263,10 @@ From Monday main workspace:
 - [ ] Get board ID
 
 ### Phase 3: Field Mapping
-- [ ] Get Monday Superlative column IDs (DONE)
-- [ ] Get Monday Newly Licensed column IDs (DONE)
-- [ ] Get Ana's Monday user ID
-- [ ] Verify status label mappings
+- [x] Get Monday Superlative column IDs (DONE)
+- [x] Get Monday Newly Licensed column IDs (DONE)
+- [x] Get Ana's Monday user ID → `97053956` (Anaya Dada)
+- [x] Verify status label mappings (DONE - see mapping table above)
 - [ ] Create Close ID column if needed
 
 ### Phase 4: Migration Scripts
