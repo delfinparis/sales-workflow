@@ -321,12 +321,161 @@ From Monday main workspace:
 
 ---
 
+## How to Run/Resume Migration (2-Step Process)
+
+### Overview
+The migration is split into two steps for reliability:
+1. **Step 1: Extract** - Pull all leads from Close API → save to local JSON
+2. **Step 2: Push** - Read JSON → push to Monday API
+
+Both steps process in batches of 200 with crash-resistant progress tracking.
+
+---
+
+### Step 1: Extract Leads from Close
+
+**Script:** `scripts/extract-close-leads.py`
+
+Extracts all Close leads with:
+- Contact info (name, email, phone)
+- Lead owner, status, lead source
+- Office name
+- Last 5 activities (emails, calls, SMS, notes, meetings)
+
+**Commands:**
+```bash
+cd "/Users/djparis/Downloads/jennica-workflow 4"
+
+# Run extraction (resumes automatically if interrupted)
+python3 scripts/extract-close-leads.py
+```
+
+**Output:**
+- `scripts/close_leads_export.json` - All extracted leads
+- `scripts/extract_log.txt` - Extraction log
+
+**Resume:** Just run again. Uses `close_id` to skip already-extracted leads.
+
+---
+
+### Step 2: Push Leads to Monday
+
+**Script:** `scripts/push-to-monday.py`
+
+Reads from `close_leads_export.json` and pushes to Monday with:
+- Smart routing by owner/status (see routing rules above)
+- Status mapping to Monday indices
+- Activities combined into Notes field
+- Close ID stored for matching
+
+**Commands:**
+```bash
+cd "/Users/djparis/Downloads/jennica-workflow 4"
+
+# Preview only (no changes)
+DRY_RUN=true python3 scripts/push-to-monday.py
+
+# Run push (resumes automatically if interrupted)
+python3 scripts/push-to-monday.py
+```
+
+**Output:**
+- `scripts/push_progress.json` - Tracks pushed lead IDs
+- `scripts/push_log.txt` - Push log
+
+**Resume:** Just run again. Tracks pushed Close IDs to skip duplicates.
+
+---
+
+### If Migration is Interrupted
+
+1. **Script errors out or times out:**
+   - Just run the script again
+   - Extract script checks `close_leads_export.json` for existing IDs
+   - Push script checks `push_progress.json` for pushed IDs
+
+2. **Check progress:**
+   ```bash
+   # Extraction progress
+   tail -20 scripts/extract_log.txt
+
+   # Push progress
+   tail -20 scripts/push_log.txt
+   cat scripts/push_progress.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Pushed: {len(d.get(\"pushed_ids\",[]))}')"
+   ```
+
+3. **Start completely fresh:**
+   ```bash
+   rm scripts/close_leads_export.json scripts/push_progress.json
+   python3 scripts/extract-close-leads.py
+   python3 scripts/push-to-monday.py
+   ```
+
+---
+
+### Legacy Script (Still Available)
+**File:** `scripts/migrate-close-to-monday.py`
+
+The original single-script approach that pulls from Close and pushes to Monday in one run.
+The 2-step process above is preferred for large migrations as it's more crash-resistant.
+
+---
+
 ## Rollback Plan
 
 If migration fails:
 1. Close CRM data remains unchanged (read-only migration)
 2. Monday boards can be cleared and re-run
-3. Each script is idempotent (can re-run safely)
+3. Script has resume capability - just run again
+
+---
+
+## Phase 6: Migrate Future Tasks from Close
+
+After the lead push completes, migrate scheduled/future tasks from Close to Monday.
+
+### Overview
+Close has scheduled tasks (follow-ups, reminders) that need to be migrated so they don't get lost.
+Since each Monday lead now has a `Close ID` field, we can match tasks to leads.
+
+### Step 6.1: Extract Future Tasks from Close
+
+**Script:** `scripts/extract-close-tasks.py` (to be created)
+
+Pull all open/incomplete tasks from Close:
+- API endpoint: `/task/?is_complete=false`
+- Capture: task text, due date, assigned user, linked lead_id
+
+**Output:** `scripts/close_tasks_export.json`
+
+### Step 6.2: Match and Push Tasks to Monday
+
+**Script:** `scripts/push-tasks-to-monday.py` (to be created)
+
+For each Close task:
+1. Look up the lead's `close_id` in Close task
+2. Search Monday for item with matching Close ID
+3. Either:
+   - Create a subitem/task on the Monday item, OR
+   - Append to the Notes field with due date
+
+### Close Task API Fields
+| Field | Description |
+|-------|-------------|
+| `id` | Task ID |
+| `lead_id` | Linked Close lead ID |
+| `text` | Task description |
+| `date` | Due date |
+| `is_complete` | Boolean (we filter for false) |
+| `assigned_to` | Close user ID |
+| `_type` | Task type |
+
+### Progress Tracking - Phase 6
+- [ ] Create `extract-close-tasks.py` script
+- [ ] Run task extraction
+- [ ] Create `push-tasks-to-monday.py` script
+- [ ] Match tasks to Monday items by Close ID
+- [ ] Push tasks to Monday (Notes or subitems)
 
 ---
 
@@ -338,3 +487,4 @@ If migration fails:
 - Unassigned leads get assigned to DJ
 - Rea's newly licensed leads get 1-year hibernation date set
 - Duplicate checking by email before creating Monday items
+- Future tasks will be migrated in Phase 6 after leads are pushed

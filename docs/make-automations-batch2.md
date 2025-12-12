@@ -2156,3 +2156,378 @@ dj@kalerealty.com
 - [ ] Verify SMS sequence enrollment
 - [ ] Verify status shows "In Workflow"
 - [ ] Test with full month's data
+
+---
+
+## BATCH 9: Superlative Board Core Automations (21 Scenarios)
+
+These scenarios are documented in JSON blueprint files in `/make/` folder. Import into Make.com.
+
+### Scenario 22: JustCall SMS Sent → Monday Update
+**File:** `make/01-justcall-sms-sent.json`
+
+**Purpose:** When Jennica sends an SMS via JustCall, update the lead's status in Monday to 'SMS Sent' and log the timestamp.
+
+**Trigger:** JustCall webhook (outgoing SMS)
+
+---
+
+### Scenario 23: JustCall Reply Received → Monday + Notify Ana
+**File:** `make/02-justcall-reply-received.json`
+
+**Purpose:** When a lead replies via SMS, update Monday status to 'Replied - Awaiting Ana', assign Ana, and send notification.
+
+**Trigger:** JustCall webhook (incoming SMS)
+
+---
+
+### Scenario 24: Timeout & Hibernation Manager (Daily)
+**File:** `make/03-timeout-hibernation-manager.json`
+
+**Purpose:** Daily scheduled scenario that handles 30-day timeouts and 90-day hibernations - sets dates when entering these statuses and resets leads when periods expire.
+
+**Trigger:** Scheduled - Daily at 8:00 AM
+
+---
+
+### Scenario 25: Status Change → Set Timeout/Hibernation Dates
+**File:** `make/04-status-change-handler.json`
+
+**Purpose:** When a lead enters 30-Day Timeout or 90-Day Hibernation status, automatically set the expiration date.
+
+**Trigger:** Monday status column change
+
+**✅ DONE** - Set up via Monday native automations
+
+---
+
+### Scenario 26: Do Not Contact Status Manager
+**File:** `make/05-do-not-contact-manager.json`
+
+**Purpose:** Automatically sets the 'Do Not Contact' status based on lead status changes. This is Jennica's primary visual cue to avoid contacting leads in timeout, hibernation, or terminal statuses.
+
+**Trigger:** Monday status column change
+
+**Critical:** Essential for preventing accidental contact with leads who should not be contacted.
+
+**⚠️ D.J. WILL DO** - Using Monday native automations
+
+**Column Conversion Required:**
+> Convert "Do Not Contact" from checkbox to **Status column** with values:
+> - **"Contact"** (green) - Lead can be contacted
+> - **"Do Not Contact"** (red) - Lead should NOT be contacted
+>
+> Monday native automations can't toggle checkboxes, but CAN change status values.
+
+**Automations to create:**
+1. When Status changes to "30-Day Timeout" → set Do Not Contact to "Do Not Contact"
+2. When Status changes to "90-Day Hibernation" → set Do Not Contact to "Do Not Contact"
+3. When Status changes to "Dead" → set Do Not Contact to "Do Not Contact"
+4. When Status changes to "Kale Agent" → set Do Not Contact to "Do Not Contact"
+5. When Status changes to "New Lead" → set Do Not Contact to "Contact"
+
+---
+
+### Scenario 27: Dead Lead Review Manager
+**File:** `make/06-dead-lead-review-manager.json`
+
+**Purpose:** Manages the 1-year exclusion period for Dead leads. Sets 'Dead Until' date when entering Dead status, and flags leads as 'Review Eligible' after 1 year. Does NOT auto-return leads - requires manual human decision.
+
+**Trigger:** Monday status change + Daily scheduled check
+
+**⚠️ D.J. WILL DO (partial)** - The "set Dead Until date" part can be done with Monday native automations.
+
+**Column Conversion Required:**
+> Convert "Review Eligible" from checkbox to **Status column** with values:
+> - **"Not Yet"** (gray) - Lead not ready for review
+> - **"Review Eligible"** (yellow) - Lead ready for human review after 1 year
+>
+> The daily check for setting "Review Eligible" after 1 year needs Make.com (Dev).
+
+---
+
+### Scenario 28: Ana Current Tasks - Auto-Populate
+**File:** `make/07-ana-response-suggestions.json`
+
+**Purpose:** When a lead enters 'Replied - Awaiting Ana' status, automatically populate the 'Current Tasks' column with contextual reply options based on the Superlative Type.
+
+**Trigger:** Monday status change to 'Replied - Awaiting Ana'
+
+---
+
+### Scenario 29: Tool Offered - Checklist & Follow-up Reminder
+**File:** `make/08-tool-offered-checklist.json`
+
+**Purpose:** When Ana moves a lead to 'Tool Offered': (1) Populates Current Tasks with checklist, (2) Waits 10 minutes then checks if Next Action Date is set, (3) Pings Ana if she forgot.
+
+**Trigger:** Monday status change to 'Tool Offered'
+
+---
+
+### Scenario 30: Relationship Building - Pivot Prompts
+**File:** `make/09-relationship-building-prompts.json`
+
+**Purpose:** When Ana moves a lead to 'Relationship Building' (after tool follow-up or training), populate Current Tasks with pivot ideas to keep the conversation going.
+
+**Trigger:** Monday status change to 'Relationship Building'
+
+---
+
+### Scenario 31: No Show Handler
+**File:** `make/10-no-show-handler.json`
+
+**Purpose:** When DJ marks a lead as 'No Show', checks the No Show Count and either (1) notifies Ana for follow-up on 1st no-show, or (2) auto-moves to Hibernation on 2nd no-show.
+
+**Trigger:** Monday status change to 'No Show'
+
+---
+
+### Scenario 32: DJ Meeting Prep - Auto-Populate Questions
+**File:** `make/12-dj-meeting-prep.json`
+
+**Purpose:** When a lead's status changes to Meeting Scheduled, populates Current Tasks with DJ's meeting questions and prep checklist.
+
+**Trigger:** Monday status change to 'Meeting Scheduled'
+
+---
+
+### Scenario 33: Google Meet Notes to Monday
+**File:** `make/13-google-meet-notes-to-monday.json`
+
+**Purpose:** After a Google Meet ends, finds the Gemini-generated meeting notes in Google Docs, extracts the content, and pushes it to the lead's Monday record.
+
+**Trigger:** Scheduled - Every 15-30 minutes (calendar-triggered)
+
+---
+
+### Scenario 34: Stale Lead Alert - Daily Check
+**File:** `make/14-stale-lead-alert.json`
+
+**Purpose:** Every morning, finds leads that have been sitting without activity for 7+ days and alerts Ana via Slack.
+
+**Trigger:** Scheduled - Daily at 9:00 AM
+
+---
+
+### Scenario 35: Timeout Count Manager
+**File:** `make/15-timeout-count-manager.json`
+
+**Purpose:** When a lead enters 30-Day Timeout, increments timeout count and auto-hibernates after 3 timeouts.
+
+**Trigger:** Monday status change to '30-Day Timeout'
+
+**⚠️ D.J. WILL DO (partial)** - The "increment count" part can be done with Monday native automations. The "auto-hibernate after 3" logic needs Make.com for conditional check.
+
+---
+
+### Scenario 36: DJ Meeting Prep Reminders
+**File:** `make/16-dj-meeting-prep-reminders.json`
+
+**Purpose:** Sends DJ reminders to prep for meetings at 24h, 1h, and 10min before if Meeting Prep Done is unchecked.
+
+**Trigger:** Scheduled - Every 15 minutes
+
+---
+
+### Scenario 37: DJ Post-Meeting Processing Nag
+**File:** `make/17-dj-post-meeting-nag.json`
+
+**Purpose:** Nags DJ to fill in meeting fields within 24 hours of meeting completion. Also runs daily 5pm reminder.
+
+**Trigger:** Scheduled - Every hour + Daily at 5:00 PM
+
+---
+
+### Scenario 38: DJ Offer Follow-up Reminders
+**File:** `make/18-dj-offer-followup-reminders.json`
+
+**Purpose:** Reminds DJ to follow up on Offer Extended leads at Day 3, 7, 14, 21, and 30 with stage-appropriate prompts.
+
+**Trigger:** Scheduled - Daily at 9:00 AM
+
+---
+
+### Scenario 39: Bulk Event Invite Sender
+**File:** `make/19-bulk-event-invite-sender.json`
+
+**Purpose:** Processes leads queued for event invite and sends individual SMS via JustCall API to avoid bulk pricing.
+
+**Trigger:** Scheduled - Every 15 minutes
+
+**Column Conversion Required:**
+> Convert "Queue for Event Invite" checkbox to **Status column** with values:
+> - **"Queued"** (orange) - Lead waiting to receive invite
+> - **"Sent"** (green) - Invite already sent
+>
+> Make.com scenario changes status to "Sent" after SMS is sent.
+
+---
+
+### Scenario 40: Warm Lead Handback to Ana
+**File:** `make/20-warm-lead-handback.json`
+
+**Purpose:** When DJ marks Meeting Outcome as Warm, automatically transitions lead to Nurture status and assigns to Ana.
+
+**Trigger:** Monday column change - Meeting Outcome
+
+**⚠️ D.J. WILL DO** - Can be done with Monday native automations (no Make.com needed)
+
+---
+
+### Scenario 41: Offer Extended Setup
+**File:** `make/21-offer-extended-setup.json`
+
+**Purpose:** When status changes to Offer Extended, sets Offer Date, resets follow-up status columns, and prompts DJ.
+
+**Trigger:** Monday status change to 'Offer Extended'
+
+**⚠️ D.J. WILL DO** - Using Monday native automations
+
+**Column Conversion Required:**
+> Convert follow-up checkboxes to **Status columns** with values "Done" / "Pending":
+> - Day 3 Follow-up → Status: "Pending" / "Done"
+> - Day 7 Follow-up → Status: "Pending" / "Done"
+> - Day 14 Follow-up → Status: "Pending" / "Done"
+> - Day 21 Follow-up → Status: "Pending" / "Done"
+> - Day 30 Follow-up → Status: "Pending" / "Done"
+>
+> When status changes to "Offer Extended", automation resets all to "Pending".
+
+---
+
+## BATCH 10: Rea's Newly Licensed Board Automations (8 Scenarios)
+
+These scenarios are documented in JSON blueprint files in `/rea/make/` folder.
+
+### Scenario 42: REA - Google Sheets Import to Monday
+**File:** `rea/make/01-google-sheets-import.json`
+
+**Purpose:** When Rea clicks 'Import to Monday' button in Google Sheets, this webhook receives the cleaned/de-duped lead data and creates items in the Newly Licensed board.
+
+**Trigger:** Custom webhook from Google Apps Script
+
+---
+
+### Scenario 43: REA - Close SMS Reply Received
+**File:** `rea/make/02-close-sms-reply-received.json`
+
+**Purpose:** When a lead replies to any SMS in the Close CRM workflow, update their Monday status to 'Replied' and move them to the 'Responded' group.
+
+**Trigger:** Close CRM webhook (incoming SMS)
+
+---
+
+### Scenario 44: REA - Calendly Appointment Booked
+**File:** `rea/make/03-calendly-appointment-booked.json`
+
+**Purpose:** When a lead books an appointment via Calendly, update their Monday status to 'Appointment Scheduled' and move to 'Scheduled Appointments' group.
+
+**Trigger:** Calendly webhook (invitee created)
+
+---
+
+### Scenario 45: REA - Calendly Appointment Completed
+**File:** `rea/make/04-calendly-appointment-completed.json`
+
+**Purpose:** When a scheduled appointment time passes (and is not marked as no-show), update Monday status to 'Completed Appointment'. DJ takes over from here.
+
+**Trigger:** Scheduled check or Calendly webhook
+
+---
+
+### Scenario 46: REA - Calendly No Show Handler
+**File:** `rea/make/05-calendly-no-show.json`
+
+**Purpose:** When DJ marks a lead as 'No Show' in Monday, increment the no-show count and create a task for Rea to reschedule.
+
+**Trigger:** Monday status change to 'No Show'
+
+---
+
+### Scenario 47: REA - 30-Day Timeout Check
+**File:** `rea/make/06-thirty-day-timeout.json`
+
+**Purpose:** Daily check for leads imported 30+ days ago who are still in 'Never Responded' group. Moves them to 'Lost - No Response' status and adds to event invite list.
+
+**Trigger:** Scheduled - Daily
+
+---
+
+### Scenario 48: REA - Hibernation Expiration Check
+**File:** `rea/make/07-hibernation-expiration.json`
+
+**Purpose:** Daily check for leads whose 'Hibernation Until' date has passed (primarily 'Chose Another Firm' leads after 90 days). Returns them to active status for re-engagement.
+
+**Trigger:** Scheduled - Daily
+
+---
+
+### Scenario 49: REA - Week 3 Never Responded Calling Reminder
+**File:** `rea/make/08-week-three-calling-reminder.json`
+
+**Purpose:** On Week 3 of each month (around the 15th-21st), remind Rea to manually call leads in the 'Never Responded' group who haven't engaged with the automated SMS sequence.
+
+**Trigger:** Scheduled - Monthly (Week 3)
+
+---
+
+## Summary: All Scenarios To Build
+
+### Batch 9: Superlative Board Core (20 Scenarios)
+| # | Name | File | Type | Owner |
+|---|------|------|------|-------|
+| 22 | JustCall SMS Sent | `make/01-justcall-sms-sent.json` | Webhook | Dev |
+| 23 | JustCall Reply Received | `make/02-justcall-reply-received.json` | Webhook | Dev |
+| 24 | Timeout & Hibernation Manager | `make/03-timeout-hibernation-manager.json` | Daily | Dev |
+| 25 | Status Change Handler | `make/04-status-change-handler.json` | Event | ✅ Done |
+| 26 | Do Not Contact Status Manager | `make/05-do-not-contact-manager.json` | Event | ✅ Done |
+| 27 | Dead Lead Review Manager | `make/06-dead-lead-review-manager.json` | Event + Daily | **D.J.** (partial) ⚠️ Convert checkbox→status |
+| 28 | Ana Response Suggestions | `make/07-ana-response-suggestions.json` | Event | Dev |
+| 29 | Tool Offered Checklist | `make/08-tool-offered-checklist.json` | Event | Dev |
+| 30 | Relationship Building Prompts | `make/09-relationship-building-prompts.json` | Event | Dev |
+| 31 | No Show Handler | `make/10-no-show-handler.json` | Event | Dev |
+| 32 | DJ Meeting Prep | `make/12-dj-meeting-prep.json` | Event | Dev |
+| 33 | Google Meet Notes to Monday | `make/13-google-meet-notes-to-monday.json` | Scheduled | Dev |
+| 34 | Stale Lead Alert | `make/14-stale-lead-alert.json` | Daily | Dev |
+| 35 | Timeout Count Manager | `make/15-timeout-count-manager.json` | Event | ✅ Done (partial - auto-hibernate needs Make) |
+| 36 | DJ Meeting Prep Reminders | `make/16-dj-meeting-prep-reminders.json` | Scheduled | Dev |
+| 37 | DJ Post-Meeting Nag | `make/17-dj-post-meeting-nag.json` | Scheduled | Dev |
+| 38 | DJ Offer Follow-up Reminders | `make/18-dj-offer-followup-reminders.json` | Daily | Dev |
+| 39 | Bulk Event Invite Sender | `make/19-bulk-event-invite-sender.json` | Scheduled | Dev ⚠️ Convert checkbox→status |
+| 40 | Warm Lead Handback | `make/20-warm-lead-handback.json` | Event | **D.J.** |
+| 41 | Offer Extended Setup | `make/21-offer-extended-setup.json` | Event | ✅ Done |
+
+### Batch 10: Rea's Newly Licensed Board (8 Scenarios)
+| # | Name | File | Type |
+|---|------|------|------|
+| 42 | Google Sheets Import | `rea/make/01-google-sheets-import.json` | Webhook |
+| 43 | Close SMS Reply | `rea/make/02-close-sms-reply-received.json` | Webhook |
+| 44 | Calendly Appointment Booked | `rea/make/03-calendly-appointment-booked.json` | Webhook |
+| 45 | Calendly Appointment Completed | `rea/make/04-calendly-appointment-completed.json` | Scheduled |
+| 46 | Calendly No Show | `rea/make/05-calendly-no-show.json` | Event |
+| 47 | 30-Day Timeout Check | `rea/make/06-thirty-day-timeout.json` | Daily |
+| 48 | Hibernation Expiration | `rea/make/07-hibernation-expiration.json` | Daily |
+| 49 | Week 3 Calling Reminder | `rea/make/08-week-three-calling-reminder.json` | Monthly |
+
+---
+
+## Priority Order for Implementation
+
+**High Priority (Core workflow):**
+1. Scenario 22-23: JustCall SMS integration (Jennica's main workflow)
+2. Scenario 25-26: Status change + Do Not Contact (safety)
+3. Scenario 28: Ana response suggestions (Ana's workflow)
+
+**Medium Priority (Automation helpers):**
+4. Scenario 24: Timeout/Hibernation manager
+5. Scenario 29-30: Tool Offered + Relationship Building prompts
+6. Scenario 31: No Show handler
+7. Scenario 34-35: Stale lead alert + Timeout count
+
+**Lower Priority (DJ workflow):**
+8. Scenario 32, 36-38: DJ meeting prep and reminders
+9. Scenario 40-41: Warm handback + Offer setup
+10. Scenario 33: Google Meet notes (requires Gemini setup)
+
+**Rea's Board:**
+11. Scenarios 42-49: Deploy after Superlative board is stable
