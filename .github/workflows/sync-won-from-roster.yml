@@ -1,0 +1,35 @@
+name: Daily Won Status Sync from Roster
+
+on:
+  schedule:
+    # Runs daily at 6 AM UTC (12 AM / midnight Chicago time)
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  sync-won-status:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Won Status Sync
+        env:
+          MONDAY_API_KEY: ${{ secrets.MONDAY_API_KEY }}
+        run: python scripts/sync-won-from-roster.py
+
+      - name: Summary
+        run: |
+          echo "## Won Status Sync Complete" >> $GITHUB_STEP_SUMMARY
+          echo "Checked Superlative and Newly Licensed boards against Kale Roster." >> $GITHUB_STEP_SUMMARY
+          echo "Any leads matching active agents by email/phone have been marked as Won." >> $GITHUB_STEP_SUMMARY

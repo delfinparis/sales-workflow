@@ -1,0 +1,162 @@
+{
+  "name": "Duplicate Lead Detector",
+  "description": "When a new lead is created on Superlative board, check if email already exists. If duplicate found, add warning update and notify DJ.",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:watchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "boardId": "18390370563"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Triggers when new item created on Superlative Leads board"
+    },
+    {
+      "id": 2,
+      "module": "monday:searchItemsByColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "18390370563",
+        "columnId": "email_mky6p7cy",
+        "columnValue": "{{1.email_mky6p7cy.text}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Search for items with matching email address"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "filter": {
+        "name": "More than 1 match found (duplicate exists)",
+        "conditions": [
+          [
+            {
+              "a": "{{length(2.items)}}",
+              "b": "1",
+              "o": "number:greater"
+            }
+          ]
+        ]
+      },
+      "note": "Only continue if more than 1 item has this email (the new one + existing duplicate)"
+    },
+    {
+      "id": 4,
+      "module": "monday:createUpdate",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "itemId": "{{1.pulseId}}",
+        "body": "**DUPLICATE ALERT**\n\nThis email address already exists on another lead in the board.\n\n**Existing lead(s):**\n{{join(map(2.items; 'name'); ', ')}}\n\nPlease review and merge if necessary using Power-Ups > Manage Duplicates."
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "note": "Add warning update to the new item"
+    },
+    {
+      "id": 5,
+      "module": "monday:changeColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "18390370563",
+        "itemId": "{{1.pulseId}}",
+        "columnId": "name",
+        "value": "[DUP?] {{1.pulseName}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        }
+      },
+      "note": "Prefix item name with [DUP?] for visibility"
+    },
+    {
+      "id": 6,
+      "module": "email:sendEmail",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "to": "dj@kalerealty.com",
+        "subject": "Duplicate Lead Alert: {{1.pulseName}}",
+        "content": "A potential duplicate lead was just created on the Superlative board.\n\n<strong>New Lead:</strong> {{1.pulseName}}\n<strong>Email:</strong> {{1.email_mky6p7cy.text}}\n\n<strong>Existing lead(s) with same email:</strong>\n{{join(map(2.items; 'name'); ', ')}}\n\n<a href=\"https://kalerealty.monday.com/boards/18390370563/pulses/{{1.pulseId}}\">View in Monday</a>\n\nUse Power-Ups > Manage Duplicates to merge if needed."
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 150
+        }
+      },
+      "note": "Email DJ about the duplicate"
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Create new scenario in Make.com",
+    "step_2": "Add module: Monday.com > Watch Items",
+    "step_3": "Configure: Board ID = 18390370563 (Superlative Leads)",
+    "step_4": "Add module: Monday.com > Search Items by Column Value",
+    "step_5": "Configure: Board ID = 18390370563, Column = email_mky6p7cy, Value = {{email from step 1}}",
+    "step_6": "Add Filter: length(items) > 1",
+    "step_7": "Add module: Monday.com > Create an Update (warning message)",
+    "step_8": "Add module: Monday.com > Change Column Value (prefix name with [DUP?])",
+    "step_9": "Add module: Email > Send Email (to dj@kalerealty.com)",
+    "step_10": "Test by creating a lead with an existing email",
+    "step_11": "Activate scenario"
+  },
+  "column_reference": {
+    "email_column_id": "email_mky6p7cy",
+    "phone_column_id": "phone_mky6fr9j",
+    "name_column": "name"
+  },
+  "user_ids": {
+    "dj": 10993107,
+    "ana": 97053956,
+    "jennica": 96623424,
+    "rea": 10995945
+  }
+}

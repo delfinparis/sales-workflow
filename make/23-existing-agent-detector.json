@@ -1,0 +1,188 @@
+{
+  "name": "Existing Kale Agent Detector",
+  "description": "When a new lead is created on Superlative board, check if email already exists in the Kale Roster (active agents). If match found, alert that this person is already an agent.",
+  "flow": [
+    {
+      "id": 1,
+      "module": "monday:watchItems",
+      "version": 1,
+      "parameters": {
+        "connection": null,
+        "boardId": "18390370563"
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0
+        }
+      },
+      "note": "Triggers when new item created on Superlative Leads board"
+    },
+    {
+      "id": 2,
+      "module": "monday:searchItemsByColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "359616654",
+        "columnId": "work_email",
+        "columnValue": "{{1.email_mky6p7cy.text}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 300,
+          "y": 0
+        }
+      },
+      "note": "Search Kale Roster board for matching work email"
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicFilter",
+      "version": 1,
+      "parameters": {},
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 600,
+          "y": 0
+        }
+      },
+      "filter": {
+        "name": "Match found in roster (already an agent)",
+        "conditions": [
+          [
+            {
+              "a": "{{length(2.items)}}",
+              "b": "0",
+              "o": "number:greater"
+            }
+          ]
+        ]
+      },
+      "note": "Only continue if at least 1 matching agent found"
+    },
+    {
+      "id": 4,
+      "module": "monday:createUpdate",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "itemId": "{{1.pulseId}}",
+        "body": "**EXISTING AGENT ALERT**\n\nThis person is already a Kale agent!\n\n**Matching agent(s) in roster:**\n{{join(map(2.items; 'name'); ', ')}}\n\nThis lead should likely be marked as Won or removed."
+      },
+      "metadata": {
+        "designer": {
+          "x": 900,
+          "y": 0
+        }
+      },
+      "note": "Add warning update to the lead"
+    },
+    {
+      "id": 5,
+      "module": "monday:changeColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "18390370563",
+        "itemId": "{{1.pulseId}}",
+        "columnId": "name",
+        "value": "[AGENT!] {{1.pulseName}}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 0
+        }
+      },
+      "note": "Prefix item name with [AGENT!] for visibility"
+    },
+    {
+      "id": 6,
+      "module": "monday:changeColumnValue",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "boardId": "18390370563",
+        "itemId": "{{1.pulseId}}",
+        "columnId": "status",
+        "value": "{\"label\": \"Won\"}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 1200,
+          "y": 150
+        }
+      },
+      "note": "Automatically set status to Won"
+    },
+    {
+      "id": 7,
+      "module": "email:sendEmail",
+      "version": 1,
+      "parameters": {
+        "connection": null
+      },
+      "mapper": {
+        "to": "dj@kalerealty.com",
+        "subject": "Existing Agent Added as Lead: {{1.pulseName}}",
+        "content": "A new lead was just created on Superlative board, but this person is already a Kale agent!\n\n<strong>Lead Name:</strong> {{1.pulseName}}\n<strong>Email:</strong> {{1.email_mky6p7cy.text}}\n\n<strong>Matching agent(s) in roster:</strong>\n{{join(map(2.items; 'name'); ', ')}}\n\n<a href=\"https://kalerealty.monday.com/boards/18390370563/pulses/{{1.pulseId}}\">View Lead in Monday</a>\n\nThe lead has been automatically marked as Won."
+      },
+      "metadata": {
+        "designer": {
+          "x": 1500,
+          "y": 0
+        }
+      },
+      "note": "Email DJ about the match"
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true
+    }
+  },
+  "setup_instructions": {
+    "step_1": "Create new scenario in Make.com",
+    "step_2": "Add module: Monday.com > Watch Items",
+    "step_3": "Configure: Board ID = 18390370563 (Superlative Leads)",
+    "step_4": "Add module: Monday.com > Search Items by Column Value",
+    "step_5": "Configure: Board ID = 359616654 (Kale Roster), Column = work_email, Value = {{email from step 1}}",
+    "step_6": "Add Filter: length(items) > 0",
+    "step_7": "Add module: Monday.com > Create an Update (alert message)",
+    "step_8": "Add module: Monday.com > Change Column Value (prefix name with [AGENT!])",
+    "step_9": "Add module: Monday.com > Change Column Value (set status to Won)",
+    "step_10": "Add module: Email > Send Email (to dj@kalerealty.com)",
+    "step_11": "Test by creating a lead with an existing agent's email",
+    "step_12": "Activate scenario"
+  },
+  "board_reference": {
+    "superlative_leads": {
+      "board_id": "18390370563",
+      "email_column": "email_mky6p7cy",
+      "phone_column": "phone_mky6fr9j",
+      "status_column": "status"
+    },
+    "kale_roster": {
+      "board_id": "359616654",
+      "email_column": "work_email",
+      "phone_column": "phone_number8",
+      "active_agents_group": "group_title"
+    }
+  },
+  "notes": "This scenario only checks email. For phone matching, you would need a second search module in parallel. The daily sync script (sync-won-from-roster.py) catches both email and phone matches as a backup."
+}
